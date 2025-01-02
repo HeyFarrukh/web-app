@@ -1,8 +1,8 @@
 import React from 'react';
-import { Search } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { CompanyLogos } from './CompanyLogos';
+import { SearchBar } from './search/SearchBar';
 
 export const Hero = () => {
   const navigate = useNavigate();
@@ -47,31 +47,7 @@ export const Hero = () => {
           </motion.p>
           
           <div className="max-w-3xl mx-auto mb-12">
-            <form onSubmit={handleSearch} className="flex gap-2">
-              <motion.div 
-                className="flex-1 relative"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <input
-                  type="text"
-                  placeholder="Search apprenticeships..."
-                  className="w-full px-6 py-4 rounded-full border-2 border-gray-200 dark:border-gray-700 focus:border-orange-500 dark:focus:border-orange-500 focus:outline-none dark:bg-gray-800 dark:text-white transition-all"
-                />
-                <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              </motion.div>
-              <motion.button 
-                className="px-8 py-4 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-all transform hover:scale-105"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.8 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Get Started
-              </motion.button>
-            </form>
+            <SearchBar onSubmit={handleSearch} />
           </div>
           
           <CompanyLogos />

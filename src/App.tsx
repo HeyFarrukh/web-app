@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { WeGetIt } from './components/WeGetIt';
@@ -9,9 +9,21 @@ import { SignIn } from './pages/SignIn';
 import { Listings } from './pages/Listings';
 import { JoinUs } from './pages/JoinUs';
 
+// Scroll to top component
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname]);
+
+  return null;
+};
+
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen bg-white dark:bg-gray-900">
         <Navbar />
         <Routes>
