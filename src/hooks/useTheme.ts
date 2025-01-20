@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 
 export const useTheme = () => {
   const [isDark, setIsDark] = useState(() => {
+    // Always default to light theme
     const savedTheme = localStorage.getItem('theme');
-    return savedTheme === 'dark' || 
-      (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    return savedTheme === 'dark' ? true : false;
   });
 
   useEffect(() => {

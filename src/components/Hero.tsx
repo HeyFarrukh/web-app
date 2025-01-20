@@ -43,7 +43,7 @@ export const Hero = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            We track Apprenticeships So You Don't Have to
+            We track Apprenticeships So You Don't Have to.
           </motion.p>
           
           <div className="max-w-3xl mx-auto mb-12">

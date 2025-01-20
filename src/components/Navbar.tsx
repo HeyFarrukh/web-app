@@ -4,6 +4,7 @@ import { Sun, Moon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { MobileMenu } from './navigation/MobileMenu';
 import { useTheme } from '../hooks/useTheme';
+import { UserProfile } from './UserProfile';
 
 export const Navbar = () => {
   const { isDark, toggleTheme } = useTheme();
@@ -16,7 +17,6 @@ export const Navbar = () => {
       backdrop-blur-md 
       bg-white/75 dark:bg-gray-900/75 
       rounded-full shadow-lg z-50
-      /* Adjust border-[2px] to increase/decrease border thickness */
       dark:border-[2px] dark:border-orange-500/50
       transition-all duration-300
     `}>
@@ -35,17 +35,7 @@ export const Navbar = () => {
             <Link to="/listings" className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400">
               Listings
             </Link>
-            <Link 
-              to="/join" 
-              className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400"
-              onClick={(e) => {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                setTimeout(() => {
-                  window.location.href = '/join';
-                }, 500);
-              }}
-            >
+            <Link to="/join" className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400">
               Join Us
             </Link>
             <a 
@@ -72,6 +62,8 @@ export const Navbar = () => {
                 <Moon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
               )}
             </button>
+
+            <UserProfile />
           </div>
 
           <MobileMenu

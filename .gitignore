@@ -1,62 +1,23 @@
-<<<<<<< HEAD
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Dependencies
+node_modules
+.pnp
+.pnp.js
 
-# dependencies
-node_modules/
+# Testing
+coverage
 
-# Expo
-.expo/
-dist/
-web-build/
+# Production
+build
+dist
 
-# Native
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
+# Misc
 .DS_Store
-*.pem
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
-=======
-# Logs
-logs
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
->>>>>>> 319194b (Project with Updated Files)

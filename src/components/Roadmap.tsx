@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 
 const objectives = [
-  { title: 'List All Apprenticeships in One Place', completed: true },
-  { title: 'Test Driven AI CV-Optimised', completed: false },
+  { title: 'List All Apprenticeships in One Place', completed: false },
+  { title: 'AI CV-Optimisation', completed: false },
   { title: 'Apprenticeship Community', completed: false },
   { title: 'Mentor Matching', completed: false },
   { title: 'AI Virtual Interview Preparation', completed: false },

@@ -1,10 +1,32 @@
 import React from 'react';
+import { GoogleLogin } from '@react-oauth/google';
+import { useNavigate } from 'react-router-dom';
+import { GoogleAuthService } from '../../services/auth/googleAuth';
 
 export const GoogleSignIn = () => {
+  const navigate = useNavigate();
+
   return (
-    <button className="w-full flex items-center justify-center space-x-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-white px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-      <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
-      <span>Sign in with Google</span>
-    </button>
+    <div className="w-full">
+      <GoogleLogin
+        onSuccess={async (credentialResponse) => {
+          try {
+            await GoogleAuthService.handleCredentialResponse(credentialResponse);
+            navigate('/listings');
+          } catch (error) {
+            console.error('Authentication failed:', error);
+          }
+        }}
+        onError={() => {
+          console.error('Login Failed');
+        }}
+        useOneTap
+        theme="outline"
+        size="large"
+        width="100%"
+        text="continue_with"
+        shape="rectangular"
+      />
+    </div>
   );
 };

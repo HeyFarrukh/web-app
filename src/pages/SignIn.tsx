@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { SignInForm } from '../components/auth/SignInForm';
 import { GoogleSignIn } from '../components/auth/GoogleSignIn';
 
 export const SignIn = () => {
@@ -12,31 +11,19 @@ export const SignIn = () => {
         className="w-full max-w-md mx-auto p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-xl"
       >
         <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">
-          Welcome Back
+          Welcome to ApprenticeWatch
         </h2>
         
         <div className="space-y-6">
           <GoogleSignIn />
-          
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-gray-900 text-gray-500">Or continue with</span>
-            </div>
-          </div>
-          
-          <SignInForm />
-          
-          <button className="w-full py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
-            Sign In
-          </button>
-          
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account?{' '}
-            <a href="#" className="text-orange-600 hover:text-orange-500 dark:text-orange-400">
-              Sign up
+            By continuing, you agree to our{' '}
+            <a href="/terms" className="text-orange-600 hover:text-orange-500 dark:text-orange-400">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" className="text-orange-600 hover:text-orange-500 dark:text-orange-400">
+              Privacy Policy
             </a>
           </p>
         </div>
