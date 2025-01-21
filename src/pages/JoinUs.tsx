@@ -1,22 +1,27 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Award, Users, Briefcase } from 'lucide-react';
+import { Award, Users, Briefcase, Cpu } from 'lucide-react';
 
 const benefits = [
   {
     icon: Award,
     title: 'Earn a Certificate',
-    description: 'Receive an official ApprenticeWatch Ambassador certificate, recognized by leading companies in the industry.',
+    description: 'Receive an official ApprenticeWatch Ambassador certificate to improve your LinkedIn Profile and CV!',
+  },
+  {
+    icon: Cpu,
+    title: 'Shape the Future',
+    description: 'Share your ideas and help us make ApprenticeWatch even better for everyone!',
   },
   {
     icon: Users,
     title: 'Drive Community Change',
-    description: 'Join regular meetings with fellow ambassadors and industry leaders to shape the future of apprenticeships.',
+    description: 'Join meetings with fellow ambassadors and industry leaders to shape the future of apprenticeships.',
   },
   {
     icon: Briefcase,
     title: 'Boost Your CV',
-    description: 'Gain valuable experience in community leadership, event organization, and digital marketing.',
+    description: 'Gain valuable experience in community leadership, event organisation, and digital marketing.',
   },
 ];
 
