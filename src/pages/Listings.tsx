@@ -1,4 +1,3 @@
-import React from 'react';
 import { ListingCard } from '../components/listings/ListingCard';
 import { ListingsFilter } from '../components/listings/ListingsFilter';
 
