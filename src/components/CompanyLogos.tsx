@@ -7,19 +7,20 @@ const stats = [
   {
     value: "500+",
     label: "Active Apprenticeships",
-    description: "Updated daily from top companies across the UK"
+    description: "Updated daily with top opportunities from companies across the UK."
   },
   {
-    value: "98%",
-    label: "Success Rate",
-    description: "Of our users successfully land apprenticeships"
+    value: "100%",
+    label: "Satisfaction Rate",
+    description: "Of users say ApprenticeWatch has saved them time!"
   },
   {
     value: "24/7",
-    label: "AI Support",
-    description: "Get help with applications anytime, anywhere"
+    label: "Real-Time Notifications",
+    description: "Get instant updates on new apprenticeships anytime, anywhere."
   }
 ];
+
 
 export const CompanyLogos = () => {
   return (
