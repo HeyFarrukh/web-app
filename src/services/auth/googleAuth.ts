@@ -1,11 +1,13 @@
 import { jwtDecode } from 'jwt-decode';
 import { userService } from '../firebase/userService';
+import { auth } from '../../config/firebase';
+import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 
 interface GoogleUser {
   email: string;
   name: string;
   picture: string;
-  sub: string; // Google's user ID
+  sub: string;
 }
 
 export class GoogleAuthService {
@@ -18,52 +20,54 @@ export class GoogleAuthService {
   }
 
   static isAuthenticated(): boolean {
-    const token = this.getToken();
-    if (!token) return false;
-
-    try {
-      const decodedToken: any = jwtDecode(token);
-      return decodedToken.exp * 1000 > Date.now();
-    } catch {
-      return false;
-    }
+    return auth.currentUser !== null;
   }
 
   static async handleCredentialResponse(response: any) {
     const token = response.credential;
+
+    if (!token) {
+      throw new Error('No token received from Google');
+    }
+
     const decodedUser: GoogleUser = jwtDecode(token);
 
-    // Store the token and user data locally
-    localStorage.setItem(this.tokenKey, token);
-    const userData = {
-      email: decodedUser.email,
-      name: decodedUser.name,
-      picture: decodedUser.picture,
-      id: decodedUser.sub,
-      lastLogin: new Date().toISOString()
-    };
-    localStorage.setItem(this.userKey, JSON.stringify(userData));
+    // Ensure that you're using the ID token for Firebase auth
+    const credential = GoogleAuthProvider.credential(token);
 
-    // Save user data to Firebase
     try {
-      await userService.saveUserProfile(decodedUser.sub, {
+      // Sign in to Firebase with the Google credential
+      const userCredential = await signInWithCredential(auth, credential);
+      const firebaseUser = userCredential.user;
+
+      // Store the token and user data locally
+      localStorage.setItem(this.tokenKey, token);
+      const userData = {
+        email: decodedUser.email,
+        name: decodedUser.name,
+        picture: decodedUser.picture,
+        id: firebaseUser.uid,
+        lastLogin: new Date().toISOString()
+      };
+      localStorage.setItem(this.userKey, JSON.stringify(userData));
+
+      // Save user data to Firebase
+      await userService.saveUserProfile(firebaseUser.uid, {
         ...userData,
         createdAt: new Date().toISOString()
       });
-    } catch (error) {
-      console.error('Failed to save user data to Firebase:', error);
-      // Still return the user even if Firebase save fails
-      // This ensures the user can still use the app
-    }
 
-    return decodedUser;
+      return decodedUser;
+    } catch (error) {
+      console.error('Firebase authentication failed:', error);
+      throw error;
+    }
   }
 
   static async logout() {
-    const userId = this.getCurrentUser()?.id;
+    const userId = auth.currentUser?.uid;
     if (userId) {
       try {
-        // Update last logout time in Firebase
         await userService.saveUserProfile(userId, {
           lastLogout: new Date().toISOString()
         });
@@ -72,13 +76,13 @@ export class GoogleAuthService {
       }
     }
 
+    await auth.signOut();
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
     window.location.href = '/';
   }
 
   static getCurrentUser() {
-    const userData = localStorage.getItem(this.userKey);
-    return userData ? JSON.parse(userData) : null;
+    return auth.currentUser;
   }
 }

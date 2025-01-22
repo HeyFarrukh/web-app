@@ -8,20 +8,23 @@ export const UserProfile = () => {
 
   if (!user) return null;
 
+  // Destructure the necessary user data from Firebase
+  const { displayName, photoURL } = user;
+
   return (
     <div className="relative group">
       <button className="flex items-center space-x-2">
-        {user.picture ? (
+        {photoURL ? (
           <img 
-            src={user.picture} 
-            alt={user.name} 
+            src={photoURL} 
+            alt={displayName || 'User'} 
             className="w-8 h-8 rounded-full"
           />
         ) : (
           <User className="w-8 h-8 p-1 rounded-full bg-orange-100 dark:bg-orange-900 text-orange-500" />
         )}
         <span className="hidden md:block text-gray-700 dark:text-gray-300">
-          {user.name}
+          {displayName || 'User'}
         </span>
       </button>
 
