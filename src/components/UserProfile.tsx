@@ -1,30 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { LogOut, User } from 'lucide-react';
 import { GoogleAuthService } from '../services/auth/googleAuth';
 
 export const UserProfile = () => {
-  const user = GoogleAuthService.getCurrentUser();
+  const [userData, setUserData] = useState<any>(null);
 
-  if (!user) return null;
+  useEffect(() => {
+    // Retrieve user data from localStorage on component mount
+    const storedUserData = localStorage.getItem('user_data');
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData));
+    }
+  }, []);
 
-  // Destructure the necessary user data from Firebase
-  const { displayName, photoURL } = user;
+  if (!userData) return null;
+
+  const { name, picture } = userData;
 
   return (
     <div className="relative group">
       <button className="flex items-center space-x-2">
-        {photoURL ? (
+        {picture ? (
           <img 
-            src={photoURL} 
-            alt={displayName || 'User'} 
+            src={picture} 
+            alt={name || 'User'} 
             className="w-8 h-8 rounded-full"
           />
         ) : (
           <User className="w-8 h-8 p-1 rounded-full bg-orange-100 dark:bg-orange-900 text-orange-500" />
         )}
         <span className="hidden md:block text-gray-700 dark:text-gray-300">
-          {displayName || 'User'}
+          {name || 'User'}
         </span>
       </button>
 

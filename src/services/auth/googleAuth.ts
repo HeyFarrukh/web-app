@@ -47,14 +47,14 @@ export class GoogleAuthService {
         name: decodedUser.name,
         picture: decodedUser.picture,
         id: firebaseUser.uid,
-        lastLogin: new Date().toISOString()
+        lastLogin: new Date().toISOString(),
       };
-      localStorage.setItem(this.userKey, JSON.stringify(userData));
+      localStorage.setItem(this.userKey, JSON.stringify(userData));  // Store user data in localStorage
 
       // Save user data to Firebase
       await userService.saveUserProfile(firebaseUser.uid, {
         ...userData,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       });
 
       return decodedUser;
@@ -69,7 +69,7 @@ export class GoogleAuthService {
     if (userId) {
       try {
         await userService.saveUserProfile(userId, {
-          lastLogout: new Date().toISOString()
+          lastLogout: new Date().toISOString(),
         });
       } catch (error) {
         console.error('Failed to update logout time:', error);
