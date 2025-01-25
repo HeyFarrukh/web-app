@@ -13,7 +13,7 @@ export const Navbar = () => {
   return (
     <nav className={`
       fixed left-1/2 -translate-x-1/2 top-4 
-      w-[700px] max-w-[95%] 
+      w-[800px] max-w-[95%] 
       backdrop-blur-md 
       bg-white/75 dark:bg-gray-900/75 
       rounded-full shadow-lg z-50
@@ -32,9 +32,9 @@ export const Navbar = () => {
           </Link>
           
           <div className="hidden md:flex items-center flex-1 justify-end">
-            <div className="flex items-center space-x-10 mr-10">
-              <Link to="/listings" className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400">
-                Listings
+            <div className="flex items-center space-x-12 mr-12">
+              <Link to="/apprenticeships" className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 whitespace-nowrap">
+                Apprenticeships
               </Link>
               <Link to="/join" className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400">
                 Join Us
@@ -44,7 +44,7 @@ export const Navbar = () => {
               </Link>
             </div>
             
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-8">
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"

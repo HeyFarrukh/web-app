@@ -1,18 +1,21 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GoogleSignIn } from '../components/auth/GoogleSignIn';
-import { GoogleAuthService } from '../services/auth/googleAuth'; // Adjust path as needed
+import { GoogleAuthService } from '../services/auth/googleAuth';
 
 export const SignIn = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Check if the user is already authenticated
     if (GoogleAuthService.isAuthenticated()) {
-      navigate('/listings'); // Redirect to listings page
+      // If they came from a specific page, go back there
+      const from = location.state?.from?.pathname || '/apprenticeships';
+      navigate(from);
     }
-  }, [navigate]);
+  }, [navigate, location]);
 
   return (
     <div className="min-h-screen pt-16 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">

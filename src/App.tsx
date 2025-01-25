@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { HelmetProvider } from 'react-helmet-async';
 import { Navbar } from './components/Navbar';
@@ -32,7 +32,8 @@ export const App = () => {
                 </>
               } />
               <Route path="/signin" element={<SignIn />} />
-              <Route path="/listings" element={<Listings />} />
+              <Route path="/apprenticeships" element={<Listings />} />
+              <Route path="/listings" element={<Navigate to="/apprenticeships" replace />} />
               <Route path="/join" element={<JoinUs />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<TermsOfService />} />

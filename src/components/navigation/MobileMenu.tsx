@@ -109,7 +109,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
 
                 <nav className="space-y-2">
                   {[
-                    { to: '/listings', label: 'Listings' },
+                    { to: '/apprenticeships', label: 'Apprenticeships' },
                     { to: '/join', label: 'Join Us' },
                     { to: '/team', label: 'Team' }
                   ].map(({ to, label }) => (
