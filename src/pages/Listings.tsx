@@ -36,7 +36,7 @@ export const Listings = () => {
       <Helmet>
         <title>Apprenticeship Listings | ApprenticeWatch - Find Your Perfect Opportunity</title>
         <meta name="description" content="Browse the latest apprenticeship opportunities from top UK companies. Filter by location, industry, and more to find your perfect apprenticeship match." />
-        <meta name="keywords" content="UK apprenticeships, apprenticeship listings, apprentice jobs, apprenticeship opportunities, tech apprenticeships" />
+        <meta name="keywords" content="UK apprenticeships, apprenticeship listings, apprentice jobs, apprenticeship opportunities, tech apprenticeships, degree apprenticeships" />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
