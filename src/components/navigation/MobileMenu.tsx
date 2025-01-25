@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X, Sun, Moon, User, Mail, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { GoogleAuthService } from '../../services/auth/googleAuth';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -18,6 +19,9 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   isDark,
   onThemeToggle 
 }) => {
+  const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+  const isAuthenticated = GoogleAuthService.isAuthenticated();
+
   const handleNavigation = (to: string) => {
     onClose();
     if (to.startsWith('#')) {
@@ -72,11 +76,42 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                   </button>
                 </div>
 
+                {isAuthenticated && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl"
+                  >
+                    <div className="flex items-center space-x-4">
+                      {userData.picture ? (
+                        <img 
+                          src={userData.picture} 
+                          alt={userData.name} 
+                          className="w-14 h-14 rounded-full border-2 border-orange-500"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center border-2 border-orange-500">
+                          <User className="w-7 h-7 text-orange-500" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-lg font-medium text-gray-900 dark:text-white truncate">
+                          {userData.name}
+                        </p>
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-2">
+                          <Mail className="w-4 h-4 flex-shrink-0" />
+                          <span className="truncate">{userData.email}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
                 <nav className="space-y-2">
                   {[
                     { to: '/listings', label: 'Listings' },
                     { to: '/join', label: 'Join Us' },
-                    { to: '#why-us', label: 'Why Us?' }
+                    { to: '/team', label: 'Team' }
                   ].map(({ to, label }) => (
                     <motion.div
                       key={to}
@@ -94,7 +129,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 </nav>
 
                 <motion.div 
-                  className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700"
+                  className="mt-6 space-y-4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
@@ -115,6 +150,19 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                       </>
                     )}
                   </button>
+
+                  {isAuthenticated && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        GoogleAuthService.logout();
+                      }}
+                      className="flex items-center justify-center w-full space-x-2 py-4 px-4 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Sign Out</span>
+                    </button>
+                  )}
                 </motion.div>
               </div>
             </motion.div>

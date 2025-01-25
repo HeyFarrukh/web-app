@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://apprenticewatch.com/sitemap.xml
+
+# Disallow crawling of authentication pages
+Disallow: /signin

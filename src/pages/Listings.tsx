@@ -1,3 +1,5 @@
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { ListingCard } from '../components/listings/ListingCard';
 import { ListingsFilter } from '../components/listings/ListingsFilter';
 
@@ -30,24 +32,70 @@ const demoListings = [
 
 export const Listings = () => {
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          Available Apprenticeships
-        </h1>
+    <>
+      <Helmet>
+        <title>Apprenticeship Listings | ApprenticeWatch - Find Your Perfect Opportunity</title>
+        <meta name="description" content="Browse the latest apprenticeship opportunities from top UK companies. Filter by location, industry, and more to find your perfect apprenticeship match." />
+        <meta name="keywords" content="UK apprenticeships, apprenticeship listings, apprentice jobs, apprenticeship opportunities, tech apprenticeships" />
         
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-1">
-            <ListingsFilter />
-          </div>
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Apprenticeship Listings | ApprenticeWatch - Find Your Perfect Opportunity" />
+        <meta property="og:description" content="Browse the latest apprenticeship opportunities from top UK companies. Filter by location, industry, and more to find your perfect apprenticeship match." />
+        <meta property="og:image" content="/media/listings-og-image.png" />
+        
+        {/* Twitter */}
+        <meta name="twitter:title" content="Apprenticeship Listings | ApprenticeWatch - Find Your Perfect Opportunity" />
+        <meta name="twitter:description" content="Browse the latest apprenticeship opportunities from top UK companies. Filter by location, industry, and more to find your perfect apprenticeship match." />
+        
+        {/* Schema.org JSON-LD */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "JobPosting",
+            "jobListings": demoListings.map(listing => ({
+              "@type": "JobPosting",
+              "title": listing.title,
+              "description": listing.description,
+              "hiringOrganization": {
+                "@type": "Organization",
+                "name": listing.company,
+                "logo": listing.logo
+              },
+              "jobLocation": {
+                "@type": "Place",
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressLocality": listing.location
+                }
+              },
+              "employmentType": listing.type,
+              "datePosted": new Date().toISOString(),
+              "validThrough": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            }))
+          })}
+        </script>
+      </Helmet>
+
+      <div className="min-h-screen pt-24 pb-12 bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+            Available Apprenticeships
+          </h1>
           
-          <div className="lg:col-span-3 space-y-6">
-            {demoListings.map((listing, index) => (
-              <ListingCard key={index} {...listing} />
-            ))}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-1">
+              <ListingsFilter />
+            </div>
+            
+            <div className="lg:col-span-3 space-y-6">
+              {demoListings.map((listing, index) => (
+                <ListingCard key={index} {...listing} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
