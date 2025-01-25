@@ -33,14 +33,14 @@ const teamMembers: TeamMember[] = [
     role: "Co-Founder",
     type: "founder",
     image: "/media/jamal-av.png",
-    description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    description: "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change.",
     links: {
       github: "https://github.com",
       linkedin: "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
     }
   },
   {
-    name: "Alex Turner",
+    name: "John Doe",
     role: "Brand Ambassador",
     type: "ambassador",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80",
@@ -51,7 +51,7 @@ const teamMembers: TeamMember[] = [
     }
   },
   {
-    name: "Emma Wilson",
+    name: "Emma Doe",
     role: "Brand Ambassador",
     type: "ambassador",
     image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80",
