@@ -61,7 +61,7 @@ export const Footer = () => {
               </span>
             </Link>
             <p className="text-gray-400 mb-6 max-w-sm">
-              Revolutionizing apprenticeship discovery and career development across the UK.
+              Revolutionising apprenticeship discovery and career development across the UK.
             </p>
             {/* Contact Information */}
             <div className="space-y-3">

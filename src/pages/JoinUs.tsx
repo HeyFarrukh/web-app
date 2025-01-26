@@ -84,7 +84,7 @@ export const JoinUs = () => {
               transition={{ delay: 0.2 }}
               className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
             >
-              Join our mission to revolutionize apprenticeship discovery while developing your career
+              Join our mission to revolutionise apprenticeship discovery while developing your career
             </motion.p>
           </div>
 
