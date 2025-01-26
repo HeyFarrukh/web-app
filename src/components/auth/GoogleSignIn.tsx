@@ -8,10 +8,10 @@ export const GoogleSignIn = () => {
 
   return (
     <GoogleOAuthProvider clientId="423840207023-6r1aqpq3852onbj0s8tgrd0ic8llud3c.apps.googleusercontent.com">
-      <div className="w-full">
+      <div className="google-signin-container w-full">
         <GoogleLogin
           onSuccess={async (credentialResponse) => {
-            console.log('Google Response:', credentialResponse); // Log the response
+            console.log('Google Response:', credentialResponse);
             try {
               await GoogleAuthService.handleCredentialResponse(credentialResponse);
               navigate('/listings');
@@ -25,7 +25,7 @@ export const GoogleSignIn = () => {
           useOneTap
           theme="outline"
           size="large"
-          width="100%"
+          width="370"  // Fallback pixel width
           text="continue_with"
           shape="rectangular"
         />

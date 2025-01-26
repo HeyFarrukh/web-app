@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google Sign-In Fixes */
+.google-signin-container > div {
+  width: 100% !important;
+}
+
+iframe[src*="accounts.google.com"] {
+  width: 100% !important;
+  min-width: 300px !important;
+}
+
+/* Scroll Animation */
 @keyframes scroll {
   0% {
     transform: translateX(0);
@@ -20,6 +31,7 @@
   animation-play-state: paused;
 }
 
+/* Slow Spin Animation */
 @keyframes spin-slow {
   from {
     transform: rotate(0deg);
@@ -33,7 +45,7 @@
   animation: spin-slow 10s linear infinite;
 }
 
-/* Mobile optimizations */
+/* Mobile Optimizations */
 @media (max-width: 768px) {
   .container {
     padding-left: 1rem;
@@ -51,14 +63,19 @@
   .grid {
     gap: 1rem !important;
   }
+
+  /* Mobile-specific Google button fix */
+  iframe[src*="accounts.google.com"] {
+    min-width: 280px !important;
+  }
 }
 
-/* Smooth scrolling */
+/* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Better mobile touch handling */
+/* Mobile Touch Handling */
 @media (hover: none) {
   .hover\:scale-105:hover {
     transform: none !important;
