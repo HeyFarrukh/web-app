@@ -186,18 +186,18 @@ export const Team = () => {
   return (
     <>
       <Helmet>
-        <title>Our Team | ApprenticeWatch - Leaders in Apprenticeship Discovery</title>
+        <title>Our Team - Apprenticewatch</title>
         <meta name="description" content="Meet the visionary team behind ApprenticeWatch. Our founders and brand ambassadors are dedicated to revolutionising apprenticeship discovery in the UK." />
         <meta name="keywords" content="ApprenticeWatch team, apprenticeship experts, UK apprenticeship leaders, apprenticeship innovators" />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Our Team | ApprenticeWatch - Leaders in Apprenticeship Discovery" />
+        <meta property="og:title" content="Our Team - Apprenticewatch" />
         <meta property="og:description" content="Meet the visionary team behind ApprenticeWatch. Our founders and brand ambassadors are dedicated to revolutionising apprenticeship discovery in the UK." />
         <meta property="og:image" content="/media/team-og-image.png" />
         
         {/* Twitter */}
-        <meta name="twitter:title" content="Our Team | ApprenticeWatch - Leaders in Apprenticeship Discovery" />
+        <meta name="twitter:title" content="Our Team - Apprenticewatch" />
         <meta name="twitter:description" content="Meet the visionary team behind ApprenticeWatch. Our founders and brand ambassadors are dedicated to revolutionising apprenticeship discovery in the UK." />
         
         {/* Schema.org JSON-LD */}

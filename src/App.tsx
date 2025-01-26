@@ -53,7 +53,7 @@ export const App = () => {
 
   return (
     <HelmetProvider>
-      <GoogleOAuthProvider clientId="972953081439-feffiadbd6v8laecusaq3jnh5m6nll94.apps.googleusercontent.com">
+      <GoogleOAuthProvider clientId="423840207023-6r1aqpq3852onbj0s8tgrd0ic8llud3c.apps.googleusercontent.com">
         <Router>
           <ScrollToTop />
           <AppRoutes />

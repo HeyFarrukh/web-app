@@ -1,9 +1,29 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 
 export const Privacy = () => {
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50/30 to-white dark:from-gray-900 dark:to-gray-800">
+      <Helmet>
+
+      <title>Privacy Policy - ApprenticeWatch</title>
+      <meta name="title" content="Privacy Policy - ApprenticeWatch" />
+      <meta name="description" content="Your privacy matters to us! Discover how we protect your data and use it responsibly to enhance your journey in finding the perfect apprenticeship. Read our Privacy Policy for full details." />
+
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://apprenticewatch.com/privacy" />
+      <meta property="og:title" content="Privacy Policy - ApprenticeWatch" />
+      <meta property="og:description" content="Your privacy matters to us! Discover how we protect your data and use it responsibly to enhance your journey in finding the perfect apprenticeship. Read our Privacy Policy for full details." />
+      <meta property="og:image" content="/media/privacy-policy.png" />
+
+      <meta property="twitter:card" content="summary_large_image" />
+      <meta property="twitter:url" content="https://apprenticewatch.com/privacy" />
+      <meta property="twitter:title" content="Privacy Policy - ApprenticeWatch" />
+      <meta property="twitter:description" content="Your privacy matters to us! Discover how we protect your data and use it responsibly to enhance your journey in finding the perfect apprenticeship. Read our Privacy Policy for full details." />
+      <meta property="twitter:image" content="/media/privacy-policy.png" />
+
+      </Helmet>
       <motion.div 
         className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0, y: 20 }}
