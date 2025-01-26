@@ -18,29 +18,31 @@ interface TeamMember {
 
 const teamMembers: TeamMember[] = [
   {
-    name: "Farrukh Ahmad",
+    name: "John Smith",
     role: "Founder",
     type: "founder",
-    image: "/media/farrukh-av.png",
-    description: "I’m passionate about making it easier for young professionals to find apprenticeships. After struggling myself to keep up with all the opportunities out there, I’m on a mission to simplify the process and help others save time and stress.",
-    links: {
-      github: "https://github.com/HeyFarrukh?utm_source=apprentice-watch",
-      linkedin: "https://www.linkedin.com/in/farrukh-ahmad-9547b1260?utm_source=apprentice-watch",
-    }
-  },
-  {
-    name: "Jamal Mitchell",
-    role: "Co-Founder",
-    type: "founder",
-    image: "/media/jamal-av.png",
-    description: "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change.",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     links: {
       github: "https://github.com",
-      linkedin: "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
+      linkedin: "https://linkedin.com",
+      twitter: "https://twitter.com"
     }
   },
   {
-    name: "John Doe",
+    name: "Sarah Johnson",
+    role: "Co-Founder",
+    type: "founder",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+    description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    links: {
+      github: "https://github.com",
+      linkedin: "https://linkedin.com",
+      twitter: "https://twitter.com"
+    }
+  },
+  {
+    name: "Alex Turner",
     role: "Brand Ambassador",
     type: "ambassador",
     image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80",
@@ -51,7 +53,7 @@ const teamMembers: TeamMember[] = [
     }
   },
   {
-    name: "Emma Doe",
+    name: "Emma Wilson",
     role: "Brand Ambassador",
     type: "ambassador",
     image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80",
@@ -193,19 +195,19 @@ export const Team = () => {
   return (
     <>
       <Helmet>
-        <title>Our Team | ApprenticeWatch</title>
-        <meta name="description" content="Meet the visionary team behind ApprenticeWatch. Our founders and brand ambassadors are dedicated to revolutionising apprenticeship discovery in the UK." />
+        <title>Our Team | ApprenticeWatch - Leaders in Apprenticeship Discovery</title>
+        <meta name="description" content="Meet the visionary team behind ApprenticeWatch. Our founders and brand ambassadors are dedicated to revolutionizing apprenticeship discovery in the UK." />
         <meta name="keywords" content="ApprenticeWatch team, apprenticeship experts, UK apprenticeship leaders, apprenticeship innovators" />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Our Team | ApprenticeWatch" />
-        <meta property="og:description" content="Meet the visionary team behind ApprenticeWatch. Our founders and brand ambassadors are dedicated to revolutionising apprenticeship discovery in the UK." />
+        <meta property="og:title" content="Our Team | ApprenticeWatch - Leaders in Apprenticeship Discovery" />
+        <meta property="og:description" content="Meet the visionary team behind ApprenticeWatch. Our founders and brand ambassadors are dedicated to revolutionizing apprenticeship discovery in the UK." />
         <meta property="og:image" content="/media/team-og-image.png" />
         
         {/* Twitter */}
-        <meta name="twitter:title" content="Our Team | ApprenticeWatch" />
-        <meta name="twitter:description" content="Meet the visionary team behind ApprenticeWatch. Our founders and brand ambassadors are dedicated to revolutionising apprenticeship discovery in the UK." />
+        <meta name="twitter:title" content="Our Team | ApprenticeWatch - Leaders in Apprenticeship Discovery" />
+        <meta name="twitter:description" content="Meet the visionary team behind ApprenticeWatch. Our founders and brand ambassadors are dedicated to revolutionizing apprenticeship discovery in the UK." />
         
         {/* Schema.org JSON-LD */}
         <script type="application/ld+json">
@@ -239,10 +241,10 @@ export const Team = () => {
             className="text-center mb-16"
           >
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Meet the <span className="text-orange-500">Team</span>
+              Meet Our <span className="text-orange-500">Visionaries</span>
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              The minds behind ApprenticeWatch, working to revolutionise how apprenticeships are discovered and accessed.
+              The minds behind ApprenticeWatch, working to revolutionize how apprenticeships are discovered and accessed.
             </p>
           </motion.div>
 
@@ -258,7 +260,7 @@ export const Team = () => {
             </div>
           </div>
 
-          {/* Ambassadors Section
+          {/* Ambassadors Section */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -273,7 +275,7 @@ export const Team = () => {
                 <AmbassadorCard key={`${member.name}-${index}`} member={member} index={index} />
               ))}
             </div>
-          </motion.div> */}
+          </motion.div>
         </div>
       </div>
     </>

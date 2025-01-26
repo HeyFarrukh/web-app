@@ -9,6 +9,7 @@ import { Roadmap } from './components/Roadmap';
 import { Footer } from './components/Footer';
 import { SignIn } from './pages/SignIn';
 import { Listings } from './pages/Listings';
+import { ApprenticeshipDetail } from './pages/ApprenticeshipDetail';
 import { JoinUs } from './pages/JoinUs';
 import { Privacy } from './pages/Privacy';
 import { TermsOfService } from './pages/TermsOfService';
@@ -18,7 +19,7 @@ import { Analytics } from './services/analytics/analytics';
 import { useAnalytics } from './hooks/useAnalytics';
 
 const AppRoutes = () => {
-  useAnalytics(); // Track page views
+  useAnalytics();
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -33,6 +34,7 @@ const AppRoutes = () => {
         } />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/apprenticeships" element={<Listings />} />
+        <Route path="/apprenticeships/:id" element={<ApprenticeshipDetail />} />
         <Route path="/listings" element={<Navigate to="/apprenticeships" replace />} />
         <Route path="/join" element={<JoinUs />} />
         <Route path="/privacy" element={<Privacy />} />
