@@ -10,8 +10,9 @@ interface ListingCardProps {
 
 export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   const navigate = useNavigate();
-  
+
   const truncateDescription = (text: string, maxLength: number = 150) => {
+    if (!text) return '';
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   };
@@ -54,7 +55,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
 
           <div className="mt-4 flex items-center justify-between">
             <button 
-              onClick={() => navigate(`/apprenticeships/${listing.vacancyReference}`)}
+              onClick={() => navigate(`/apprenticeships/${listing.id}`)}
               className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
             >
               View Details

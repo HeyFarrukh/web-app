@@ -43,7 +43,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         pages.push(totalPages);
       }
     }
-    
+    console.log("Pages:", pages);
     return pages;
   };
 

@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ListingCard } from '../components/listings/ListingCard';
-import { ListingDetails } from '../components/listings/ListingDetails';
 import { ListingsFilter } from '../components/listings/ListingsFilter';
 import { Pagination } from '../components/listings/Pagination';
 import { ListingType } from '../types/listing';
-import { AnimatePresence } from 'framer-motion';
 import { vacancyService } from '../services/firebase/vacancyService';
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 
 const ITEMS_PER_PAGE = 5;
 
 export const Listings = () => {
-  const [selectedListing, setSelectedListing] = useState<ListingType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [listings, setListings] = useState<ListingType[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -112,7 +109,6 @@ export const Listings = () => {
                       <ListingCard 
                         key={listing.id} 
                         listing={listing}
-                        onViewDetails={setSelectedListing}
                       />
                     ))}
                   </div>
@@ -138,15 +134,6 @@ export const Listings = () => {
           </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        {selectedListing && (
-          <ListingDetails 
-            listing={selectedListing} 
-            onClose={() => setSelectedListing(null)} 
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 };

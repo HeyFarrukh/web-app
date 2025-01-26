@@ -1,28 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LogoScroll } from './logos/LogoScroll';
 import { StatCard } from './stats/StatCard';
-
-const stats = [
-  {
-    value: "500+",
-    label: "Active Apprenticeships",
-    description: "Updated daily with top opportunities from companies across the UK."
-  },
-  {
-    value: "100%",
-    label: "Satisfaction Rate",
-    description: "Of users say ApprenticeWatch has saved them time!"
-  },
-  {
-    value: "24/7",
-    label: "Real-Time Notifications",
-    description: "Get instant updates on new apprenticeships anytime, anywhere."
-  }
-];
-
+import { vacancyService } from '../services/firebase/vacancyService';
 
 export const CompanyLogos = () => {
+  const [totalVacancies, setTotalVacancies] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchTotalVacancies = async () => {
+      try {
+        const count = await vacancyService.getTotalActiveVacancies();
+        setTotalVacancies(count);
+      } catch (error) {
+        console.error('Error fetching total vacancies:', error);
+      }
+    };
+
+    fetchTotalVacancies();
+  }, []);
+
+  const stats = [
+    {
+      value: totalVacancies !== null ? `${totalVacancies}+` : "Loading...",
+      label: "Active Apprenticeships",
+      description: "Updated in real-time with opportunities from companies across the UK."
+    },
+    {
+      value: "100%",
+      label: "Satisfaction Rate",
+      description: "Of users say ApprenticeWatch has saved them time!"
+    },
+    {
+      value: "24/7",
+      label: "Real-Time Notifications",
+      description: "Get instant updates on new apprenticeships anytime, anywhere."
+    }
+  ];
+
   return (
     <div className="mt-16">
       <motion.h3 

@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Twitter } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-
 interface TeamMember {
   name: string;
   role: string;
@@ -15,30 +14,27 @@ interface TeamMember {
     twitter?: string;
   };
 }
-
 const teamMembers: TeamMember[] = [
   {
-    name: "John Smith",
+    name: "Farrukh Ahmad",
     role: "Founder",
     type: "founder",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    image: "/media/farrukh-av.png",
+    description: "I’m on a mission to make it easier for young professionals to find apprenticeships. Having faced the challenge myself of keeping up with the endless apprenticeships, I’m determined to simplify the process and take the stress out of it for others. I’m not just talking about change—I’m here to make it happen.",
     links: {
-      github: "https://github.com",
-      linkedin: "https://linkedin.com",
-      twitter: "https://twitter.com"
+      github: "https://github.com/HeyFarrukh?utm_source=apprentice-watch",
+      linkedin: "https://www.linkedin.com/in/farrukh-ahmad-9547b1260?utm_source=apprentice-watch",
     }
   },
   {
-    name: "Sarah Johnson",
+    name: "Jamal Mitchell",
     role: "Co-Founder",
     type: "founder",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-    description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    image: "/media/jamal-av.png",
+    description: "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. When Farrukh shared his bold vision with me, I immediately recognised the potential for change and knew this was the opportunity to make a real impact.",
     links: {
       github: "https://github.com",
-      linkedin: "https://linkedin.com",
-      twitter: "https://twitter.com"
+      linkedin: "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
     }
   },
   {
@@ -64,7 +60,6 @@ const teamMembers: TeamMember[] = [
     }
   }
 ];
-
 const FounderCard: React.FC<{ member: TeamMember }> = ({ member }) => (
   <motion.div
     initial={{ opacity: 0, y: 50 }}
@@ -94,7 +89,6 @@ const FounderCard: React.FC<{ member: TeamMember }> = ({ member }) => (
         <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
           {member.description}
         </p>
-
         <div className="flex space-x-4">
           {member.links.github && (
             <motion.a
@@ -137,7 +131,6 @@ const FounderCard: React.FC<{ member: TeamMember }> = ({ member }) => (
     </div>
   </motion.div>
 );
-
 const AmbassadorCard: React.FC<{ member: TeamMember; index: number }> = ({ member, index }) => (
   <motion.div
     initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
@@ -187,11 +180,9 @@ const AmbassadorCard: React.FC<{ member: TeamMember; index: number }> = ({ membe
     </div>
   </motion.div>
 );
-
 export const Team = () => {
   const founders = teamMembers.filter(member => member.type === 'founder');
   const ambassadors = teamMembers.filter(member => member.type === 'ambassador');
-
   return (
     <>
       <Helmet>
@@ -232,7 +223,6 @@ export const Team = () => {
           })}
         </script>
       </Helmet>
-
       <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -241,13 +231,12 @@ export const Team = () => {
             className="text-center mb-16"
           >
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Meet Our <span className="text-orange-500">Visionaries</span>
+              Meet the <span className="text-orange-500">Team</span>
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              The minds behind ApprenticeWatch, working to revolutionize how apprenticeships are discovered and accessed.
+              The minds behind ApprenticeWatch, working to revolutionise how apprenticeships are discovered and accessed.
             </p>
           </motion.div>
-
           {/* Founders Section */}
           <div className="relative mb-24">
             <div className="grid md:grid-cols-2 gap-12">
@@ -259,8 +248,7 @@ export const Team = () => {
               <div className="w-full h-full bg-gradient-to-b from-transparent via-orange-500 to-transparent animate-pulse" />
             </div>
           </div>
-
-          {/* Ambassadors Section */}
+          {/* Ambassadors Section
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -275,7 +263,7 @@ export const Team = () => {
                 <AmbassadorCard key={`${member.name}-${index}`} member={member} index={index} />
               ))}
             </div>
-          </motion.div>
+          </motion.div> */}
         </div>
       </div>
     </>
