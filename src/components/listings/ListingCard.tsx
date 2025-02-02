@@ -1,10 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, MapPin, GraduationCap, Clock } from 'lucide-react';
+import { Building2, MapPin, GraduationCap, Clock, PoundSterling } from 'lucide-react';
 import { ListingType } from '../../types/listing';
 import { formatDate } from '../../utils/dateUtils';
-
-
 
 interface ListingCardProps {
   listing: ListingType;
@@ -19,15 +17,22 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
     return text.slice(0, maxLength) + '...';
   };
 
+  const formatWage = (wage: ListingType['wage']) => {
+    if (wage.wageType === 'CompetitiveSalary') {
+      return 'Competitive Salary';
+    }
+    return wage.wageAdditionalInformation || `${wage.wageType} (${wage.wageUnit})`;
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6">
       <div className="flex items-start space-x-4">
-      <img 
-  src={listing.logo} 
-  alt={listing.employerName} 
-  className="w-16 h-16 rounded-lg object-contain bg-white"
-  onError={(e) => e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
-/>
+        <img 
+          src={listing.logo} 
+          alt={listing.employerName} 
+          className="w-16 h-16 rounded-lg object-contain bg-white"
+          onError={(e) => e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
+        />
         <div className="flex-1">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             {listing.title}
@@ -49,6 +54,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
             <div className="flex items-center space-x-1">
               <Clock className="w-4 h-4" />
               <span>Closes {formatDate(listing.closingDate)}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <PoundSterling className="w-4 h-4" />
+              <span>{formatWage(listing.wage)}</span>
             </div>
           </div>
 

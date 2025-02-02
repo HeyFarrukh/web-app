@@ -10,7 +10,7 @@ class VacancyService {
       id: listing.id,
       title: listing.title,
       description: listing.description,
-      employerName: listing.employer_name, // CORRECT MAPPING - IMPORTANT!
+      employerName: listing.employer_name,
       vacancyReference: listing.vacancy_reference,
       vacancyUrl: listing.vacancy_url,
       providerName: listing.provider_name,
@@ -74,81 +74,61 @@ class VacancyService {
     }
   }
 
-  async getVacancies({
-    page = 1,
-    pageSize = 10,
-    filters = {}
-  }: {
-    page: number;
-    pageSize: number;
-    filters: {
-      search?: string;
-      location?: string;
-      level?: string;
-    };
-  }) {
-    try {
-      const now = new Date().toISOString();
-      let query = supabase
-        .from(this.TABLE_NAME)
-        .select('*', { count: 'exact' }) // Request count for pagination
-        .eq('is_active', true)
-        .gt('closing_date', now)
-        .order('posted_date', { ascending: false });
+async getVacancies({
+  page = 1,
+  pageSize = 10,
+  filters = {}
+}: {
+  page: number;
+  pageSize: number;
+  filters: {
+    search?: string;
+    location?: string;
+    level?: string;
+  };
+}) {
+  try {
+    const now = new Date().toISOString();
+    let query = supabase
+      .from(this.TABLE_NAME)
+      .select('*', { count: 'exact' })
+      .eq('is_active', true)
+      .gt('closing_date', now)
+      .order('posted_date', { ascending: false });
 
-      if (filters.location) {
-        query = query.eq('address_line3', filters.location);
-      }
+if (filters.search) {
+  query = query.or(
+    `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%`
+  );
+}
 
-      if (filters.level) {
-        query = query.eq('course_level', parseInt(filters.level));
-      }
+    if (filters.location) {
+      query = query.eq('address_line3', filters.location);
+    }
 
-      // Log the query BEFORE execution to see what SQL is generated
-      const queryForLog = query.toString(); // Get the query string for logging
-      console.log("Supabase Query (for count and data):", query); // Log the query object directly
+    if (filters.level) {
+      query = query.eq('course_level', parseInt(filters.level));
+    }
 
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
 
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
+    const { data, error, count } = await query.range(from, to);
 
-      const paginatedQuery = query.range(from, to); // Create separate query for pagination
-      const { data, error: dataError, count } = await paginatedQuery; // Execute paginated query
-
-      // Log the raw Supabase response to inspect data, error, and count
-      console.log("Supabase Response:", { data, dataError, count });
-
-
-      if (dataError) {
-        console.error('Supabase error in getVacancies (data fetch):', dataError);
-        throw dataError;
-      }
-
-      // if (error) { // This 'error' was not defined, should use 'dataError' or 'countError' if needed, but likely redundant now
-      //   console.error('Supabase error in getVacancies:', error); // Redundant error log
-      //   throw error; // Redundant error throw
-      // }
-
-
-      let filteredData = data || [];
-      if (filters.search) {
-        const searchTerm = filters.search.toLowerCase();
-        filteredData = filteredData.filter(vacancy =>
-          vacancy.title.toLowerCase().includes(searchTerm) ||
-          vacancy.description.toLowerCase().includes(searchTerm) ||
-          vacancy.employer_name.toLowerCase().includes(searchTerm)
-        );
-      }
-
-      return {
-        vacancies: (filteredData as SupabaseListing[]).map(d => this.transformListing(d)),
-        total: count || 0,
-      };
-    } catch (error) {
-      console.error('Error getting vacancies:', error);
+    if (error) {
+      console.error('Supabase error in getVacancies:', error);
       throw error;
     }
+
+    return {
+      vacancies: (data as SupabaseListing[]).map(d => this.transformListing(d)),
+      total: count || 0,
+    };
+  } catch (error) {
+    console.error('Error getting vacancies:', error);
+    throw error;
   }
+}
 
   async getVacancyById(id: string): Promise<ListingType> {
     try {
@@ -165,7 +145,7 @@ class VacancyService {
       }
 
       if (!data) {
-        throw new Error('Vacancy not found'); // Or handle null data appropriately
+        throw new Error('Vacancy not found');
       }
 
       return this.transformListing(data as SupabaseListing);
@@ -181,7 +161,7 @@ class VacancyService {
         .from(this.TABLE_NAME)
         .select('address_line3')
         .eq('is_active', true)
-        .neq('address_line3', null);
+        .not('address_line3', 'is', null);
 
       if (error) {
         console.error('Supabase error in getAvailableLocations:', error);
@@ -202,15 +182,22 @@ class VacancyService {
         .from(this.TABLE_NAME)
         .select('course_level')
         .eq('is_active', true)
-        .neq('course_level', null);
+        .not('course_level', 'is', null)
+        .order('course_level');
 
       if (error) {
         console.error('Supabase error in getAvailableLevels:', error);
         throw error;
       }
 
-      const levels = Array.from(new Set(data?.map(d => d.course_level))) as number[];
-      return levels.sort((a, b) => a - b);
+      // Use Set to get unique values and filter out any remaining null/undefined
+      const levels = Array.from(new Set(
+        data
+          ?.map(d => d.course_level)
+          .filter(level => level != null)
+      )) as number[];
+      
+      return levels;
     } catch (error) {
       console.error('Error getting available levels:', error);
       throw error;
