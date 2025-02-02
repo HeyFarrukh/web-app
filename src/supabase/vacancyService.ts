@@ -1,58 +1,58 @@
 // services/supabase/vacancyService.ts
-import supabase from '../../config/supabase';
-import { ListingType, SupabaseListing } from '../../types/listing'; // Import both interfaces
+import supabase  from '../config/supabase';
+import { ListingType, SupabaseListing } from '../types/listing'; // Import both interfaces
 
 class VacancyService {
   private readonly TABLE_NAME = 'vacancies';
-  
+
   private transformListing(listing: SupabaseListing): ListingType {
     return {
-        id: listing.id,
-        title: listing.title,
-        description: listing.description,
-        employerName: listing.employer_name, // CORRECT MAPPING - IMPORTANT!
-        vacancyReference: listing.vacancy_reference,
-        vacancyUrl: listing.vacancy_url,
-        providerName: listing.provider_name,
-        postedDate: new Date(listing.posted_date),
-        closingDate: new Date(listing.closing_date),
-        startDate: new Date(listing.start_date),
-        expectedDuration: listing.expected_duration,
-        hoursPerWeek: listing.hours_per_week,
-        workingWeekDescription: listing.working_week_description,
-        numberOfPositions: listing.number_of_positions,
-        isDisabilityConfident: listing.is_disability_confident,
-        isNationalVacancy: listing.is_national_vacancy ?? false,
-        address: {
-            addressLine1: listing.address_line1,
-            addressLine2: listing.address_line2,
-            addressLine3: listing.address_line3,
-            postcode: listing.postcode
-        },
-        location: {
-            latitude: listing.latitude ?? 0,
-            longitude: listing.longitude ?? 0
-        },
-        course: {
-            larsCode: listing.lars_code ?? 0,
-            level: listing.course_level,
-            route: listing.course_route,
-            title: listing.course_title
-        },
-        apprenticeshipLevel: listing.apprenticeship_level,
-        wage: {
-            wageType: listing.wage_type,
-            wageUnit: listing.wage_unit,
-            wageAdditionalInformation: listing.wage_additional_information
-        },
-        employerContactEmail: listing.employer_contact_email,
-        employerContactName: listing.employer_contact_name,
-        employerContactPhone: listing.employer_contact_phone,
-        employerWebsiteUrl: listing.employer_website_url,
-        ukprn: listing.ukprn ?? 0,
-        logo: listing.logo
+      id: listing.id,
+      title: listing.title,
+      description: listing.description,
+      employerName: listing.employer_name, // CORRECT MAPPING - IMPORTANT!
+      vacancyReference: listing.vacancy_reference,
+      vacancyUrl: listing.vacancy_url,
+      providerName: listing.provider_name,
+      postedDate: new Date(listing.posted_date),
+      closingDate: new Date(listing.closing_date),
+      startDate: new Date(listing.start_date),
+      expectedDuration: listing.expected_duration,
+      hoursPerWeek: listing.hours_per_week,
+      workingWeekDescription: listing.working_week_description,
+      numberOfPositions: listing.number_of_positions,
+      isDisabilityConfident: listing.is_disability_confident,
+      isNationalVacancy: listing.is_national_vacancy ?? false,
+      address: {
+        addressLine1: listing.address_line1,
+        addressLine2: listing.address_line2,
+        addressLine3: listing.address_line3,
+        postcode: listing.postcode
+      },
+      location: {
+        latitude: listing.latitude ?? 0,
+        longitude: listing.longitude ?? 0
+      },
+      course: {
+        larsCode: listing.lars_code ?? 0,
+        level: listing.course_level,
+        route: listing.course_route,
+        title: listing.course_title
+      },
+      apprenticeshipLevel: listing.apprenticeship_level,
+      wage: {
+        wageType: listing.wage_type,
+        wageUnit: listing.wage_unit,
+        wageAdditionalInformation: listing.wage_additional_information
+      },
+      employerContactEmail: listing.employer_contact_email,
+      employerContactName: listing.employer_contact_name,
+      employerContactPhone: listing.employer_contact_phone,
+      employerWebsiteUrl: listing.employer_website_url,
+      ukprn: listing.ukprn ?? 0,
+      logo: listing.logo
     };
-}
+  }
 
   async getTotalActiveVacancies(): Promise<number> {
     try {
@@ -104,17 +104,31 @@ class VacancyService {
         query = query.eq('course_level', parseInt(filters.level));
       }
 
+      // Log the query BEFORE execution to see what SQL is generated
+      const queryForLog = query.toString(); // Get the query string for logging
+      console.log("Supabase Query (for count and data):", query); // Log the query object directly
+
+
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
+      const paginatedQuery = query.range(from, to); // Create separate query for pagination
+      const { data, error: dataError, count } = await paginatedQuery; // Execute paginated query
 
-      const { data, error, count } = await query.range(from, to);
+      // Log the raw Supabase response to inspect data, error, and count
+      console.log("Supabase Response:", { data, dataError, count });
 
 
-      if (error) {
-        console.error('Supabase error in getVacancies:', error);
-        throw error;
+      if (dataError) {
+        console.error('Supabase error in getVacancies (data fetch):', dataError);
+        throw dataError;
       }
+
+      // if (error) { // This 'error' was not defined, should use 'dataError' or 'countError' if needed, but likely redundant now
+      //   console.error('Supabase error in getVacancies:', error); // Redundant error log
+      //   throw error; // Redundant error throw
+      // }
+
 
       let filteredData = data || [];
       if (filters.search) {

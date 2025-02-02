@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LogoScroll } from './logos/LogoScroll';
 import { StatCard } from './stats/StatCard';
-import { vacancyService } from '../services/firebase/vacancyService';
+import { vacancyService } from '../supabase/vacancyService';
 
 export const CompanyLogos = () => {
   const [totalVacancies, setTotalVacancies] = useState<number | null>(null);

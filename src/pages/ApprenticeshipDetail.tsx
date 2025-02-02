@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { ListingType } from '../types/listing';
 import { formatDate } from '../utils/dateUtils';
-import { vacancyService } from '../services/firebase/vacancyService';
+import { vacancyService } from '../supabase/vacancyService';
 
 interface InfoCardProps {
   icon: React.ElementType;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { vacancyService } from '../../services/firebase/vacancyService';
+import { vacancyService } from '../../supabase/vacancyService';
 
 interface ListingsFilterProps {
   onFilterChange: (filters: {
