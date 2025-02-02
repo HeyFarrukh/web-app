@@ -6,11 +6,26 @@ import {
 } from 'lucide-react';
 import { ListingType } from '../../types/listing';
 import { formatDate } from '../../utils/dateUtils';
+import { companies } from '../logos/companyData';
 
 interface ListingDetailsProps {
   listing: ListingType;
   onClose: () => void;
 }
+
+// Function to get the logo URL from the company domain
+const getLogoUrl = (employerName: string) => {
+  const normalizedEmployerName = employerName.toLowerCase();
+  const company = companies.find((company) =>
+    company.name.toLowerCase() === normalizedEmployerName
+  );
+
+  if (company && company.domain) {
+    return `https://img.logo.dev/${company.domain}?token=${import.meta.env.VITE_LOGODEV_KEY}`;
+  }
+
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(employerName)}&background=random`;
+};
 
 export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose }) => {
   return (
@@ -31,10 +46,12 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing, onClose
         {/* Header */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-start space-x-4">
+            {/* Logo */}
             <img 
-              src={listing.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
-              alt={listing.employerName}
-              className="w-20 h-20 rounded-lg object-contain bg-white"
+              src={getLogoUrl(listing.employerName)} 
+              alt={listing.employerName} 
+              className="w-16 h-16 rounded-lg object-contain bg-white"
+              onError={(e) => e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
             />
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">

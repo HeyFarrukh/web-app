@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, MapPin, GraduationCap, Clock, PoundSterling } from 'lucide-react';
 import { ListingType } from '../../types/listing';
 import { formatDate } from '../../utils/dateUtils';
+import { companies } from '../logos/companyData';
 
 interface ListingCardProps {
   listing: ListingType;
@@ -24,11 +25,26 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
     return wage.wageAdditionalInformation || `${wage.wageType} (${wage.wageUnit})`;
   };
 
+  // Function to get the logo URL from the company domain
+  const getLogoUrl = (employerName: string) => {
+    const normalizedEmployerName = employerName.toLowerCase();
+    const company = companies.find((company) =>
+      company.name.toLowerCase() === normalizedEmployerName
+    );
+
+    if (company && company.domain) {
+      return `https://img.logo.dev/${company.domain}?token=${import.meta.env.VITE_LOGODEV_KEY}`;
+    }
+
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(employerName)}&background=random`;
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6">
       <div className="flex items-start space-x-4">
+        {/* Display company logo */}
         <img 
-          src={listing.logo} 
+          src={getLogoUrl(listing.employerName)} 
           alt={listing.employerName} 
           className="w-16 h-16 rounded-lg object-contain bg-white"
           onError={(e) => e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
@@ -37,7 +53,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             {listing.title}
           </h3>
-          
+
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-300">
             <div className="flex items-center space-x-1">
               <Building2 className="w-4 h-4" />
@@ -78,6 +94,15 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           </div>
         </div>
       </div>
+
+      {/* The hidden anchor for Logo.dev compliance */}
+      {/* Use visibility: hidden or display: none */}
+      <a 
+  href="https://logo.dev" 
+  className="invisible"
+>
+  Logos provided by Logo.dev
+</a>
     </div>
   );
 };
