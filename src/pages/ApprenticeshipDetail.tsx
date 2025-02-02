@@ -193,11 +193,12 @@ export const ApprenticeshipDetail = () => {
           {/* Header */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row sm:items-start sm:space-x-4">
-              <img 
-                src={listing.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
-                alt={listing.employerName}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-contain bg-white dark:bg-gray-700 mb-4 sm:mb-0"
-              />
+            <img 
+          src={listing.logo} 
+          alt={listing.employerName} 
+          className="w-16 h-16 rounded-lg object-contain bg-white"
+          onError={(e) => e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
+        />
               <div>
                 <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                   {listing.title}
