@@ -108,18 +108,17 @@ export const ApprenticeshipDetail = () => {
     <>
       <Helmet>
         <title>{`${listing.title} at ${listing.employerName} | ApprenticeWatch`}</title>
-        <meta 
-          name="description" 
-          content={`Apply for ${listing.title} apprenticeship at ${listing.employerName}. ${listing.course.level} apprenticeship in ${listing.address.addressLine3}. Training provided by ${listing.providerName}.`}
-        />
+        <meta
+        name="description"
+        content={`Apply for the ${listing.title} apprenticeship at ${listing.employerName}. Level ${listing.course.level} opportunity in ${listing.address.addressLine3}. Learn more and apply now on ApprenticeWatch.`}
+      />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:title" content={`${listing.title} at ${listing.employerName}`} />
         <meta 
           property="og:description" 
-          content={`Level ${listing.course.level} apprenticeship opportunity in ${listing.address.addressLine3}. Training provided by ${listing.providerName}.`}
-        />
+          content={`Apply for the ${listing.title} apprenticeship at ${listing.employerName}. Level ${listing.course.level} opportunity in ${listing.address.addressLine3}. Learn more and apply now on ApprenticeWatch.`}        />
         <meta property="og:image" content="/media/apprentice-watch.png" />
         
         {/* Twitter */}
@@ -127,46 +126,52 @@ export const ApprenticeshipDetail = () => {
         <meta name="twitter:title" content={`${listing.title} at ${listing.employerName}`} />
         <meta 
           name="twitter:description" 
-          content={`Level ${listing.course.level} apprenticeship opportunity in ${listing.address.addressLine3}. Training provided by ${listing.providerName}.`}
-        />
+          content={`Apply for the ${listing.title} apprenticeship at ${listing.employerName}. Level ${listing.course.level} opportunity in ${listing.address.addressLine3}. Learn more and apply now on ApprenticeWatch.`}        />
         <meta name="twitter:image" content="/media/apprentice-watch.png" />
         
         {/* Schema.org JSON-LD */}
         <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "JobPosting",
-            "title": listing.title,
-            "description": listing.description,
-            "datePosted": listing.postedDate,
-            "validThrough": listing.closingDate,
-            "employmentType": "Apprenticeship",
-            "hiringOrganization": {
-              "@type": "Organization",
-              "name": listing.employerName,
-              "sameAs": listing.employerWebsiteUrl
-            },
-            "jobLocation": {
-              "@type": "Place",
-              "address": {
-                "@type": "PostalAddress",
-                "streetAddress": listing.address.addressLine1,
-                "addressLocality": listing.address.addressLine3,
-                "postalCode": listing.address.postcode,
-                "addressCountry": "UK"
-              }
-            },
-            "educationRequirements": {
-              "@type": "EducationalOccupationalCredential",
-              "credentialCategory": `Level ${listing.course.level} Apprenticeship`
-            },
-            "numberOfPositions": listing.numberOfPositions,
-            "employmentUnit": {
-              "@type": "Organization",
-              "name": listing.providerName
-            }
-          })}
-        </script>
+  {JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    "title": listing.title,
+    "description": listing.description,
+    "datePosted": listing.postedDate,
+    "validThrough": listing.closingDate,
+    "employmentType": "Apprenticeship",
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": listing.employerName,
+      "sameAs": listing.employerWebsiteUrl // Good to include if available
+    },
+    "jobLocation": {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": listing.address.addressLine1,
+        "addressLocality": listing.address.addressLine3,
+        "postalCode": listing.address.postcode,
+        "addressCountry": "UK"
+      }
+    },
+    "educationRequirements": {
+      "@type": "EducationalOccupationalCredential",
+      "credentialCategory": `Level ${listing.course.level} Apprenticeship`
+    },
+    "numberOfPositions": listing.numberOfPositions,
+    "employmentUnit": { // Consider changing to 'provider' for clarity if it refers to training provider
+      "@type": "Organization",
+      "name": listing.providerName
+    },
+    "baseSalary": listing.wage.wageType === 'Competitive Salary' ? undefined : { // Conditionally add salary
+      "@type": "MonetaryAmount",
+      "currency": "GBP", // Assuming GBP, adjust if needed
+      "value": listing.wage.wageAdditionalInformation ? listing.wage.wageAdditionalInformation : "Negotiable", // Or extract a numerical value if possible
+      "unitText": listing.wage.wageUnit // e.g., "HOUR", "WEEK", "YEAR"
+    },
+    "jobBenefits": listing.wage.wageAdditionalInformation ? listing.wage.wageAdditionalInformation : undefined // Add wage details as benefits if applicable
+  })}
+</script>
       </Helmet>
 
       <div className="min-h-screen pt-24 pb-12 bg-gray-50 dark:bg-gray-900">
