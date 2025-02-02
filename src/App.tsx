@@ -17,10 +17,10 @@ import { Team } from './pages/Team';
 import { ScrollToTop } from './components/navigation/ScrollToTop';
 import { Analytics } from './services/analytics/analytics';
 import { useAnalytics } from './hooks/useAnalytics';
+import supabase from './config/supabase';
 
 const AppRoutes = () => {
   useAnalytics();
-
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <Navbar />
