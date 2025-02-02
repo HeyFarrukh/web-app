@@ -1,61 +1,86 @@
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs,
-  doc,
-  getDoc,
-  DocumentData,
-  QueryDocumentSnapshot,
-  FirestoreError,
-  orderBy,
-  limit,
-  startAfter,
-  Query,
-  getCountFromServer
-} from 'firebase/firestore';
-import { db } from '../../config/firebase';
-import { ListingType } from '../../types/listing';
+// services/supabase/vacancyService.ts
+import supabase from '../../config/supabase';
+import { ListingType, SupabaseListing } from '../../types/listing'; // Import both interfaces
 
 class VacancyService {
-  private readonly COLLECTION_NAME = 'vacancies';
+  private readonly TABLE_NAME = 'vacancies';
+  
+  private transformListing(listing: SupabaseListing): ListingType {
+    return {
+        id: listing.id,
+        title: listing.title,
+        description: listing.description,
+        employerName: listing.employer_name, // CORRECT MAPPING - IMPORTANT!
+        vacancyReference: listing.vacancy_reference,
+        vacancyUrl: listing.vacancy_url,
+        providerName: listing.provider_name,
+        postedDate: new Date(listing.posted_date),
+        closingDate: new Date(listing.closing_date),
+        startDate: new Date(listing.start_date),
+        expectedDuration: listing.expected_duration,
+        hoursPerWeek: listing.hours_per_week,
+        workingWeekDescription: listing.working_week_description,
+        numberOfPositions: listing.number_of_positions,
+        isDisabilityConfident: listing.is_disability_confident,
+        isNationalVacancy: listing.is_national_vacancy ?? false,
+        address: {
+            addressLine1: listing.address_line1,
+            addressLine2: listing.address_line2,
+            addressLine3: listing.address_line3,
+            postcode: listing.postcode
+        },
+        location: {
+            latitude: listing.latitude ?? 0,
+            longitude: listing.longitude ?? 0
+        },
+        course: {
+            larsCode: listing.lars_code ?? 0,
+            level: listing.course_level,
+            route: listing.course_route,
+            title: listing.course_title
+        },
+        apprenticeshipLevel: listing.apprenticeship_level,
+        wage: {
+            wageType: listing.wage_type,
+            wageUnit: listing.wage_unit,
+            wageAdditionalInformation: listing.wage_additional_information
+        },
+        employerContactEmail: listing.employer_contact_email,
+        employerContactName: listing.employer_contact_name,
+        employerContactPhone: listing.employer_contact_phone,
+        employerWebsiteUrl: listing.employer_website_url,
+        ukprn: listing.ukprn ?? 0,
+        logo: listing.logo
+    };
+}
 
-  /**
-   * Gets the total count of active apprenticeships
-   * @returns Promise with the total count
-   */
   async getTotalActiveVacancies(): Promise<number> {
     try {
-      const vacanciesRef = collection(db, this.COLLECTION_NAME);
-      const now = new Date();
-      
-      // Query for vacancies that haven't closed yet
-      const q = query(
-        vacanciesRef,
-        where('closingDate', '>', now),
-        orderBy('closingDate')
-      );
-      
-      const snapshot = await getCountFromServer(q);
-      return snapshot.data().count;
+      const now = new Date().toISOString();
+      const { count, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true)
+        .gt('closing_date', now);
+
+      if (error) {
+        console.error('Supabase error in getTotalActiveVacancies:', error);
+        throw error;
+      }
+      return count || 0;
     } catch (error) {
       console.error('Error getting total vacancies:', error);
-      throw this.handleFirestoreError(error as FirestoreError);
+      throw error;
     }
   }
 
-  /**
-   * Gets a paginated list of vacancies with optional filters
-   */
-  async getVacancies({ 
-    page = 1, 
+  async getVacancies({
+    page = 1,
     pageSize = 10,
-    lastDoc = null,
     filters = {}
   }: {
     page: number;
     pageSize: number;
-    lastDoc?: QueryDocumentSnapshot<DocumentData> | null;
     filters: {
       search?: string;
       location?: string;
@@ -63,133 +88,119 @@ class VacancyService {
     };
   }) {
     try {
-      const vacanciesRef = collection(db, this.COLLECTION_NAME);
-      let baseQuery: Query = query(vacanciesRef);
+      const now = new Date().toISOString();
+      let query = supabase
+        .from(this.TABLE_NAME)
+        .select('*', { count: 'exact' }) // Request count for pagination
+        .eq('is_active', true)
+        .gt('closing_date', now)
+        .order('posted_date', { ascending: false });
 
-      // Add filters first
       if (filters.location) {
-        baseQuery = query(baseQuery, 
-          where('address.addressLine3', '==', filters.location),
-          orderBy('postedDate', 'desc')
-        );
-      } else if (filters.level) {
-        baseQuery = query(baseQuery,
-          where('course.level', '==', parseInt(filters.level)),
-          orderBy('postedDate', 'desc')
-        );
-      } else {
-        baseQuery = query(baseQuery, orderBy('postedDate', 'desc'));
+        query = query.eq('address_line3', filters.location);
       }
 
-      // Add pagination
-      let finalQuery = query(baseQuery, limit(pageSize));
-      if (lastDoc) {
-        finalQuery = query(finalQuery, startAfter(lastDoc));
+      if (filters.level) {
+        query = query.eq('course_level', parseInt(filters.level));
       }
 
-      const snapshot = await getDocs(finalQuery);
-      
-      // Get the total count of documents that match the query
-      const countSnapshot = await getCountFromServer(baseQuery);
-      const total = countSnapshot.data().count;
-      
-      const vacancies = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as ListingType[];
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
 
-      // Filter by search term if provided (client-side filtering as Firestore doesn't support full-text search)
-      const filteredVacancies = filters.search 
-        ? vacancies.filter(vacancy => 
-            vacancy.title.toLowerCase().includes(filters.search!.toLowerCase()) ||
-            vacancy.description.toLowerCase().includes(filters.search!.toLowerCase()) ||
-            vacancy.employerName.toLowerCase().includes(filters.search!.toLowerCase())
-          )
-        : vacancies;
+
+      const { data, error, count } = await query.range(from, to);
+
+
+      if (error) {
+        console.error('Supabase error in getVacancies:', error);
+        throw error;
+      }
+
+      let filteredData = data || [];
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        filteredData = filteredData.filter(vacancy =>
+          vacancy.title.toLowerCase().includes(searchTerm) ||
+          vacancy.description.toLowerCase().includes(searchTerm) ||
+          vacancy.employer_name.toLowerCase().includes(searchTerm)
+        );
+      }
 
       return {
-        vacancies: filteredVacancies,
-        total,
-        lastDoc: snapshot.docs[snapshot.docs.length - 1] || null
+        vacancies: (filteredData as SupabaseListing[]).map(d => this.transformListing(d)),
+        total: count || 0,
       };
     } catch (error) {
       console.error('Error getting vacancies:', error);
-      throw this.handleFirestoreError(error as FirestoreError);
+      throw error;
     }
   }
 
-  /**
-   * Gets a single vacancy by ID
-   */
   async getVacancyById(id: string): Promise<ListingType> {
     try {
-      const docRef = doc(db, this.COLLECTION_NAME, id);
-      const docSnap = await getDoc(docRef);
-      
-      if (!docSnap.exists()) {
-        throw new Error('Vacancy not found');
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('*')
+        .eq('id', id)
+        .eq('is_active', true)
+        .single();
+
+      if (error) {
+        console.error('Supabase error in getVacancyById:', error);
+        throw error;
       }
 
-      return {
-        id: docSnap.id,
-        ...docSnap.data()
-      } as ListingType;
+      if (!data) {
+        throw new Error('Vacancy not found'); // Or handle null data appropriately
+      }
+
+      return this.transformListing(data as SupabaseListing);
     } catch (error) {
-      console.error('Error getting vacancy:', error);
-      throw this.handleFirestoreError(error as FirestoreError);
+      console.error('Error getting vacancy by ID:', error);
+      throw error;
     }
   }
 
-  /**
-   * Gets all available locations from vacancies
-   */
   async getAvailableLocations(): Promise<string[]> {
     try {
-      const snapshot = await getDocs(collection(db, this.COLLECTION_NAME));
-      const locations = new Set<string>();
-      
-      snapshot.docs.forEach(doc => {
-        const data = doc.data();
-        if (data.address?.addressLine3) {
-          locations.add(data.address.addressLine3);
-        }
-      });
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('address_line3')
+        .eq('is_active', true)
+        .neq('address_line3', null);
 
-      return Array.from(locations).sort();
+      if (error) {
+        console.error('Supabase error in getAvailableLocations:', error);
+        throw error;
+      }
+
+      const locations = Array.from(new Set(data?.map(d => d.address_line3))) as string[];
+      return locations.sort();
     } catch (error) {
-      console.error('Error getting locations:', error);
-      throw this.handleFirestoreError(error as FirestoreError);
+      console.error('Error getting available locations:', error);
+      throw error;
     }
   }
 
-  /**
-   * Gets all available apprenticeship levels
-   */
   async getAvailableLevels(): Promise<number[]> {
     try {
-      const snapshot = await getDocs(collection(db, this.COLLECTION_NAME));
-      const levels = new Set<number>();
-      
-      snapshot.docs.forEach(doc => {
-        const data = doc.data();
-        if (data.course?.level) {
-          levels.add(data.course.level);
-        }
-      });
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('course_level')
+        .eq('is_active', true)
+        .neq('course_level', null);
 
-      return Array.from(levels).sort((a, b) => a - b);
+      if (error) {
+        console.error('Supabase error in getAvailableLevels:', error);
+        throw error;
+      }
+
+      const levels = Array.from(new Set(data?.map(d => d.course_level))) as number[];
+      return levels.sort((a, b) => a - b);
     } catch (error) {
-      console.error('Error getting levels:', error);
-      throw this.handleFirestoreError(error as FirestoreError);
+      console.error('Error getting available levels:', error);
+      throw error;
     }
-  }
-
-  /**
-   * Handles Firestore errors
-   */
-  private handleFirestoreError(error: FirestoreError): Error {
-    // Add specific error handling if needed
-    return error;
   }
 }
 
