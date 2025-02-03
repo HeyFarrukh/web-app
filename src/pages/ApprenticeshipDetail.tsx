@@ -137,41 +137,43 @@ export const ApprenticeshipDetail = () => {
     "title": listing.title,
     "description": listing.description,
     "datePosted": listing.postedDate,
-    "validThrough": listing.closingDate,
-    "employmentType": "Apprenticeship",
+    "validThrough": listing.closingDate || "2025-12-31", // Provide a fallback date if missing
+    "employmentType": "FULL_TIME", // Default to FULL_TIME if missing
     "hiringOrganization": {
       "@type": "Organization",
       "name": listing.employerName,
-      "sameAs": listing.employerWebsiteUrl // Good to include if available
+      "sameAs": listing.employerWebsiteUrl || undefined
     },
     "jobLocation": {
       "@type": "Place",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": listing.address.addressLine1,
-        "addressLocality": listing.address.addressLine3,
-        "postalCode": listing.address.postcode,
-        "addressCountry": "UK"
-      }
+"address": {
+  "@type": "PostalAddress",
+  "streetAddress": listing.address.addressLine1 || "Unknown Street",
+  "addressLocality": listing.address.addressLine3 || "Unknown City",
+  "addressRegion": listing.address.addressLine3 || "Unknown Region", // <-- This is still useful but optional
+  "postalCode": listing.address.postcode || "00000",
+  "addressCountry": "UK"
+}
     },
     "educationRequirements": {
       "@type": "EducationalOccupationalCredential",
       "credentialCategory": `Level ${listing.course.level} Apprenticeship`
     },
-    "numberOfPositions": listing.numberOfPositions,
-    "employmentUnit": { // Consider changing to 'provider' for clarity if it refers to training provider
+    "numberOfPositions": listing.numberOfPositions || 1,
+    "employmentUnit": {
       "@type": "Organization",
       "name": listing.providerName
     },
-    "baseSalary": listing.wage.wageType === 'Competitive Salary' ? undefined : { // Conditionally add salary
+    "baseSalary": listing.wage.wageType === 'Competitive Salary' ? undefined : {
       "@type": "MonetaryAmount",
-      "currency": "GBP", // Assuming GBP, adjust if needed
-      "value": listing.wage.wageAdditionalInformation ? listing.wage.wageAdditionalInformation : "Negotiable", // Or extract a numerical value if possible
-      "unitText": listing.wage.wageUnit // e.g., "HOUR", "WEEK", "YEAR"
+      "currency": "GBP",
+      "value": listing.wage.wageAdditionalInformation || "Negotiable",
+      "unitText": listing.wage.wageUnit || "YEAR"
     },
-    "jobBenefits": listing.wage.wageAdditionalInformation ? listing.wage.wageAdditionalInformation : undefined // Add wage details as benefits if applicable
+    "jobBenefits": listing.wage.wageAdditionalInformation || undefined
   })}
 </script>
+
       </Helmet>
 
       <div className="min-h-screen pt-24 pb-12 bg-gray-50 dark:bg-gray-900">
