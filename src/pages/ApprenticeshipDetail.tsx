@@ -138,7 +138,7 @@ export const ApprenticeshipDetail = () => {
     "description": listing.description,
     "datePosted": listing.postedDate,
     "validThrough": listing.closingDate || "2025-12-31", // Provide a fallback date if missing
-    "employmentType": "FULL_TIME", // Default to FULL_TIME if missing
+    "employmentType": "FULL TIME", // Default to FULL_TIME if missing
     "hiringOrganization": {
       "@type": "Organization",
       "name": listing.employerName,
