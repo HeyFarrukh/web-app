@@ -25,7 +25,7 @@ export const TermsOfService = () => {
             prose-a:text-orange-600 dark:prose-a:text-orange-400
             prose-a:no-underline hover:prose-a:text-orange-700 dark:hover:prose-a:text-orange-300
           "><h1>Terms of Service</h1>
-            <p>Last updated: January 02, 2025</p>
+            <p>Last updated: February 04, 2025</p>
             <h2>1. Agreement to Terms</h2>
             <p>By accessing or using the ApprenticeWatch website (the "Service"), you agree to be bound by these Terms of Service ("Terms"). This Service is operated by ApprenticeWatch, based in the United Kingdom. If you do not agree to these Terms, you are prohibited from using or accessing the Service.</p>
 
@@ -96,7 +96,7 @@ export const TermsOfService = () => {
             <h2>17. Contact Us</h2>
             <p>If you have any questions about these Terms of Service, please contact us:</p>
             <ul>
-                <li>By email: privacy@apprenticewatch.com</li>
+                <li>By email: terms@apprenticewatch.com</li>
             </ul>
           </div>
         </div>
