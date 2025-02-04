@@ -28,8 +28,8 @@ export const CompanyLogos = () => {
     },
     {
       value: "60%",
-      label: "Satisfaction Rate",
-      description: "Of users say ApprenticeWatch has saved them time!"
+      label: "Confidence Improvement",
+      description: "Of users say ApprenticeWatch has improved their confidence!"
     },
     {
       value: "24/7",
