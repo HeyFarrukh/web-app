@@ -27,9 +27,9 @@ export const CompanyLogos = () => {
       description: "Updated in real-time with opportunities from companies across the UK."
     },
     {
-      value: "60%",
+      value: "80%",
       label: "Confidence Improvement",
-      description: "Of users say ApprenticeWatch has improved their confidence!"
+      description: "Of users say ApprenticeWatch has saved them time!"
     },
     {
       value: "24/7",
