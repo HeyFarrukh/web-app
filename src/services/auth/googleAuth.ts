@@ -97,7 +97,7 @@ export class GoogleAuthService {
       };
       localStorage.setItem(this.userKey, JSON.stringify(userData));  // Store user data in localStorage
 
-      // Save/Update user data in Supabase 'users' table
+      // Save/Update user data to Supabase
       await GoogleAuthService.saveUserProfile(supabaseUser, userData);
 
 
@@ -108,7 +108,7 @@ export class GoogleAuthService {
     }
   }
 
-  private static async saveUserProfile(supabaseUser: User, userData: SupabaseUserProfile) {
+  public static async saveUserProfile(supabaseUser: User, userData: SupabaseUserProfile) { // Changed to public static
     if (!supabaseUser || !supabaseUser.id) {
       console.error('No Supabase user or user ID available to save profile.');
       return;

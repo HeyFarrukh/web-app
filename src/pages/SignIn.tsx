@@ -38,7 +38,7 @@ export const SignIn = () => {
           Welcome to ApprenticeWatch
         </h2>
 
-        <div className="space-y-6">
+        <div className="space-y-6 flex flex-col items-center"> {/* Added flex flex-col items-center here for centering */}
           <GoogleSignIn />
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             By continuing, you agree to our{' '}
