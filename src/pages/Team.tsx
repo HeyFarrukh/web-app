@@ -39,17 +39,17 @@ const teamMembers: TeamMember[] = [
       linkedin: "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
     }
   },
-  {
-    name: "Humza",
-    role: "Senior Lead Developer",
-    type: "senior-lead",
-    image: "",
-    description: "With over a decade of experience in full-stack development and a passion for mentoring, I lead the technical vision of ApprenticeWatch. My focus is on building scalable solutions that make apprenticeship discovery seamless and accessible for everyone.",
-    links: {
-      github: "https://github.com",
-      linkedin: "https://linkedin.com",
-    }
-  },
+  // {
+  //   name: "Humza",
+  //   role: "Senior Lead Developer",
+  //   type: "senior-lead",
+  //   image: "",
+  //   description: "With over a decade of experience in full-stack development and a passion for mentoring, I lead the technical vision of ApprenticeWatch. My focus is on building scalable solutions that make apprenticeship discovery seamless and accessible for everyone.",
+  //   links: {
+  //     github: "https://github.com",
+  //     linkedin: "https://linkedin.com",
+  //   }
+  // },
   // {
   //   name: "Alex Turner",
   //   role: "Brand Ambassador",
@@ -349,9 +349,9 @@ export const Team = () => {
             transition={{ delay: 0.4 }}
             className="mt-16"
           >
-            <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8">
+            {/* <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8">
               Our <span className="text-orange-500">Brand Ambassadors</span>
-            </h2>
+            </h2> */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {ambassadors.map((member, index) => (
                 <AmbassadorCard key={`${member.name}-${index}`} member={member} index={index} />
