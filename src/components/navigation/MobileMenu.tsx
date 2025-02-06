@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Sun, Moon, User, Mail, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -19,8 +19,36 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   isDark,
   onThemeToggle 
 }) => {
-  const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-  const isAuthenticated = GoogleAuthService.isAuthenticated();
+  const [userData, setUserData] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const authStatus = await GoogleAuthService.isAuthenticated();
+      setIsAuthenticated(authStatus);
+      if (authStatus) {
+        const storedData = localStorage.getItem('user_data');
+        if (storedData) {
+          setUserData(JSON.parse(storedData));
+        }
+      } else {
+        setUserData(null);
+      }
+    };
+
+    checkAuth();
+  }, [isOpen]); // Re-check when menu opens
+
+  const handleLogout = async () => {
+    try {
+      onClose(); // Close menu first
+      await GoogleAuthService.logout();
+      setIsAuthenticated(false);
+      setUserData(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const handleNavigation = (to: string) => {
     onClose();
@@ -83,7 +111,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                     className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl"
                   >
                     <div className="flex items-center space-x-4">
-                      {userData.picture ? (
+                      {userData?.picture ? (
                         <img 
                           src={userData.picture} 
                           alt={userData.name} 
@@ -96,11 +124,11 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-lg font-medium text-gray-900 dark:text-white truncate">
-                          {userData.name}
+                          {userData?.name}
                         </p>
                         <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-2">
                           <Mail className="w-4 h-4 flex-shrink-0" />
-                          <span className="truncate">{userData.email}</span>
+                          <span className="truncate">{userData?.email}</span>
                         </div>
                       </div>
                     </div>
@@ -153,10 +181,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
 
                   {isAuthenticated && (
                     <button
-                      onClick={() => {
-                        onClose();
-                        GoogleAuthService.logout();
-                      }}
+                      onClick={handleLogout}
                       className="flex items-center justify-center w-full space-x-2 py-4 px-4 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
                     >
                       <LogOut className="w-5 h-5" />

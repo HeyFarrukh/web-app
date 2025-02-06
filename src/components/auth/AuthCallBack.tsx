@@ -1,77 +1,69 @@
-// pages/AuthCallback.tsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GoogleAuthService } from '../../services/auth/googleAuth'; // Import your AuthService
+import { GoogleAuthService } from '../../services/auth/googleAuth';
+import supabase from '../../config/supabase';
+import { SupabaseUserProfile } from '../../types/auth'; // We'll create this type
 
 export const AuthCallback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("AuthCallback.tsx: useEffect triggered");
-
-    const checkAndSaveUser = async () => { // Renamed function for clarity
-      console.log("AuthCallback.tsx: checkAndSaveUser function started");
-      const isAuthenticated = await GoogleAuthService.isAuthenticated();
-      console.log("AuthCallback.tsx: isAuthenticated result:", isAuthenticated);
-
-      if (isAuthenticated) {
-        console.log("AuthCallback.tsx: User is authenticated.");
-
-        try {
-          const currentUser = await GoogleAuthService.getCurrentUser(); // Get Supabase User
-          console.log("AuthCallback.tsx: Current Supabase User:", currentUser); // Log Supabase user
-
-          if (currentUser && currentUser.data && currentUser.data.user) { // Safely access user data
-            const supabaseUser = currentUser.data.user;
-            const userDataToSave = { // Prepare user data for saving
-              id: supabaseUser.id,
-              email: supabaseUser.email || '', // Ensure email is not null
-              name: supabaseUser.user_metadata?.name !== undefined ? supabaseUser.user_metadata.name : null, // Explicitly handle undefined name to null
-              picture: supabaseUser.user_metadata?.avatar_url !== undefined ? supabaseUser.user_metadata.avatar_url : null, // Explicitly handle undefined picture to null
-              last_login: new Date().toISOString(),
-            };
-            console.log("AuthCallback.tsx: User data to save:", userDataToSave); // Log user data
-
-            await GoogleAuthService.saveUserProfile(supabaseUser, userDataToSave); // Save profile
-            console.log("AuthCallback.tsx: User profile saved successfully.");
-
-            // ADD THIS LINE: Update localStorage after saving profile
-            localStorage.setItem('user_data', JSON.stringify(userDataToSave));
-            console.log("AuthCallback.tsx: localStorage updated with user data."); // Log localStorage update
-
-
-            navigate('/listings', { replace: true }); // Redirect to listings
-          } else {
-            console.error("AuthCallback.tsx: Could not retrieve Supabase user data after authentication.");
-            navigate('/signin', { replace: true }); // Redirect to signin on error
-          }
-
-
-        } catch (error) {
-          console.error("AuthCallback.tsx: Error saving user profile:", error);
-          navigate('/signin', { replace: true }); // Redirect to signin on error
+    const handleCallback = async () => {
+      try {
+        // Get the current session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session error:", error);
+          navigate('/signin');
+          return;
         }
 
-      } else {
-        console.log("AuthCallback.tsx: User is NOT authenticated, redirecting to signin");
-        navigate('/signin', { replace: true }); // Redirect to signin if not authenticated
+        if (!session?.user) {
+          console.error("No user in session");
+          navigate('/signin');
+          return;
+        }
+
+        // Get user metadata from session
+        const { user } = session;
+        
+        // Ensure we have required fields
+        if (!user.email) {
+          throw new Error('User email is required but missing');
+        }
+
+        const userData: SupabaseUserProfile = {
+          id: user.id,
+          email: user.email, // We know this exists now
+          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+          picture: user.user_metadata?.avatar_url || null,
+          last_login: new Date().toISOString()
+        };
+
+        // Save user data to localStorage
+        localStorage.setItem('user_data', JSON.stringify(userData));
+
+        // Save user profile to Supabase
+        await GoogleAuthService.saveUserProfile(user, userData);
+
+        // Navigate to apprenticeships page
+        navigate('/apprenticeships');
+      } catch (error) {
+        console.error('Auth callback error:', error);
+        navigate('/signin');
       }
-      console.log("AuthCallback.tsx: checkAndSaveUser function finished");
     };
 
-    checkAndSaveUser();
-    console.log("AuthCallback.tsx: useEffect finished (checkAndSaveUser called)");
+    handleCallback();
   }, [navigate]);
 
-  function decodedUserName(email: string| null) {
-    if (!email) return '';
-    return email.split('@')[0];
-  }
-
   return (
-    <div>
-      <h1>Authorizing...</h1>
-      <p>Please wait, you are being redirected.</p>
+    <div className="min-h-screen pt-16 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+        <p className="text-gray-600 dark:text-gray-400">Completing sign in...</p>
+      </div>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, User, Mail } from 'lucide-react';
 import { GoogleAuthService } from '../services/auth/googleAuth';
+import supabase from '../config/supabase';
 
 interface UserData {
   name: string;
@@ -15,10 +16,38 @@ export const UserProfile = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const storedUserData = localStorage.getItem('user_data');
-    if (storedUserData) {
-      setUserData(JSON.parse(storedUserData));
-    }
+    const loadUserData = async () => {
+      try {
+        // Check if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          setUserData(null);
+          return;
+        }
+
+        // Get stored user data
+        const storedData = localStorage.getItem('user_data');
+        if (storedData) {
+          setUserData(JSON.parse(storedData));
+        } else if (session.user) {
+          // If no stored data but we have a session, create user data from session
+          const userData = {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
+            picture: session.user.user_metadata?.avatar_url
+          };
+          localStorage.setItem('user_data', JSON.stringify(userData));
+          setUserData(userData);
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        setUserData(null);
+      }
+    };
+
+    loadUserData();
 
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -30,6 +59,16 @@ export const UserProfile = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      setIsOpen(false);
+      await GoogleAuthService.logout();
+      setUserData(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   if (!userData) return null;
 
   return (
@@ -37,6 +76,7 @@ export const UserProfile = () => {
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="relative group"
+        aria-label="User menu"
       >
         {userData.picture ? (
           <div className="relative flex items-center justify-center">
@@ -93,7 +133,7 @@ export const UserProfile = () => {
             
             <div className="p-3">
               <button
-                onClick={() => GoogleAuthService.logout()}
+                onClick={handleLogout}
                 className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl flex items-center space-x-3 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
