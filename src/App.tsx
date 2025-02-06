@@ -18,6 +18,7 @@ import { ScrollToTop } from './components/navigation/ScrollToTop';
 import { Analytics } from './services/analytics/analytics';
 import { useAnalytics } from './hooks/useAnalytics';
 import supabase from './config/supabase';
+import { AuthCallback } from './components/auth/AuthCallBack'; // Import AuthCallback component
 
 const AppRoutes = () => {
   useAnalytics();
@@ -40,6 +41,7 @@ const AppRoutes = () => {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/team" element={<Team />} />
+        <Route path="/auth/callback" element={<AuthCallback />} /> {/* Add the AuthCallback route */}
       </Routes>
       <Footer />
     </div>
