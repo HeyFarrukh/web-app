@@ -2,25 +2,27 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Twitter } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+
 interface TeamMember {
   name: string;
   role: string;
   image: string;
   description: string;
-  type: 'founder' | 'ambassador';
+  type: 'founder' | 'senior-lead' | 'ambassador';
   links: {
     github?: string;
     linkedin?: string;
     twitter?: string;
   };
 }
+
 const teamMembers: TeamMember[] = [
   {
     name: "Farrukh Ahmad",
     role: "Founder",
     type: "founder",
     image: "/media/farrukh-av.png",
-    description: "I’m on a mission to make it easier for young professionals to find apprenticeships. Having faced the challenge myself of keeping up with the endless apprenticeships, I’m determined to simplify the process and take the stress out of it for others. I’m not just talking about change—I’m here to make it happen.",
+    description: "I'm on a mission to make it easier for young professionals to find apprenticeships. Having faced the challenge myself of keeping up with the endless apprenticeships, I'm determined to simplify the process and take the stress out of it for others. I'm not just talking about change—I'm here to make it happen.",
     links: {
       github: "https://github.com/HeyFarrukh?utm_source=apprentice-watch",
       linkedin: "https://www.linkedin.com/in/farrukh-ahmad-9547b1260?utm_source=apprentice-watch",
@@ -38,28 +40,40 @@ const teamMembers: TeamMember[] = [
     }
   },
   {
-    name: "Alex Turner",
-    role: "Brand Ambassador",
-    type: "ambassador",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80",
-    description: "Passionate about connecting students with opportunities. Former apprentice turned advocate.",
+    name: "Humza",
+    role: "Senior Lead Developer",
+    type: "senior-lead",
+    image: "",
+    description: "With over a decade of experience in full-stack development and a passion for mentoring, I lead the technical vision of ApprenticeWatch. My focus is on building scalable solutions that make apprenticeship discovery seamless and accessible for everyone.",
     links: {
+      github: "https://github.com",
       linkedin: "https://linkedin.com",
-      twitter: "https://twitter.com"
     }
   },
-  {
-    name: "Emma Wilson",
-    role: "Brand Ambassador",
-    type: "ambassador",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80",
-    description: "Helping bridge the gap between education and industry through meaningful connections.",
-    links: {
-      linkedin: "https://linkedin.com",
-      twitter: "https://twitter.com"
-    }
-  }
+  // {
+  //   name: "Alex Turner",
+  //   role: "Brand Ambassador",
+  //   type: "ambassador",
+  //   image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80",
+  //   description: "Passionate about connecting students with opportunities. Former apprentice turned advocate.",
+  //   links: {
+  //     linkedin: "https://linkedin.com",
+  //     twitter: "https://twitter.com"
+  //   }
+  // },
+  // {
+  //   name: "Emma Wilson",
+  //   role: "Brand Ambassador",
+  //   type: "ambassador",
+  //   image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80",
+  //   description: "Helping bridge the gap between education and industry through meaningful connections.",
+  //   links: {
+  //     linkedin: "https://linkedin.com",
+  //     twitter: "https://twitter.com"
+  //   }
+  // }
 ];
+
 const FounderCard: React.FC<{ member: TeamMember }> = ({ member }) => (
   <motion.div
     initial={{ opacity: 0, y: 50 }}
@@ -131,6 +145,66 @@ const FounderCard: React.FC<{ member: TeamMember }> = ({ member }) => (
     </div>
   </motion.div>
 );
+
+const SeniorLeadCard: React.FC<{ member: TeamMember }> = ({ member }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    whileHover={{ y: -5 }}
+    className="relative group max-w-2xl mx-auto"
+  >
+    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 rounded-xl transform -rotate-1 group-hover:rotate-0 transition-transform duration-300" />
+    
+    <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300">
+      <div className="flex items-center space-x-6">
+        <div className="relative flex-shrink-0">
+          <div className="w-24 h-24 rounded-full overflow-hidden ring-2 ring-orange-500">
+            <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+          </div>
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-md">
+            {member.role}
+          </div>
+        </div>
+        
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            {member.name}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+            {member.description}
+          </p>
+          <div className="flex space-x-3">
+            {member.links.github && (
+              <motion.a
+                href={member.links.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
+              >
+                <Github className="w-4 h-4" />
+              </motion.a>
+            )}
+            {member.links.linkedin && (
+              <motion.a
+                href={member.links.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
+              >
+                <Linkedin className="w-4 h-4" />
+              </motion.a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
+
 const AmbassadorCard: React.FC<{ member: TeamMember; index: number }> = ({ member, index }) => (
   <motion.div
     initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
@@ -180,9 +254,12 @@ const AmbassadorCard: React.FC<{ member: TeamMember; index: number }> = ({ membe
     </div>
   </motion.div>
 );
+
 export const Team = () => {
   const founders = teamMembers.filter(member => member.type === 'founder');
+  const seniorLeads = teamMembers.filter(member => member.type === 'senior-lead');
   const ambassadors = teamMembers.filter(member => member.type === 'ambassador');
+
   return (
     <>
       <Helmet>
@@ -237,6 +314,7 @@ export const Team = () => {
               The minds behind ApprenticeWatch, working to revolutionise how apprenticeships are discovered and accessed.
             </p>
           </motion.div>
+
           {/* Founders Section */}
           <div className="relative mb-24">
             <div className="grid md:grid-cols-2 gap-12">
@@ -248,7 +326,23 @@ export const Team = () => {
               <div className="w-full h-full bg-gradient-to-b from-transparent via-orange-500 to-transparent animate-pulse" />
             </div>
           </div>
-          {/* Ambassadors Section
+
+          {/* Senior Lead Section */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mb-24"
+          >
+            <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8">
+              Technical <span className="text-orange-500">Leadership</span>
+            </h2>
+            {seniorLeads.map((member, index) => (
+              <SeniorLeadCard key={`${member.name}-${index}`} member={member} />
+            ))}
+          </motion.div>
+
+          {/* Ambassadors Section */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -263,7 +357,7 @@ export const Team = () => {
                 <AmbassadorCard key={`${member.name}-${index}`} member={member} index={index} />
               ))}
             </div>
-          </motion.div> */}
+          </motion.div>
         </div>
       </div>
     </>
