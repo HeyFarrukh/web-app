@@ -9,12 +9,22 @@ export const SignIn = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Check if the user is already authenticated
-    if (GoogleAuthService.isAuthenticated()) {
-      // If they came from a specific page, go back there
-      const from = location.state?.from?.pathname || '/apprenticeships';
-      navigate(from);
-    }
+    console.log("SignIn.tsx useEffect: Checking authentication..."); // ADD THIS LINE
+
+    (async () => { // Use an async immediately invoked function expression (IIFE)
+      const isAuthenticated = await GoogleAuthService.isAuthenticated(); // AWAIT the promise
+      console.log("Is Authenticated?", isAuthenticated); // Log the resolved boolean value
+
+      if (isAuthenticated) {
+        console.log("SignIn.tsx useEffect: User is authenticated, redirecting..."); // ADD THIS LINE
+        // If they came from a specific page, go back there
+        const from = location.state?.from?.pathname || '/apprenticeships';
+        navigate(from);
+      } else {
+        console.log("SignIn.tsx useEffect: User is NOT authenticated, showing sign-in page."); // ADD THIS LINE
+      }
+    })(); // Invoke the IIFE immediately
+
   }, [navigate, location]);
 
   return (
@@ -27,7 +37,7 @@ export const SignIn = () => {
         <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">
           Welcome to ApprenticeWatch
         </h2>
-        
+
         <div className="space-y-6">
           <GoogleSignIn />
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
