@@ -10,6 +10,8 @@
 
 <img src="https://vitejs.dev/logo.svg" alt="Vite" width="50" height="50"/> Vite
 
+<img src="https://avatars.githubusercontent.com/u/54469796?s=400&v=4" alt="Supabase" width="50" height="50"/> Supabase
+
 <img src="https://firebase.google.com/static/images/brand-guidelines/logo-logomark.png" alt="Firebase" width="50" height="50"/> Firebase
 
 ## Features
