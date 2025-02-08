@@ -14,11 +14,11 @@ import { JoinUs } from './pages/JoinUs';
 import { Privacy } from './pages/Privacy';
 import { TermsOfService } from './pages/TermsOfService';
 import { Team } from './pages/Team';
+import { NotFound } from './pages/NotFound';
 import { ScrollToTop } from './components/navigation/ScrollToTop';
 import { Analytics } from './services/analytics/analytics';
 import { useAnalytics } from './hooks/useAnalytics';
-import supabase from './config/supabase';
-import { AuthCallback } from './components/auth/AuthCallBack'; // Import AuthCallback component
+import { AuthCallback } from './components/auth/AuthCallBack';
 
 const AppRoutes = () => {
   useAnalytics();
@@ -41,7 +41,8 @@ const AppRoutes = () => {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/team" element={<Team />} />
-        <Route path="/auth/callback" element={<AuthCallback />} /> {/* Add the AuthCallback route */}
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
     </div>
