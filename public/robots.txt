@@ -5,3 +5,6 @@ Sitemap: https://apprenticewatch.com/sitemap.xml
 
 # Disallow crawling of authentication pages
 Disallow: /signin
+
+# Disallow crawling of the 404 page
+Disallow: /404

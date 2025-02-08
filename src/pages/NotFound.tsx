@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Home, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Home, RefreshCw } from "lucide-react";
 
 export const NotFound = () => {
   const navigate = useNavigate();
@@ -9,7 +9,30 @@ export const NotFound = () => {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
-  const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  const konamiCode = [
+    "ArrowUp",
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowLeft",
+    "ArrowRight",
+    "b",
+    "a",
+  ];
+
+  useEffect(() => {
+    // Add noindex meta tag
+    const metaTag = document.createElement("meta");
+    metaTag.name = "robots";
+    metaTag.content = "noindex, nofollow";
+    document.head.appendChild(metaTag);
+
+    return () => {
+      document.head.removeChild(metaTag);
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -19,17 +42,17 @@ export const NotFound = () => {
       }
       setKonami(newKonami);
 
-      if (newKonami.join(',') === konamiCode.join(',')) {
+      if (newKonami.join(",") === konamiCode.join(",")) {
         setShowEasterEgg(true);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [konami]);
 
   const handleTryAgain = () => {
-    setAttempts(prev => prev + 1);
+    setAttempts((prev) => prev + 1);
     if (attempts >= 2) {
       setShowEasterEgg(true);
     }
@@ -46,15 +69,15 @@ export const NotFound = () => {
             exit={{ opacity: 0, y: -20 }}
             className="text-center"
           >
-            <motion.h1 
+            <motion.h1
               className="text-9xl font-bold text-orange-500 mb-4"
-              animate={{ 
+              animate={{
                 rotate: [0, -5, 5, -5, 0],
-                scale: [1, 1.1, 1]
+                scale: [1, 1.1, 1],
               }}
-              transition={{ 
+              transition={{
                 duration: 0.5,
-                times: [0, 0.2, 0.4, 0.6, 0.8]
+                times: [0, 0.2, 0.4, 0.6, 0.8],
               }}
             >
               404
@@ -63,12 +86,12 @@ export const NotFound = () => {
               Oops! Page Not Found
             </h2>
             <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">
-              Looks like this page took a gap year! Maybe try the Konami code? 
+              Looks like this page took a gap year! Maybe try the Konami code?
               (↑↑↓↓←→←→ba)
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate("/")}
                 className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center space-x-2"
               >
                 <Home className="w-5 h-5" />
@@ -92,13 +115,13 @@ export const NotFound = () => {
             className="text-center"
           >
             <motion.div
-              animate={{ 
+              animate={{
                 rotate: 360,
-                scale: [1, 1.2, 1]
+                scale: [1, 1.2, 1],
               }}
-              transition={{ 
+              transition={{
                 rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-                scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
+                scale: { duration: 1, repeat: Infinity, ease: "easeInOut" },
               }}
               className="text-9xl mb-8"
             >
@@ -108,10 +131,12 @@ export const NotFound = () => {
               Achievement Unlocked: Easter Egg Found!
             </h2>
             <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">
-              Congrats! You've discovered our secret gaming mode. Unfortunately, it's still in development... just like your career without an apprenticeship! 😉
+              Congrats! You've discovered our secret gaming mode.
+              Unfortunately, it's still in development... just like your career
+              without an apprenticeship! 😉
             </p>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors inline-flex items-center space-x-2"
             >
               <Home className="w-5 h-5" />
