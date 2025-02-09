@@ -20,7 +20,7 @@ interface Improvement {
   suggestions: string[];
   impact: "high" | "medium" | "low";
   context?: string;
-  optimizedContent?: string;
+  optimisedContent?: string;
 }
 
 interface CopyState {
@@ -43,7 +43,7 @@ const LoadingMessages = [
   "The AI is in its bag rn... 💼"
 ];
 
-export const OptimizeCV = () => {
+export const OptimiseCV = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, isLoading, userData } = useAuth();
@@ -72,6 +72,7 @@ export const OptimizeCV = () => {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       // Save current location to redirect back after login
+      console.log('[OptimiseCV] Redirecting to /signin, state:', { from: location }); // Add this line
       navigate('/signin', { 
         state: { from: location },
         replace: true 
@@ -95,7 +96,7 @@ export const OptimizeCV = () => {
     return true;
   };
 
-  const handleOptimize = async () => {
+  const handleOptimise = async () => {
     if (!isAuthenticated) {
       navigate('/signin', { 
         state: { from: location },
@@ -116,7 +117,7 @@ export const OptimizeCV = () => {
       
       // Record the optimization
       if (userData?.id) {
-        await cvTrackingService.recordOptimization(
+        await cvTrackingService.recordOptimisation(
           userData.id,
           cvText,
           jobDescription,
@@ -124,7 +125,7 @@ export const OptimizeCV = () => {
           {
             tokenCount: cvText.split(/\s+/).length,
             processingTime: Date.now() - startTime,
-            apiVersion: 'gemini-1.5-flash'
+            apiVersion: 'gemini-2.0-flash'
           }
         );
       }
@@ -137,7 +138,7 @@ export const OptimizeCV = () => {
 
       // Only show improvements that have suggestions or optimized content
       const validImprovements = analysis.improvements.filter(
-        imp => (imp.suggestions?.length > 0 || imp.optimizedContent)
+        imp => (imp.suggestions?.length > 0 || imp.optimisedContent)
       );
       setImprovements(validImprovements);
       
@@ -202,10 +203,10 @@ export const OptimizeCV = () => {
   return (
     <>
       <Helmet>
-        <title>AI CV Optimization - ApprenticeWatch</title>
+        <title>AI CV Optimisation - ApprenticeWatch</title>
         <meta 
           name="description" 
-          content="Optimize your CV with AI-powered insights and recommendations tailored for apprenticeship applications." 
+          content="Optimise your CV with AI-powered insights and recommendations tailored for apprenticeship applications." 
         />
       </Helmet>
 
@@ -224,7 +225,7 @@ export const OptimizeCV = () => {
               </span>
             </div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              AI CV <span className="text-orange-500">Optimization</span>
+              AI CV <span className="text-orange-500">Optimisation</span>
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
               Let our AI analyze and enhance your CV for better apprenticeship opportunities
@@ -284,12 +285,12 @@ export const OptimizeCV = () => {
               </div>
 
               <button
-                onClick={handleOptimize}
+                onClick={handleOptimise}
                 disabled={isAnalyzing}
                 className="w-full py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
                 <Sparkles className="w-5 h-5" />
-                <span>{isAnalyzing ? 'AI is Analyzing...' : 'Optimize with AI'}</span>
+                <span>{isAnalyzing ? 'AI is Analyzing...' : 'Optimise with AI'}</span>
               </button>
             </motion.div>
 
@@ -470,14 +471,14 @@ export const OptimizeCV = () => {
                           </ul>
 
                           {/* Optimized Content Section */}
-                          {improvement.optimizedContent && (
+                          {improvement.optimisedContent && (
                             <div className="mt-4 space-y-2">
                               <div className="flex items-center justify-between">
                                 <h5 className="text-sm font-medium text-gray-900 dark:text-white">
-                                  Optimized {improvement.section}
+                                  Optimised {improvement.section}
                                 </h5>
                                 <button
-                                  onClick={() => handleCopyContent(improvement.section, improvement.optimizedContent!)}
+                                  onClick={() => handleCopyContent(improvement.section, improvement.optimisedContent!)}
                                   className="flex items-center space-x-1 text-orange-500 hover:text-orange-600 text-sm"
                                 >
                                   {copyStates[improvement.section] ? (
@@ -494,7 +495,7 @@ export const OptimizeCV = () => {
                                 </button>
                               </div>
                               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-sm text-gray-700 dark:text-gray-300">
-                                {improvement.optimizedContent}
+                                {improvement.optimisedContent}
                               </div>
                             </div>
                           )}
@@ -586,4 +587,4 @@ export const OptimizeCV = () => {
   );
 };
 
-export default OptimizeCV;
+export default OptimiseCV;

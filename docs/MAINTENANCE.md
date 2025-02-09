@@ -91,7 +91,7 @@ The system implements multiple layers of error handling:
 3. Check error logs for patterns
 4. Update test cases for new features
 
-#### Performance Optimization
+#### Performance Optimisation
 1. Cache frequently requested analyses
 2. Implement request throttling
 3. Monitor response times

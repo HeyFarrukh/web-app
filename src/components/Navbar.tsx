@@ -38,7 +38,7 @@ export const Navbar = () => {
               Apprenticeships
             </Link>
             <Link 
-              to="/optimize-cv" 
+              to="/optimise-cv" 
               className="relative group"
             >
               <div className="relative overflow-hidden px-4 py-1.5 rounded-full border-2 border-orange-500">

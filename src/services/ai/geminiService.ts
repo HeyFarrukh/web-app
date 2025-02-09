@@ -14,7 +14,7 @@ export interface AIAnalysisResponse {
     impact: "high" | "medium" | "low";
     context: string;
     suggestions: string[];
-    optimizedContent?: string;
+    optimisedContent?: string;
   }[];
 }
 
@@ -48,7 +48,7 @@ Output must be in the following JSON structure ONLY, with NO markdown formatting
       "impact": "high" | "medium" | "low",
       "context": string,
       "suggestions": string[],
-      "optimizedContent": string (provide complete rewritten section that matches the user's writing style)
+      "optimisedContent": string (provide complete rewritten section that matches the user's writing style)
     }
   ]
 }
@@ -79,12 +79,12 @@ For each section:
 - Include context explaining the issue
 - Rate impact as high/medium/low
 - Focus on matching job requirements
-- Provide optimized content that maintains the user's writing style
+- Provide optimised content that maintains the user's writing style
 - If a section is well-written and doesn't need changes, do not include it
 
 CRITICAL REQUIREMENTS:
 - Use British English spelling and terminology at all times
-- Ensure optimized content matches the user's writing style and tone
+- Ensure optimised content matches the user's writing style and tone
 - Maintain the language structure of the user's CV
 - Do not make the content sound AI-generated
 - Focus on making the CV align with apprenticeship requirements

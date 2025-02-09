@@ -1,17 +1,9 @@
-// File: pages/SignIn.tsx
-
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React from 'react'; // No useEffect needed
 import { motion } from 'framer-motion';
 import { GoogleSignIn } from '../components/auth/GoogleSignIn';
-// REMOVE: import { GoogleAuthService } from '../services/auth/googleAuth';  // No longer needed here
 
 export const SignIn = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  // REMOVE: const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Now handled in useAuth
 
-  // useEffect is no longer needed here, as useAuth covers this
   return (
     <div className="min-h-screen pt-16 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
       <motion.div

@@ -130,7 +130,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 {[
                   { to: '/apprenticeships', label: 'Apprenticeships' },
                   { 
-                    to: '/optimize-cv', 
+                    to: '/optimise-cv', 
                     label: 'Optimize CV',
                     icon: Sparkles,
                     special: true 

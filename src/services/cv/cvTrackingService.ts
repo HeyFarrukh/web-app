@@ -1,7 +1,7 @@
 import supabase from '../../config/supabase';
 import { AIAnalysisResponse } from '../ai/geminiService';
 
-interface OptimizationRecord {
+interface OptimisationRecord {
   id: string;
   userId: string;
   cvText: string;
@@ -12,7 +12,7 @@ interface OptimizationRecord {
 }
 
 export class CVTrackingService {
-  async recordOptimization(
+  async recordOptimisation(
     userId: string,
     cvText: string,
     jobDescription: string,
@@ -21,8 +21,8 @@ export class CVTrackingService {
   ) {
     try {
       // Start a transaction
-      const { data: optimization, error: optimizationError } = await supabase
-        .from('cv_optimizations')
+      const { data: optimisation, error: optimisationError } = await supabase
+        .from('cv_optimisations')
         .insert({
           user_id: userId,
           cv_text: cvText,
@@ -33,28 +33,28 @@ export class CVTrackingService {
         .select()
         .single();
 
-      if (optimizationError) throw optimizationError;
+      if (optimisationError) throw optimisationError;
 
       // Record improvements
       const improvements = analysis.improvements.map(imp => ({
-        optimization_id: optimization.id,
+        optimisation_id: optimisation.id,
         section: imp.section,
         score: imp.score,
         impact: imp.impact,
         context: imp.context,
         suggestions: JSON.stringify(imp.suggestions),
-        optimized_content: imp.optimizedContent
+        optimised_content: imp.optimisedContent
       }));
 
       const { error: improvementsError } = await supabase
-        .from('cv_optimization_improvements')
+        .from('cv_optimisation_improvements')
         .insert(improvements);
 
       if (improvementsError) throw improvementsError;
 
-      return optimization;
+      return optimisation;
     } catch (error) {
-      console.error('Failed to record optimization:', error);
+      console.error('Failed to record optimisation:', error);
       throw error;
     }
   }
@@ -62,7 +62,7 @@ export class CVTrackingService {
   async getUserStats(userId: string) {
     try {
       const { data, error } = await supabase
-        .rpc('get_user_optimization_stats', { user_id: userId });
+        .rpc('get_user_optimisation_stats', { user_id: userId });
 
       if (error) throw error;
       return data;
@@ -72,13 +72,13 @@ export class CVTrackingService {
     }
   }
 
-  async getUserOptimizations(userId: string, limit = 10, offset = 0) {
+  async getUserOptimisations(userId: string, limit = 10, offset = 0) {
     try {
       const { data, error } = await supabase
-        .from('cv_optimizations')
+        .from('cv_optimisations')
         .select(`
           *,
-          cv_optimization_improvements (*)
+          cv_optimisation_improvements (*)
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
@@ -87,7 +87,7 @@ export class CVTrackingService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Failed to get user optimizations:', error);
+      console.error('Failed to get user optimisations:', error);
       throw error;
     }
   }

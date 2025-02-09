@@ -12,31 +12,21 @@ export const AuthCallback = () => {
   useEffect(() => {
     console.log('[AuthCallback] Component mounted');
 
-    const handleCallback = async () => {
+    const handleCallback = async (session: any) => { // Require the session
       console.log('[AuthCallback] Starting callback handler');
       try {
-        console.log('[AuthCallback] Getting current session');
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error('[AuthCallback] Session error:', error);
-          navigate('/signin'); // Redirect to signin on error
-          return;
-        }
-
         if (!session?.user) {
           console.error('[AuthCallback] No user in session');
-          navigate('/signin'); // Redirect if no user
+          navigate('/signin');
           return;
         }
 
         console.log('[AuthCallback] Session valid, processing user data');
         const { user } = session;
 
-        // No need to decode the JWT here; Supabase session has the data
         if (!user.email) {
           console.error('[AuthCallback] User email missing');
-          navigate('/signin'); // Redirect if email is somehow missing
+          navigate('/signin');
           return;
         }
 
@@ -44,32 +34,48 @@ export const AuthCallback = () => {
         const userData: SupabaseUserProfile = {
           id: user.id,
           email: user.email,
-          name: user.user_metadata?.full_name || user.user_metadata?.name || null,  // Use metadata
+          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
           picture: user.user_metadata?.avatar_url || null,
-          last_login: new Date().toISOString()
+          last_login: new Date().toISOString(),
         };
-      
-        // Upsert the user profile
-        await GoogleAuthService.saveUserProfile(user, userData);
 
-        // Save to localStorage
+        await GoogleAuthService.saveUserProfile(user, userData);
         localStorage.setItem('user_data', JSON.stringify(userData));
 
-        console.log('[AuthCallback] Getting redirect path');
-        const state = location.state as { from?: Location };
-        const redirectTo = state?.from?.pathname || '/apprenticeships'; // Default to /apprenticeships
-
+        // Get redirect path from query parameters *within* handleCallback
+        console.log('[AuthCallback] Getting redirect path from query params');
+        const searchParams = new URLSearchParams(location.search); // Use location.search
+        const redirectTo = searchParams.get('redirect') || '/optimise-cv';
         console.log('[AuthCallback] Redirecting to:', redirectTo);
         navigate(redirectTo, { replace: true });
 
       } catch (error) {
         console.error('[AuthCallback] Callback error:', error);
-        navigate('/signin'); // Redirect on any error
+        navigate('/signin');
       }
     };
 
-    handleCallback();
-  }, [navigate, location]);
+    // Subscribe to auth state changes.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[AuthCallback] Auth state change:', event, session); // Log the session
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Only call handleCallback for SIGNED_IN *with a user*.
+        console.log('[AuthCallback] Handling SIGNED_IN');
+        handleCallback(session);
+      }
+      // Do *NOT* handle INITIAL_SESSION here.  Let getSession handle it.
+    });
+        const getSession = async () => {
+            const {data: {session}, error} = await supabase.auth.getSession();
+            if(session) {
+                handleCallback(session)
+            }
+        }
+        getSession()
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, location]); // navigate and location as dependencies
 
   return (
     <div className="min-h-screen pt-16 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
