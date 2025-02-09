@@ -1,45 +1,17 @@
+// File: pages/SignIn.tsx
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GoogleSignIn } from '../components/auth/GoogleSignIn';
-import { GoogleAuthService } from '../services/auth/googleAuth';
+// REMOVE: import { GoogleAuthService } from '../services/auth/googleAuth';  // No longer needed here
 
 export const SignIn = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  // REMOVE: const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Now handled in useAuth
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        setIsCheckingAuth(true);
-        const isAuthenticated = await GoogleAuthService.isAuthenticated();
-        
-        if (isAuthenticated) {
-          const from = location.state?.from?.pathname || '/apprenticeships';
-          navigate(from);
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    };
-
-    checkAuth();
-  }, [navigate, location]);
-
-  if (isCheckingAuth) {
-    return (
-      <div className="min-h-screen pt-16 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Checking authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // useEffect is no longer needed here, as useAuth covers this
   return (
     <div className="min-h-screen pt-16 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
       <motion.div

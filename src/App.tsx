@@ -10,7 +10,7 @@ import { Footer } from './components/Footer';
 import { SignIn } from './pages/SignIn';
 import { Listings } from './pages/Listings';
 import { ApprenticeshipDetail } from './pages/ApprenticeshipDetail';
-import { JoinUs } from './pages/JoinUs';
+import { OptimizeCV } from './pages/OptimizeCV';
 import { Privacy } from './pages/Privacy';
 import { TermsOfService } from './pages/TermsOfService';
 import { Team } from './pages/Team';
@@ -37,7 +37,7 @@ const AppRoutes = () => {
         <Route path="/apprenticeships" element={<Listings />} />
         <Route path="/apprenticeships/:id" element={<ApprenticeshipDetail />} />
         <Route path="/listings" element={<Navigate to="/apprenticeships" replace />} />
-        <Route path="/join" element={<JoinUs />} />
+        <Route path="/optimize-cv" element={<OptimizeCV />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/team" element={<Team />} />
