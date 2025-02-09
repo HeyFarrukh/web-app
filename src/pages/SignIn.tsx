@@ -1,4 +1,3 @@
-import React from 'react'; // No useEffect needed
 import { motion } from 'framer-motion';
 import { GoogleSignIn } from '../components/auth/GoogleSignIn';
 
