@@ -43,7 +43,6 @@ export const Pagination: React.FC<PaginationProps> = ({
         pages.push(totalPages);
       }
     }
-    console.log("Pages:", pages);
     return pages;
   };
 
@@ -52,7 +51,7 @@ export const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:text-white"
         aria-label="Previous page"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -61,14 +60,14 @@ export const Pagination: React.FC<PaginationProps> = ({
       {getPageNumbers().map((page, index) => (
         <React.Fragment key={index}>
           {page === '...' ? (
-            <span className="px-4 py-2 text-gray-400">...</span>
+            <span className="px-4 py-2 text-gray-400 dark:text-gray-500">...</span>
           ) : (
             <button
               onClick={() => onPageChange(page as number)}
               className={`px-4 py-2 rounded-lg ${
                 currentPage === page
                   ? 'bg-orange-500 text-white'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               {page}
@@ -80,7 +79,7 @@ export const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:text-white"
         aria-label="Next page"
       >
         <ChevronRight className="w-5 h-5" />
