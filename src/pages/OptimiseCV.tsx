@@ -32,15 +32,9 @@ const MIN_JOB_DESC_LENGTH = 50;
 
 const LoadingMessages = [
   "Let the AI cook fr fr... 👨‍🍳",
-  "AI's doing its thing, no cap! 🧢",
   "Giving your CV that rizz... ✨",
-  "Hold up, we're cooking something bussin'... 🔥",
-  "AI's going absolutely brazy rn... 🚀",
-  "This bout to be fire, on god! 🙏",
-  "Analyzing your CV (respectfully)... 👀",
-  "AI's putting in that work, sheesh! 💪",
-  "Making your CV hit different... 💯",
-  "The AI is in its bag rn... 💼"
+  "This bout to be fire! 🙏",
+  "Analysing your CV (respectfully)... 👀",
 ];
 
 export const OptimiseCV = () => {
@@ -202,13 +196,31 @@ export const OptimiseCV = () => {
 
   return (
     <>
-      <Helmet>
-        <title>AI CV Optimisation - ApprenticeWatch</title>
-        <meta 
-          name="description" 
-          content="Optimise your CV with AI-powered insights and recommendations tailored for apprenticeship applications." 
-        />
-      </Helmet>
+ <Helmet>
+  {/* Essential SEO Meta Tags */}
+  <title>AI CV Optimisation Tool for Apprenticeships | ApprenticeWatch</title>
+  <meta 
+    name="description" 
+    content="Get instant AI-powered CV feedback tailored for apprenticeships. Optimise with expert recommendations and boost interview chances. Free tool - try now!" 
+  />
+  <meta name="robots" content="index, follow, max-snippet: 155" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="canonical" href="https://apprenticewatch.com/optimise-cv" />
+
+  {/* Open Graph (Social Sharing) */}
+  <meta property="og:title" content="AI-Powered CV Optimisation for Apprenticeships | ApprenticeWatch" />
+  <meta property="og:description" content="Stand out in apprenticeship applications with AI-analysed CV feedback. Get tailored optimisation tips instantly." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://apprenticewatch.com/optimise-cv" />
+  <meta property="og:image" content="https://apprenticewatch.com/images/og-cv-optimiser.jpg" />
+
+  {/* Twitter Card */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free AI CV Optimiser for Apprentice Applications" />
+  <meta name="twitter:description" content="AI-powered analysis helps tailor your CV to apprenticeship job descriptions. Get interview-ready in minutes." />
+  <meta name="twitter:image" content="https://apprenticewatch.com/images/twitter-cv-optimiser.jpg" />
+  
+</Helmet>
 
       <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
