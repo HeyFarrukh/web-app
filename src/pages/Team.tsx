@@ -39,7 +39,7 @@ const teamMembers: TeamMember[] = [
     role: "Co-Founder",
     type: "founder",
     image: "/media/jamal-av.png",
-    description: "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. When Farrukh shared his bold vision with me, I immediately recognised the potential for change and knew this was the opportunity to make a real impact.",
+    description: "As a friend of both founders, I really connected with their vision and saw firsthand how challenging the apprenticeship application process can be. I joined the team because I genuinely believe in what they’re building, and I wanted to use my experience in development and operations to help turn that vision into reality.",
     links: {
       github: "https://github.com",
       linkedin: "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
