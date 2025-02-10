@@ -1,3 +1,4 @@
+// File: App.tsx
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -10,7 +11,7 @@ import { Footer } from './components/Footer';
 import { SignIn } from './pages/SignIn';
 import { Listings } from './pages/Listings';
 import { ApprenticeshipDetail } from './pages/ApprenticeshipDetail';
-import { JoinUs } from './pages/JoinUs';
+import { OptimiseCV } from './pages/OptimiseCV';
 import { Privacy } from './pages/Privacy';
 import { TermsOfService } from './pages/TermsOfService';
 import { Team } from './pages/Team';
@@ -19,6 +20,7 @@ import { ScrollToTop } from './components/navigation/ScrollToTop';
 import { Analytics } from './services/analytics/analytics';
 import { useAnalytics } from './hooks/useAnalytics';
 import { AuthCallback } from './components/auth/AuthCallBack';
+import { PrivateRoute } from './components/auth/PrivateRoute'; // Import PrivateRoute
 
 const AppRoutes = () => {
   useAnalytics();
@@ -37,7 +39,17 @@ const AppRoutes = () => {
         <Route path="/apprenticeships" element={<Listings />} />
         <Route path="/apprenticeships/:id" element={<ApprenticeshipDetail />} />
         <Route path="/listings" element={<Navigate to="/apprenticeships" replace />} />
-        <Route path="/join" element={<JoinUs />} />
+
+        {/* Wrap OptimizeCV with PrivateRoute */}
+        <Route
+            path="/optimise-cv"
+            element={
+              <PrivateRoute>
+                <OptimiseCV />
+              </PrivateRoute>
+            }
+          />
+
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/team" element={<Team />} />

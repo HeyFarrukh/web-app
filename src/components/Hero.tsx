@@ -9,7 +9,7 @@ export const Hero = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/signin');
+    navigate('/apprenticeships');
   };
 
   return (

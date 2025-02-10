@@ -1,79 +1,40 @@
-import { jwtDecode } from 'jwt-decode';
+// File: services/auth/googleAuth.ts
+
 import supabase from '../../config/supabase';
 import { User } from '@supabase/supabase-js';
-import { AuthError, Session } from '@supabase/supabase-js';
+import { SupabaseUserProfile } from '../../types/auth'; // Import type
 
-interface GoogleUser {
-  email: string;
-  name: string;
-  picture: string;
-  sub: string;
-}
-
-interface SupabaseUserProfile {
-  id: string;
-  email: string;
-  name?: string | null;
-  picture?: string | null;
-  created_at?: string;
-  last_login?: string;
-  last_logout?: string;
-}
 
 export class GoogleAuthService {
   private static readonly STORAGE_KEYS = {
-    TOKEN: 'auth_token',
-    USER: 'user_data',
-    SESSION: 'sb-session'
+    TOKEN: 'auth_token', // Not used, can be removed
+    USER: 'user_data',   // Keep this
+    SESSION: 'sb-session' // Not directly used, Supabase handles this
   };
 
   static async isAuthenticated(): Promise<boolean> {
+    console.log('[GoogleAuthService] Checking authentication status');
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      return !!session?.user;
+      if (error) {
+        console.error('[GoogleAuthService] Auth check error:', error);
+        return false; // Treat errors as not authenticated
+      }
+      const isAuthed = !!session?.user;
+      console.log('[GoogleAuthService] Auth status:', isAuthed);
+      return isAuthed;
     } catch (error) {
-      console.error("Auth check failed:", error);
-      return false;
-    }
-  }
-
-  static async handleCredentialResponse(response: any) {
-    try {
-      const token = response.credential;
-      if (!token) throw new Error('No token received from Google');
-
-      const decodedUser: GoogleUser = jwtDecode(token);
-
-      const { data, error } = await supabase.auth.signInWithIdToken({
-        provider: 'google',
-        token: token,
-      });
-
-      if (error) throw error;
-      if (!data.user) throw new Error('No user data received');
-
-      const userData: SupabaseUserProfile = {
-        id: data.user.id,
-        email: data.user.email!,
-        name: data.user.user_metadata?.name || decodedUser.name,
-        picture: data.user.user_metadata?.avatar_url || decodedUser.picture,
-        last_login: new Date().toISOString(),
-      };
-
-      await this.saveUserProfile(data.user, userData);
-      localStorage.setItem(this.STORAGE_KEYS.USER, JSON.stringify(userData));
-
-      return userData;
-    } catch (error) {
-      console.error('Authentication failed:', error);
-      await this.logout();
-      throw error;
+      console.error('[GoogleAuthService] Auth check failed:', error);
+      return false; // Treat errors as not authenticated
     }
   }
 
   static async saveUserProfile(supabaseUser: User, userData: SupabaseUserProfile) {
-    if (!supabaseUser?.id) throw new Error('Invalid user data');
+    console.log('[GoogleAuthService] Saving user profile:', { userId: supabaseUser.id });
+    if (!supabaseUser?.id) {
+      console.error('[GoogleAuthService] Invalid user data for profile save');
+      throw new Error('Invalid user data');
+    }
 
     const { error } = await supabase
       .from('users')
@@ -85,84 +46,37 @@ export class GoogleAuthService {
         last_login: userData.last_login,
       }, {
         onConflict: 'id',
-        ignoreDuplicates: false
+        ignoreDuplicates: false // Ensure updates work correctly
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[GoogleAuthService] Profile save error:', error);
+      throw error;
+    }
+    console.log('[GoogleAuthService] Profile saved successfully');
   }
-
+  
   static async logout() {
+    console.log('[GoogleAuthService] Starting logout process');
     try {
-      // Update last logout time if possible
-      const userData = localStorage.getItem(this.STORAGE_KEYS.USER);
-      if (userData) {
-        const { id } = JSON.parse(userData);
-        await supabase
-          .from('users')
-          .update({ last_logout: new Date().toISOString() })
-          .eq('id', id);
-      }
+      console.log('[GoogleAuthService] Clearing user data from storage');
+      localStorage.removeItem(this.STORAGE_KEYS.USER); // Only remove user_data
 
-      // Clear all storage first
-      this.clearStorage();
-
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
-      if (error) throw error;
-
-      // Double check session is cleared
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.warn('Session persisted after logout, forcing cleanup');
-        await supabase.auth.signOut({ scope: 'global' });
-        this.clearStorage();
+      console.log('[GoogleAuthService] Signing out from Supabase');
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('[GoogleAuthService] Supabase sign-out error:', error);
+        // Don't throw; continue with cleanup
       }
 
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('[GoogleAuthService] Logout error:', error);
     } finally {
-      // Final storage cleanup and redirect
-      this.clearStorage();
+      console.log('[GoogleAuthService] Final cleanup and redirect');
       window.location.href = '/';
     }
   }
 
-  private static clearStorage() {
-    // Clear all auth-related items
-    Object.values(this.STORAGE_KEYS).forEach(key => {
-      localStorage.removeItem(key);
-    });
 
-    // Clear any Supabase-specific items
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('sb-')) {
-        localStorage.removeItem(key);
-      }
-    }
-
-    // Clear session storage
-    sessionStorage.clear();
-  }
-
-  static async refreshUserProfile() {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) throw error || new Error('No user found');
-
-      const userData: SupabaseUserProfile = {
-        id: user.id,
-        email: user.email!,
-        name: user.user_metadata?.name,
-        picture: user.user_metadata?.avatar_url,
-        last_login: new Date().toISOString(),
-      };
-
-      localStorage.setItem(this.STORAGE_KEYS.USER, JSON.stringify(userData));
-      return userData;
-    } catch (error) {
-      console.error('Failed to refresh user profile:', error);
-      return null;
-    }
-  }
+  // Remove refreshUserProfile (now handled in useAuth)
 }
