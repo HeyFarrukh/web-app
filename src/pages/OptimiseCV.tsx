@@ -212,13 +212,13 @@ export const OptimiseCV = () => {
   <meta property="og:description" content="Stand out in apprenticeship applications with AI-analysed CV feedback. Get tailored optimisation tips instantly." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://apprenticewatch.com/optimise-cv" />
-  <meta property="og:image" content="https://apprenticewatch.com/images/og-cv-optimiser.jpg" />
+  <meta property="og:image" content="https://apprenticewatch.com/media/meta/cv-optimise-page.png" />
 
   {/* Twitter Card */}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Free AI CV Optimiser for Apprentice Applications" />
   <meta name="twitter:description" content="AI-powered analysis helps tailor your CV to apprenticeship job descriptions. Get interview-ready in minutes." />
-  <meta name="twitter:image" content="https://apprenticewatch.com/images/twitter-cv-optimiser.jpg" />
+  <meta name="twitter:image" content="https://apprenticewatch.com/media/meta/cv-optimise-page.png" />
   
 </Helmet>
 
