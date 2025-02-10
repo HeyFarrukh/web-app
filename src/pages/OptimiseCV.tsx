@@ -225,10 +225,10 @@ export const OptimiseCV = () => {
               </span>
             </div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              AI CV <span className="text-orange-500">Optimisation</span>
+              AI CV <span className="text-orange-500">Optimisation ᵇᵉᵗᵃ</span>
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
-              Let our AI analyze and enhance your CV for better apprenticeship opportunities
+              Let our AI analyse and enhance your CV for better apprenticeship opportunities
             </p>
           </motion.div>
 

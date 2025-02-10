@@ -47,7 +47,7 @@ export const Navbar = () => {
                 
                 {/* Text */}
                 <span className="relative font-medium text-orange-500 group-hover:text-white transition-colors duration-300">
-                  Optimize CV
+                  Optimise CV
                 </span>
               </div>
             </Link>
