@@ -107,6 +107,9 @@ Analyze the CV against this job description and provide structured feedback foll
       const result = await this.model.generateContent(this.SYSTEM_PROMPT + "\n\n" + prompt);
       const response = await result.response;
       const text = response.text();
+
+      // Log raw response
+      console.log("Raw Gemini Response:", text)
       
       // Remove any markdown formatting if present
       const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
@@ -115,6 +118,7 @@ Analyze the CV against this job description and provide structured feedback foll
         return JSON.parse(cleanText) as AIAnalysisResponse;
       } catch (parseError) {
         console.error('Failed to parse Gemini response:', parseError);
+        console.error("Raw response content:", cleanText)
         throw new Error('Invalid response format from AI');
       }
     } catch (error) {

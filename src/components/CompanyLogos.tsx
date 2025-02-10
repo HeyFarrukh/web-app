@@ -27,15 +27,16 @@ export const CompanyLogos = () => {
       description: "Updated in real-time with opportunities from companies across the UK."
     },
     {
+      value: "FREE",
+      label: "AI CV Optimisation",
+      description: "Get instant feedback in under 20 seconds!"
+    },
+    {
       value: "80%",
       label: "Confidence Improvement",
       description: "Of users say ApprenticeWatch has saved them time!"
     },
-    {
-      value: "24/7",
-      label: "Real-Time Notifications",
-      description: "Get instant updates on new apprenticeships anytime, anywhere."
-    }
+ 
   ];
 
   return (
