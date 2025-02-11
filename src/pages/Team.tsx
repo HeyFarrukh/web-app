@@ -25,7 +25,7 @@ const teamMembers: TeamMember[] = [
     role: "Founder",
     type: "founder",
     image: "/media/farrukh-av.png",
-    description: "I'm on a mission to make it easier for young professionals to find apprenticeships. Having faced the challenge myself of keeping up with the endless apprenticeships all on different websites, I'm determined to simplify the process and take the stress out of it for others. I'm not just talking about change—I'm here to try and make it happen.",
+    description: "I know firsthand how frustrating it can be to keep up with apprenticeship opportunities scattered across different websites. That’s why I’m on a mission to make the process easier, clearer, and less stressful for young professionals. I’m not just talking about change—I’m building something that actually makes a difference.",
     links: {
       github: "https://github.com/HeyFarrukh?utm_source=apprentice-watch",
       linkedin: "https://www.linkedin.com/in/farrukh-ahmad-9547b1260?utm_source=apprentice-watch",
