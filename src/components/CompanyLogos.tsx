@@ -32,9 +32,9 @@ export const CompanyLogos = () => {
       description: "Get instant feedback in under 20 seconds!"
     },
     {
-      value: "80%",
-      label: "Confidence Improvement",
-      description: "Of users say ApprenticeWatch has saved them time!"
+      value: "24/7",
+      label: "Real-Time Notifications",
+      description: "Get instant alerts on new apprenticeships anythime. anywhere."
     },
  
   ];
