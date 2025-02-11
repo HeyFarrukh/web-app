@@ -53,7 +53,7 @@ const teamMembers: TeamMember[] = [
     role: "Chief Technical Officer",
     type: "senior-lead",
     image: "/media/humza-av.png",
-    description: "As a friend of both founders, I sympathized with their vision and understood the current tenuous state of the apprenticeship application process. I joined the team to help build the platform and make their vision a reality utilising my experience in development and operations.",
+    description: "As a friend of both founders, I really connected with their vision and saw firsthand how challenging the apprenticeship application process can be. I joined the team because I genuinely believe in what they’re building, and I wanted to use my experience in development and operations to help turn that vision into reality.",
     links: {
       github: "https://github.com/hhussain04",
       linkedin: "https://www.linkedin.com/in/humzahussain04/",
