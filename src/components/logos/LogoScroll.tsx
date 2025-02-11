@@ -3,32 +3,32 @@ import React from 'react';
 const companyLogos = [
   { 
     name: 'Accenture', 
-    url: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Accenture_logo.svg',
+    url: '/assets/logos/accenture.svg',
     width: 120
   },
   { 
     name: 'Microsoft', 
-    url: 'https://img-prod-cms-rt-microsoft-com.akamaized.net/cms/api/am/imageFileData/RE1Mu3b?ver=5c31',
+    url: '/assets/logos/microsoft.svg',
     width: 120 
   },
   { 
     name: 'Google', 
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2560px-Google_2015_logo.svg.png',
+    url: '/assets/logos/google.svg',
     width: 120 
   },
   { 
     name: 'Amazon', 
-    url: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
+    url: '/assets/logos/amazon.svg',
     width: 120 
   },
   { 
-    name: 'Meta', 
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/800px-Meta_Platforms_Inc._logo.svg.png',
+    name: 'Lloyds Banking Group', 
+    url: '/assets/logos/lloyds.svg',
     width: 120 
   },
   { 
     name: 'Deloitte', 
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Deloitte.svg/2560px-Deloitte.svg.png',
+    url: '/assets/logos/deloitte.svg',
     width: 120 
   },
   { 
@@ -38,7 +38,7 @@ const companyLogos = [
   },
   { 
     name: 'BBC', 
-    url: 'https://upload.wikimedia.org/wikipedia/commons/4/41/BBC_Logo_2021.svg',
+    url: '/assets/logos/bbc.svg',
     width: 80 
   }
 ];
