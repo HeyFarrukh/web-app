@@ -39,7 +39,7 @@ const teamMembers: TeamMember[] = [
     role: "Co-Founder",
     type: "founder",
     image: "/media/jamal-av.png",
-    description: "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. When Farrukh shared his bold vision with me, I immediately recognised the potential for change and knew this was the opportunity to make a real impact.",
+    description: "As a friend of both founders, I really connected with their vision and saw firsthand how challenging the apprenticeship application process can be. I joined the team because I genuinely believe in what they’re building, and I wanted to use my experience in development and operations to help turn that vision into reality.",
     links: {
       github: "https://github.com",
       linkedin: "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
@@ -48,20 +48,20 @@ const teamMembers: TeamMember[] = [
       email: "jamal@apprenticewatch.com"
     }
   },
-  // {
-  //   name: "Humza",
-  //   role: "Senior Lead Developer",
-  //   type: "senior-lead",
-  //   image: "",
-  //   description: "With over a decade of experience in full-stack development and a passion for mentoring, I lead the technical vision of ApprenticeWatch. My focus is on building scalable solutions that make apprenticeship discovery seamless and accessible for everyone.",
-  //   links: {
-  //     github: "https://github.com",
-  //     linkedin: "https://linkedin.com",
-  //   },
-  //   contact: {
-  //     email: "humza@apprenticewatch.com"
-  //   }
-  // },
+  {
+    name: "Humza",
+    role: "Chief Technical Officer",
+    type: "senior-lead",
+    image: "/media/humza-av.png",
+    description: "As a friend of both founders, I really connected with their vision and saw firsthand how challenging the apprenticeship application process can be. I joined the team because I genuinely believe in what they’re building, and I wanted to use my experience in development and operations to help turn that vision into reality.",
+    links: {
+      github: "https://github.com/hhussain04",
+      linkedin: "https://www.linkedin.com/in/humzahussain04/",
+    },
+    contact: {
+      email: "humza@apprenticewatch.com"
+    }
+  },
 ];
 
 const FounderCard: React.FC<{ member: TeamMember }> = ({ member }) => (
@@ -138,69 +138,71 @@ const SeniorLeadCard: React.FC<{ member: TeamMember }> = ({ member }) => (
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
     whileHover={{ y: -5 }}
-    className="relative group max-w-2xl mx-auto"
+    className="relative group max-w-3xl mx-auto"
   >
     <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 rounded-xl transform -rotate-1 group-hover:rotate-0 transition-transform duration-300" />
-    
-    <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300">
-      <div className="flex flex-col md:flex-row md:items-center gap-6">
+
+    <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-8 shadow-lg group-hover:shadow-xl transition-all duration-300">
+      <div className="flex flex-col md:flex-row md:items-start gap-8">
         <div className="relative flex-shrink-0 mx-auto md:mx-0">
-          <div className="w-24 h-24 rounded-full overflow-hidden ring-2 ring-orange-500">
+          <div className="w-28 h-28 rounded-full overflow-hidden ring-2 ring-orange-500">
             <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
           </div>
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-md">
             {member.role}
           </div>
         </div>
-        
+
         <div className="flex-1 text-center md:text-left">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            {member.name}
-          </h3>
-          
-          {member.contact?.email && (
-            <a 
-              href={`mailto:${member.contact.email}`}
-              className="text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-500 font-medium mb-3 block transition-colors"
-            >
-              {member.contact.email}
-            </a>
-          )}
-          
-          <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 break-words">
-            {member.description}
-          </p>
-          <div className="flex justify-center md:justify-start space-x-3">
-            {member.links.github && (
-              <motion.a
-                href={member.links.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
+          <div className="space-y-3">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white overflow-hidden text-ellipsis">
+              {member.name}
+            </h3>
+
+            {member.contact?.email && (
+              <a
+                href={`mailto:${member.contact.email}`}
+                className="text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-500 font-medium block transition-colors overflow-hidden text-ellipsis"
               >
-                <Github className="w-4 h-4" />
-              </motion.a>
+                {member.contact.email}
+              </a>
             )}
-            {member.links.linkedin && (
-              <motion.a
-                href={member.links.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
-              >
-                <Linkedin className="w-4 h-4" />
-              </motion.a>
-            )}
+
+            <p className="text-gray-600 dark:text-gray-300 text-sm">{member.description}</p>
+
+            <div className="flex justify-center md:justify-start space-x-3 pt-2">
+              {member.links.github && (
+                <motion.a
+                  href={member.links.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
+                >
+                  <Github className="w-4 h-4" />
+                </motion.a>
+              )}
+              {member.links.linkedin && (
+                <motion.a
+                  href={member.links.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
+                >
+                  <Linkedin className="w-4 h-4" />
+                </motion.a>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
   </motion.div>
 );
+
 
 const AmbassadorCard: React.FC<{ member: TeamMember; index: number }> = ({ member, index }) => (
   <motion.div
