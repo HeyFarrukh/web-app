@@ -14,11 +14,13 @@
 
 <img src="https://firebase.google.com/static/images/brand-guidelines/logo-logomark.png" alt="Firebase" width="50" height="50"/> Firebase
 
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Google_Gemini_logo.svg/2560px-Google_Gemini_logo.svg.png" alt="Google Gemini" height="50"/> 
+
 ## Features
 
 - Discover apprenticeships from top companies across the UK.
 - Save time by finding opportunities all in one place.
-- Get AI-powered CV optimisation (coming soon).
+- Get AI-powered CV optimisation.
 - Real-time notifications about new apprenticeships.
 
 ## Contribution
