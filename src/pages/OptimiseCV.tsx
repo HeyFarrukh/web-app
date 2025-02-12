@@ -29,14 +29,20 @@ interface CopyState {
 
 const MIN_CV_LENGTH = 200;
 const MIN_JOB_DESC_LENGTH = 50;
+const ANALYSIS_COOLDOWN = 20000; // 20 seconds cooldown
 
 const LoadingMessages = [
   "Let the AI cook... 👨‍🍳🔥",
-  "Scanning for W’s... 📄🔍",
+  "Scanning for W's... 📄🔍",
   "Giving your CV main character energy... ✨",
   "This about to be fire! 🙏",
   "Analysing your CV (respectfully)... 👀",
 ];
+
+interface WarningState {
+  show: boolean;
+  message: string;
+}
 
 export const OptimiseCV = () => {
   const navigate = useNavigate();
@@ -44,14 +50,21 @@ export const OptimiseCV = () => {
   const { isAuthenticated, isLoading, userData } = useAuth();
   const [cvText, setCvText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
-  const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
-  const [warningMessage, setWarningMessage] = useState('');
+  const [warning, setWarning] = useState<WarningState>({
+    show: false,
+    message: ''
+  });
   const [score, setScore] = useState<number | null>(null);
   const [scoreCategories, setScoreCategories] = useState<ScoreCategory[]>([]);
   const [improvements, setImprovements] = useState<Improvement[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [copyStates, setCopyStates] = useState<CopyState>({});
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [lastAnalysis, setLastAnalysis] = useState<{
+    cv: string;
+    jobDesc: string;
+    timestamp: number;
+  } | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -63,11 +76,9 @@ export const OptimiseCV = () => {
     return () => clearInterval(interval);
   }, [isAnalyzing]);
 
-  // Check authentication
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      // Save current location to redirect back after login
-      console.log('[OptimiseCV] Redirecting to /signin, state:', { from: location }); // Add this line
+      console.log('[OptimiseCV] Redirecting to /signin, state:', { from: location });
       navigate('/signin', { 
         state: { from: location },
         replace: true 
@@ -75,20 +86,55 @@ export const OptimiseCV = () => {
     }
   }, [isLoading, isAuthenticated, navigate, location]);
 
+  const showWarning = (message: string) => {
+    setWarning({
+      show: true,
+      message
+    });
+    setTimeout(() => {
+      setWarning({ show: false, message: '' });
+    }, 5000);
+  };
+
   const validateInput = () => {
     if (cvText.length < MIN_CV_LENGTH) {
-      setWarningMessage('Please paste your complete CV. The content seems too short to be a valid CV.');
-      setShowIncompleteWarning(true);
+      showWarning('Please paste your complete CV. The content seems too short to be a valid CV.');
       return false;
     }
 
     if (jobDescription.length < MIN_JOB_DESC_LENGTH) {
-      setWarningMessage('Please paste the job description. This helps us tailor your CV to the role.');
-      setShowIncompleteWarning(true);
+      showWarning('Please paste the job description. This helps us tailor your CV to the role.');
       return false;
     }
 
     return true;
+  };
+
+  const checkDuplicateAnalysis = () => {
+    if (!lastAnalysis) return false;
+
+    const isDuplicateCV = cvText === lastAnalysis.cv;
+    const isDuplicateJobDesc = jobDescription === lastAnalysis.jobDesc;
+
+    if (isDuplicateCV && isDuplicateJobDesc) {
+      showWarning("You've already analysed this exact CV and job description. Make some changes before analysing again.");
+      return true;
+    }
+
+    return false;
+  };
+
+  const checkCooldown = () => {
+    if (!lastAnalysis) return false;
+
+    const timeSinceLastAnalysis = Date.now() - lastAnalysis.timestamp;
+    if (timeSinceLastAnalysis < ANALYSIS_COOLDOWN) {
+      const remainingTime = Math.ceil((ANALYSIS_COOLDOWN - timeSinceLastAnalysis) / 1000);
+      showWarning(`Thanks for waiting ${remainingTime} seconds! You're a legend for being patient, and it helps us keep CV optimisations free! 🫶🚀`);        
+      return true;
+    }
+
+    return false;
   };
 
   const handleOptimise = async () => {
@@ -104,27 +150,30 @@ export const OptimiseCV = () => {
       return;
     }
 
+    if (checkDuplicateAnalysis() || checkCooldown()) {
+      return;
+    }
+
     const startTime = Date.now();
 
     try {
       setIsAnalyzing(true);
       const analysis = await geminiService.analyzeCV(cvText, jobDescription);
       
-      // Record the optimization
-      if (userData?.id && userData?.email) { // ADDED CHECKS FOR BOTH ID AND EMAIL
+      if (userData?.id && userData?.email) {
         await cvTrackingService.recordOptimisation(
-            userData.id,
-            cvText,
-            jobDescription,
-            analysis,
-            {
-                tokenCount: cvText.split(/\s+/).length,
-                processingTime: Date.now() - startTime,
-                apiVersion: 'gemini-2.0-flash'
-            },
-            userData.email // ADDED THIS - PASS THE EMAIL
+          userData.id,
+          cvText,
+          jobDescription,
+          analysis,
+          {
+            tokenCount: cvText.split(/\s+/).length,
+            processingTime: Date.now() - startTime,
+            apiVersion: 'gemini-2.0-flash'
+          },
+          userData.email
         );
-    }
+      }
 
       setScore(analysis.overallScore);
       setScoreCategories(analysis.categories.map(cat => ({
@@ -132,16 +181,20 @@ export const OptimiseCV = () => {
         icon: getIconForCategory(cat.name)
       })));
 
-      // Only show improvements that have suggestions or optimized content
       const validImprovements = analysis.improvements.filter(
         imp => (imp.suggestions?.length > 0 || imp.optimisedContent)
       );
       setImprovements(validImprovements);
+
+      setLastAnalysis({
+        cv: cvText,
+        jobDesc: jobDescription,
+        timestamp: Date.now()
+      });
       
     } catch (error) {
       console.error('Analysis failed:', error);
-      setWarningMessage('Sorry, something went wrong while analyzing your CV. Please try again.');
-      setShowIncompleteWarning(true);
+      showWarning('Sorry, something went wrong while analysing your CV. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -187,7 +240,6 @@ export const OptimiseCV = () => {
     }
   };
 
-  // Show loading state while checking auth
   if (isLoading) {
     return (
       <div className="min-h-screen pt-24 flex items-center justify-center">
@@ -198,35 +250,30 @@ export const OptimiseCV = () => {
 
   return (
     <>
- <Helmet>
-  {/* Essential SEO Meta Tags */}
-  <title>AI CV Optimisation Tool for Apprenticeships | ApprenticeWatch</title>
-  <meta 
-    name="description" 
-    content="Get instant AI-powered CV feedback tailored for apprenticeships. Optimise with expert recommendations and boost interview chances. Free tool - try now!" 
-  />
-  <meta name="robots" content="index, follow, max-snippet: 155" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="canonical" href="https://apprenticewatch.com/optimise-cv" />
+      <Helmet>
+        <title>AI CV Optimisation Tool for Apprenticeships | ApprenticeWatch</title>
+        <meta 
+          name="description" 
+          content="Get instant AI-powered CV feedback tailored for apprenticeships. Optimise with expert recommendations and boost interview chances. Free tool - try now!" 
+        />
+        <meta name="robots" content="index, follow, max-snippet: 155" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="canonical" href="https://apprenticewatch.com/optimise-cv" />
 
-  {/* Open Graph (Social Sharing) */}
-  <meta property="og:title" content="AI-Powered CV Optimisation for Apprenticeships | ApprenticeWatch" />
-  <meta property="og:description" content="Stand out in apprenticeship applications with AI-analysed CV feedback. Get tailored optimisation tips instantly." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://apprenticewatch.com/optimise-cv" />
-  <meta property="og:image" content="https://apprenticewatch.com/media/meta/cv-optimise-page.png" />
+        <meta property="og:title" content="AI-Powered CV Optimisation for Apprenticeships | ApprenticeWatch" />
+        <meta property="og:description" content="Stand out in apprenticeship applications with AI-analysed CV feedback. Get tailored optimisation tips instantly." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apprenticewatch.com/optimise-cv" />
+        <meta property="og:image" content="https://apprenticewatch.com/media/meta/cv-optimise-page.png" />
 
-  {/* Twitter Card */}
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Free AI CV Optimiser for Apprentice Applications" />
-  <meta name="twitter:description" content="AI-powered analysis helps tailor your CV to apprenticeship job descriptions. Get interview-ready in minutes." />
-  <meta name="twitter:image" content="https://apprenticewatch.com/media/meta/cv-optimise-page.png" />
-  
-</Helmet>
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Free AI CV Optimiser for Apprentice Applications" />
+        <meta name="twitter:description" content="AI-powered analysis helps tailor your CV to apprenticeship job descriptions. Get interview-ready in minutes." />
+        <meta name="twitter:image" content="https://apprenticewatch.com/media/meta/cv-optimise-page.png" />
+      </Helmet>
 
       <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* AI-branded Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -247,13 +294,11 @@ export const OptimiseCV = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-8">
-            {/* Left Column - Input */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="space-y-4"
             >
-              {/* PDF Upload Section */}
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
                 <div className="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-lg" />
@@ -266,7 +311,6 @@ export const OptimiseCV = () => {
                 </div>
               </div>
 
-              {/* CV Text Input */}
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
                 <div className="flex items-center space-x-2 mb-2">
                   <Cpu className="w-4 h-4 text-orange-500" />
@@ -282,7 +326,6 @@ export const OptimiseCV = () => {
                 />
               </div>
 
-              {/* Job Description Input */}
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
                 <div className="flex items-center space-x-2 mb-2">
                   <Zap className="w-4 h-4 text-orange-500" />
@@ -304,11 +347,10 @@ export const OptimiseCV = () => {
                 className="w-full py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
                 <Sparkles className="w-5 h-5" />
-                <span>{isAnalyzing ? 'AI is Analyzing...' : 'Optimise with AI'}</span>
+                <span>{isAnalyzing ? 'AI is Analysing...' : 'Optimise with AI'}</span>
               </button>
             </motion.div>
 
-            {/* Right Column - Results */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -335,7 +377,6 @@ export const OptimiseCV = () => {
                 </div>
               ) : score !== null ? (
                 <>
-                  {/* Overall Score */}
                   <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-orange-500/20">
                     <div className="text-center mb-8">
                       <motion.div
@@ -390,7 +431,6 @@ export const OptimiseCV = () => {
                       </motion.div>
                     </div>
 
-                    {/* Score Categories */}
                     <div className="grid grid-cols-2 gap-4">
                       {scoreCategories.map((category, index) => (
                         <motion.div
@@ -427,7 +467,6 @@ export const OptimiseCV = () => {
                     </div>
                   </div>
 
-                  {/* Detailed Improvements */}
                   <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-orange-500/20">
                     <div className="flex items-center space-x-2 mb-6">
                       <Bot className="w-5 h-5 text-orange-500" />
@@ -468,7 +507,6 @@ export const OptimiseCV = () => {
                             </p>
                           )}
 
-                          {/* Suggestions List */}
                           <ul className="space-y-2 mb-4">
                             {improvement.suggestions.map((suggestion, i) => (
                               <motion.li
@@ -484,7 +522,6 @@ export const OptimiseCV = () => {
                             ))}
                           </ul>
 
-                          {/* Optimized Content Section */}
                           {improvement.optimisedContent && (
                             <div className="mt-4 space-y-2">
                               <div className="flex items-center justify-between">
@@ -531,7 +568,6 @@ export const OptimiseCV = () => {
             </motion.div>
           </div>
 
-          {/* AI Disclaimer */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -553,9 +589,8 @@ export const OptimiseCV = () => {
         </div>
       </div>
 
-      {/* Incomplete Warning Modal */}
       <AnimatePresence>
-        {showIncompleteWarning && (
+        {warning.show && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -575,11 +610,11 @@ export const OptimiseCV = () => {
                     Hold Up!
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300 mt-2">
-                    {warningMessage}
+                    {warning.message}
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowIncompleteWarning(false)}
+                  onClick={() => setWarning({ show: false, message: '' })}
                   className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                 >
                   <X className="w-5 h-5" />
@@ -587,7 +622,7 @@ export const OptimiseCV = () => {
               </div>
               <div className="flex justify-end">
                 <button
-                  onClick={() => setShowIncompleteWarning(false)}
+                  onClick={() => setWarning({ show: false, message: '' })}
                   className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
                 >
                   Got it
