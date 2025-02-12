@@ -31,9 +31,10 @@ const MIN_CV_LENGTH = 200;
 const MIN_JOB_DESC_LENGTH = 50;
 
 const LoadingMessages = [
-  "Let the AI cook fr fr... 👨‍🍳",
-  "Giving your CV that rizz... ✨",
-  "This bout to be fire! 🙏",
+  "Let the AI cook... 👨‍🍳🔥",
+  "Scanning for W’s... 📄🔍",
+  "Giving your CV main character energy... ✨",
+  "This about to be fire! 🙏",
   "Analysing your CV (respectfully)... 👀",
 ];
 
