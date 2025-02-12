@@ -39,28 +39,27 @@ export const CookiePolicy: React.FC = () => {
             prose-a:text-orange-600 dark:prose-a:text-orange-400 
             prose-a:no-underline hover:prose-a:text-orange-700 dark:hover:prose-a:text-orange-300
           ">
-          <h1>Cookie Policy</h1>
-          <p>Last updated: February 04, 2025</p>
-          <p>This Cookie Policy explains what cookies are and how we currently use, or will use them pending changes in the future. You should read this policy to understand what cookies are, how we use them, the types of cookies we use, i.e., the information we collect using cookies and how that information is used, and how to control the cookie preferences. For further information on how we use, store, and keep your personal data secure, see our Privacy Policy.</p>
-          <h2>What are cookies?</h2>
-          <p>Cookies are small text files that are used to store small pieces of information. They are stored on your device when the website is loaded on your browser. These cookies help us make the website function properly, make it more secure, provide better user experience, and understand how the website performs and to analyze what works and where it needs improvement.</p>
-          <h2>How do we use cookies?</h2>
-          <p>As most of the online services, our website uses cookies first-party and third-party cookies for several purposes. The first-party cookies are mostly necessary for the website to function the right way, and they do not collect any of your personally identifiable data.</p>
-          <p>The third-party cookies used on our websites are used mainly for understanding how the website performs, how you interact with our website, keeping our services secure, providing advertisements that are relevant to you, and all in all providing you with a better and improved user experience and help speed up your future interactions with our website.</p>
-          <h2>Types of cookies we use</h2>
-          <ul>
-            <li><strong>Essential:</strong> Some cookies are essential for you to be able to experience the full functionality of our site. They allow us to maintain user sessions and prevent any security threats. They do not collect or store any personal information. For example, these cookies allow you to log-in to your account and add products to your basket, and checkout securely.</li>
-            <li><strong>Statistics:</strong> These cookies store information like the number of visitors to the website, the number of unique visitors, which pages of the website have been visited, the source of the visit, etc. This data helps us understand and analyze how well the website performs and where it needs improvement.</li>
-            <li><strong>Marketing:</strong> Our website displays advertisements. These cookies are used to personalize the advertisements that we show to you so that they are meaningful to you. These cookies also help us keep track of the efficiency of these ad campaigns. The information stored in these cookies may also be used by the third-party ad providers to show you ads on other websites on the browser as well.</li>
+            <h1>Cookie Policy</h1>
+            <p>Last updated: February 04, 2025</p>
+            <p>This Cookie Policy explains what cookies are and how we currently use, or will use them pending changes in the future. You should read this policy to understand what cookies are, how we use them, the types of cookies we use, i.e., the information we collect using cookies and how that information is used, and how to control the cookie preferences. For further information on how we use, store, and keep your personal data secure, see our Privacy Policy.</p>
+            <h2>What are cookies?</h2>
+            <p>Cookies are small text files that are used to store small pieces of information. They are stored on your device when the website is loaded on your browser. These cookies help us make the website function properly, make it more secure, provide better user experience, and understand how the website performs and to analyse what works and where it needs improvement.</p>
+            <h2>How do we use cookies?</h2>
+            <p>As most of the online services, our website uses cookies first-party and third-party cookies for several purposes. The first-party cookies are mostly necessary for the website to function the right way, and they do not collect any of your personally identifiable data.</p>
+            <p>The third-party cookies used on our websites are used mainly for understanding how the website performs, how you interact with our website, keeping our services secure, providing advertisements that are relevant to you, and all in all providing you with a better and improved user experience and help speed up your future interactions with our website.</p>
+            <h2>Types of cookies we use</h2>
+            <ul>
+            <li><strong>User session and Analytics:</strong> Some cookies are essential for you to be able to experience the full functionality of our site. They allow us to maintain user sessions and prevent any security threats. They do not collect or store any personal information. Additionally, we may collect info about the brow</li>
+            <li><strong>Statistics:</strong> These cookies store information like the number of visitors to the website, the number of unique visitors, which pages of the website have been visited, the source of the visit, etc. This data helps us understand and analyse how well the website performs and where it needs improvement.</li>
             <li><strong>Functional:</strong> These are the cookies that help certain non-essential functionalities on our website. These functionalities include embedding content like videos or sharing content on the website on social media platforms.</li>
-            <li><strong>Preferences:</strong> These cookies help us store your settings and browsing preferences like language preferences so that you have a better and efficient experience on future visits to the website.</li>
-          </ul>
-          <h2>Manage cookie preferences</h2>
-          <p>You can change your cookie preferences any time by clicking on the settings button. This will let you revisit the cookie consent banner and change your preferences or withdraw your consent right away.</p>
-          <p>In addition to this, different browsers provide different methods to block and delete cookies used by websites. You can change the settings of your browser to block/delete the cookies. To find out more about how to manage and delete cookies, visit wikipedia.org, www.allaboutcookies.org.</p>
-          <h2>Contact Us</h2>
-          <p>If you have any questions about this Cookie Policy, You can contact us:</p>
-          <ul>
+            <li><strong>Preferences:</strong> These cookies help us store your settings and browsing preferences like language preferences so that you have a better and efficient experience on future visits to the website. They also store your login information so you don't have to log in every time you visit.</li>
+            </ul>
+            <h2>Manage cookie preferences</h2>
+            <p>You can change your cookie preferences any time by clicking on the settings button. This will let you revisit the cookie consent banner and change your preferences or withdraw your consent right away.</p>
+            <p>In addition to this, different browsers provide different methods to block and delete cookies used by websites. You can change the settings of your browser to block/delete the cookies. To find out more about how to manage and delete cookies, visit wikipedia.org, www.allaboutcookies.org.</p>
+            <h2>Contact Us</h2>
+            <p>If you have any questions about this Cookie Policy, You can contact us:</p>
+            <ul>
             <li>By email: privacy@apprenticewatch.com</li>
           </ul>
           </div>
