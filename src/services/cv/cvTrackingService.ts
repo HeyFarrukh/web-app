@@ -9,18 +9,22 @@ interface OptimisationRecord {
   overallScore: number;
   createdAt: Date;
   metadata?: Record<string, any>;
+  userEmail: string; // ADDED THIS LINE
 }
 
+
 export class CVTrackingService {
+  // Line 16: Add userEmail as an optional parameter
   async recordOptimisation(
     userId: string,
     cvText: string,
     jobDescription: string,
     analysis: AIAnalysisResponse,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
+    userEmail?: string // ADDED THIS PARAMETER (optional)
   ) {
     try {
-      // Start a transaction
+      // Line 23: Add user_email to the insert object
       const { data: optimisation, error: optimisationError } = await supabase
         .from('cv_optimisations')
         .insert({
@@ -28,7 +32,8 @@ export class CVTrackingService {
           cv_text: cvText,
           job_description: jobDescription,
           overall_score: analysis.overallScore,
-          metadata: metadata || {}
+          metadata: metadata || {},
+          user_email: userEmail || '' // ADDED THIS LINE, with default
         })
         .select()
         .single();
@@ -43,7 +48,8 @@ export class CVTrackingService {
         impact: imp.impact,
         context: imp.context,
         suggestions: JSON.stringify(imp.suggestions),
-        optimised_content: imp.optimisedContent
+        optimised_content: imp.optimisedContent,
+        user_email: userEmail || '' // ADDED THIS LINE, with default
       }));
 
       const { error: improvementsError } = await supabase

@@ -111,19 +111,20 @@ export const OptimiseCV = () => {
       const analysis = await geminiService.analyzeCV(cvText, jobDescription);
       
       // Record the optimization
-      if (userData?.id) {
+      if (userData?.id && userData?.email) { // ADDED CHECKS FOR BOTH ID AND EMAIL
         await cvTrackingService.recordOptimisation(
-          userData.id,
-          cvText,
-          jobDescription,
-          analysis,
-          {
-            tokenCount: cvText.split(/\s+/).length,
-            processingTime: Date.now() - startTime,
-            apiVersion: 'gemini-2.0-flash'
-          }
+            userData.id,
+            cvText,
+            jobDescription,
+            analysis,
+            {
+                tokenCount: cvText.split(/\s+/).length,
+                processingTime: Date.now() - startTime,
+                apiVersion: 'gemini-2.0-flash'
+            },
+            userData.email // ADDED THIS - PASS THE EMAIL
         );
-      }
+    }
 
       setScore(analysis.overallScore);
       setScoreCategories(analysis.categories.map(cat => ({
