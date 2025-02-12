@@ -10,8 +10,6 @@
 - [Component Guidelines](#component-guidelines)
 - [State Management](#state-management)
 - [AI Integration](#ai-integration)
-- [Deployment](#deployment)
-- [Testing](#testing)
 
 ## Project Overview
 
@@ -29,7 +27,127 @@ ApprenticeWatch is a platform designed to help users discover apprenticeship opp
 - **Analytics**: Google Analytics 4
 - **AI**: Google's Gemini AI API
 
-[Previous sections remain unchanged...]
+
+
+## Database
+
+We use Supabase as our database with the following key tables:
+
+### Vacancies Table
+```sql
+CREATE TABLE vacancies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  employer_name TEXT NOT NULL,
+  posted_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  closing_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  -- ... other fields
+);
+```
+
+### Users Table
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY REFERENCES auth.users,
+  email TEXT UNIQUE NOT NULL,
+  name TEXT,
+  picture TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  last_login TIMESTAMP WITH TIME ZONE,
+  last_logout TIMESTAMP WITH TIME ZONE
+);
+```
+
+## Design System
+
+### Colors
+```typescript
+const colors = {
+  orange: {
+    50: '#fff7ed',   // Background
+    100: '#ffedd5',  // Light accent
+    500: '#f97316',  // Primary buttons
+    600: '#ea580c',  // Hover state
+    900: '#7c2d12'   // Dark text
+  }
+}
+```
+
+### Typography
+- Primary Font: System default sans-serif
+- Accent Font: 'Playfair Display' (for italics and special text)
+
+### Component Base Classes
+```typescript
+const baseClasses = {
+  button: "px-4 py-2 rounded-lg transition-colors",
+  input: "w-full px-4 py-2 rounded-lg border focus:ring-2",
+  card: "bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+}
+```
+## Component Guidelines
+
+### Basic Component Structure
+```typescript
+import React from 'react';
+import { motion } from 'framer-motion';
+
+interface ComponentProps {
+  // Define props
+}
+
+export const Component: React.FC<ComponentProps> = ({ /* props */ }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg"
+    >
+      {/* Content */}
+    </motion.div>
+  );
+};
+```
+
+### Animation Standards
+```typescript
+const animations = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.3 }
+}
+```
+
+## Authentication
+
+Authentication is handled through Supabase Auth with Google OAuth integration.
+
+### Key Files:
+- `src/services/auth/googleAuth.ts`: Main authentication service
+- `src/components/auth/AuthCallback.tsx`: OAuth callback handler
+- `src/components/auth/GoogleSignIn.tsx`: Sign-in component
+
+### Authentication Flow:
+1. User clicks "Sign in with Google"
+2. Redirected to Google OAuth
+3. After successful auth, redirected to `/auth/callback`
+4. User profile saved to Supabase and local storage
+5. Redirected to main application
+
+### User Profile Structure:
+```typescript
+interface SupabaseUserProfile {
+  id: string;
+  email: string;
+  name: string | null;
+  picture: string | null;
+  created_at?: string;
+  last_login?: string;
+  last_logout?: string;
+}
+```
 
 ## AI Integration
 
@@ -40,7 +158,7 @@ The AI system uses Google's Gemini API for CV analysis and optimization. The int
 
 #### 1. Gemini Service (`src/services/ai/geminiService.ts`)
 - Handles all AI-related operations
-- Uses Gemini 1.5 Flash model for fast response times
+- Uses Gemini 2.0 Flash model for fast response times
 - Implements strict type checking for responses
 - Includes comprehensive error handling
 
@@ -69,6 +187,27 @@ interface AIAnalysisResponse {
   }[];
 }
 ```
+
+## State Management
+
+- Use React hooks for component-level state
+- Use Supabase realtime subscriptions for real-time updates
+- Custom hooks for shared logic
+
+### Example Custom Hook
+```typescript
+const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Auth logic
+  }, []);
+
+  return { isAuthenticated, user };
+};
+```
+
 
 ### System Prompts
 The system uses a carefully crafted prompt structure to ensure consistent and high-quality responses:
@@ -178,4 +317,3 @@ async function testConnection() {
    - Verify UI updates
    - Check error displays
 
-[Rest of the document remains unchanged...]
