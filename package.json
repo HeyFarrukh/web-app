@@ -10,6 +10,7 @@
     "@react-oauth/google": "^0.12.1",
     "@supabase/supabase-js": "^2.39.3",
     "dotenv": "^16.4.7",
+    "esbuild": "^0.25.0",
     "firebase": "^10.8.0",
     "firebase-admin": "^12.0.0",
     "firebase-functions": "^4.6.0",
