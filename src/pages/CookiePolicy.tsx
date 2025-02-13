@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 
 export const CookiePolicy: React.FC = () => {
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50/30 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
       <Helmet>
         <title>Cookie Policy - ApprenticeWatch</title>
         <meta name="title" content="Cookie Policy - ApprenticeWatch" />
