@@ -13,6 +13,7 @@ export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
+    <div className="pb-12 bg-orange-50 dark:bg-gray-900">
     <nav className={`
       fixed left-1/2 -translate-x-1/2 top-4 
       w-[850px] max-w-[95%] 
@@ -104,5 +105,6 @@ export const Navbar = () => {
         onThemeToggle={toggleTheme}
       />
     </nav>
+    </div>
   );
 };

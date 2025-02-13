@@ -21,6 +21,7 @@ import { Analytics } from './services/analytics/analytics';
 import { useAnalytics } from './hooks/useAnalytics';
 import { AuthCallback } from './components/auth/AuthCallBack';
 import { PrivateRoute } from './components/auth/PrivateRoute'; // Import PrivateRoute
+import { CookiePolicy } from './pages/CookiePolicy';
 
 const AppRoutes = () => {
   useAnalytics();
@@ -53,6 +54,7 @@ const AppRoutes = () => {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/team" element={<Team />} />
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
