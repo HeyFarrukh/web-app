@@ -14,6 +14,7 @@ import { ApprenticeshipDetail } from './pages/ApprenticeshipDetail';
 import { OptimiseCV } from './pages/OptimiseCV';
 import { Privacy } from './pages/Privacy';
 import { TermsOfService } from './pages/TermsOfService';
+//import { CVGuide } from './pages/CVGuide';
 import { Team } from './pages/Team';
 import { NotFound } from './pages/NotFound';
 import { ScrollToTop } from './components/navigation/ScrollToTop';
@@ -55,6 +56,7 @@ const AppRoutes = () => {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/team" element={<Team />} />
         <Route path="/cookie-policy" element={<CookiePolicy />} />
+        <Route path="/cv-guide" element={<CVGuide />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
