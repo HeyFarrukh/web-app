@@ -14,7 +14,7 @@ import { ApprenticeshipDetail } from './pages/ApprenticeshipDetail';
 import { OptimiseCV } from './pages/OptimiseCV';
 import { Privacy } from './pages/Privacy';
 import { TermsOfService } from './pages/TermsOfService';
-//import { CVGuide } from './pages/CVGuide';
+import { CVGuide } from './pages/CVGuide';
 import { Team } from './pages/Team';
 import { NotFound } from './pages/NotFound';
 import { ScrollToTop } from './components/navigation/ScrollToTop';
