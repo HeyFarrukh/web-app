@@ -17,7 +17,7 @@ const footerSections = [
     title: 'Resources',
     links: [
       { label: 'Apprenticeships', href: '/listings' },
-      { label: 'CV Tips', href: '/cv-tips' },
+      { label: 'CV Tips', href: '/cv-guide' },
       { label: 'Success Stories', href: '/success-stories' },
       { label: 'FAQ', href: '/faq' }
     ]

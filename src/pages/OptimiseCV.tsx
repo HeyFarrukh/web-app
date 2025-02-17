@@ -37,6 +37,7 @@ const LoadingMessages = [
   "Giving your CV main character energy... ✨",
   "This about to be fire! 🙏",
   "Analysing your CV (respectfully)... 👀",
+  "On the edge of finishing your CV 💦"
 ];
 
 interface WarningState {
