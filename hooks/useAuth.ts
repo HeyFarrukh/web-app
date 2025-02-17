@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import supabase from '@/config/supabase';
-import { Analytics } from '@/services/analytics/analytics';
-import { googleAuthService } from '@/services/auth/googleAuthService'; // Import
+import { googleAuthService } from '@/services/auth/googleAuthService';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js'; 
 
 interface UserData {
   id: string;
@@ -21,98 +21,91 @@ export const useAuth = () => {
     let mounted = true;
     console.log('[useAuth] Hook initialized');
 
-    const checkAuth = async () => {
-      console.log('[useAuth] Starting initial auth check...');
-      setIsLoading(true);
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error('[useAuth] Initial session error:', error);
-        }
-
-        if (mounted) {
-          if (session?.user) {
-            console.log('[useAuth] User found in initial session');
-            setIsAuthenticated(true);
-            // Load from localStorage if available
-            const storedData = localStorage.getItem('user_data');
-            if (storedData) {
-              setUserData(JSON.parse(storedData));
-              setIsLoading(false); // Set loading to false if data is in localStorage
-            } else {
-              // Fetch and save (upsert)
-              await fetchAndUpsertUserProfile(session.user.id); // Use ID from initial session
-            }
-          } else {
-            console.log('[useAuth] No user in initial session');
-            setIsAuthenticated(false);
-            setUserData(null);
-            setIsLoading(false);
-          }
-        }
-      } catch (error) {
-        console.error('[useAuth] Initial auth check failed:', error);
-        if (mounted) {
-          setIsAuthenticated(false);
-          setUserData(null);
-          setIsLoading(false);
-        }
-      }
-    };
-
     const fetchAndUpsertUserProfile = async (userId: string) => {
-      setIsLoading(true); // Set loading to true before fetching
       try {
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-          if (userError || !user) {
-              console.error("[useAuth] Error fetching user:", userError);
-              return; // Exit if user fetch fails
-          }
-          const userData: UserData = {
-              id: user.id,
-              email: user.email!,
-              name: user.user_metadata?.full_name || user.user_metadata?.name || null,
-              picture: user.user_metadata?.avatar_url || null,
-              last_login: new Date().toISOString(),
-          };
-          // Use googleAuthService for upsert.
-          await googleAuthService.upsertUserData(userData)
+        if (userError || !user) {
+          console.error("[useAuth] Error fetching user:", userError);
+          return;
+        }
+        const userData: UserData = {
+          id: user.id,
+          email: user.email!,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+          picture: user.user_metadata?.avatar_url || null,
+          last_login: new Date().toISOString(),
+        };
+        await googleAuthService.upsertUserData(userData);
 
-        localStorage.setItem('user_data', JSON.stringify(userData));
         if (mounted) {
           setUserData(userData);
         }
       } catch (fetchError) {
         console.error('[useAuth] Error fetching or upserting user profile', fetchError);
-      } finally {
-        setIsLoading(false); // Set loading to false after fetch (success or failure)
       }
     };
 
-    checkAuth(); // Initial check
-
     console.log('[useAuth] Setting up auth state change listener');
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[useAuth] Auth state changed:', event);
 
-      if (!mounted) {
-        console.log('[useAuth] Component unmounted, ignoring auth state change');
-        return;
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
 
-      if (event === 'SIGNED_IN' && session?.user) {
-        console.log('[useAuth] User signed in, fetching and saving profile');
-        setIsAuthenticated(true);
-        fetchAndUpsertUserProfile(session.user.id); // Call fetchAndUpsertUserProfile
+      if (!mounted) return;
 
-      } else if (event === 'SIGNED_OUT') {
-        console.log('[useAuth] User signed out, clearing state');
-        setIsAuthenticated(false);
-        setUserData(null);
-        localStorage.removeItem('user_data');
-      }
+      console.log('[useAuth] Auth state changed:', event, session);
+
+        switch (event) {
+          case 'INITIAL_SESSION':
+          case 'SIGNED_IN':
+            if (session?.user) {
+              setIsAuthenticated(true);
+              fetchAndUpsertUserProfile(session.user.id)
+                .finally(() => setIsLoading(false));
+            } else {
+              setIsAuthenticated(false);
+              setUserData(null);
+              setIsLoading(false);
+            }
+            break;
+          case 'SIGNED_OUT':
+            setIsAuthenticated(false);
+            setUserData(null);
+            setIsLoading(false);
+            break;
+          case 'TOKEN_REFRESHED':
+            // Supabase handles refresh.  Update user data if needed.
+            if (session?.user) {
+                setIsAuthenticated(true);
+                fetchAndUpsertUserProfile(session.user.id).finally(() => {
+                  if(mounted) setIsLoading(false)
+                });
+              }
+            break;
+          // Since you only use Google OAuth, these are less critical, but it's good practice to handle them.
+          case 'USER_UPDATED':
+             if (session?.user) {
+                setIsAuthenticated(true);
+                fetchAndUpsertUserProfile(session.user.id).finally(() => { if(mounted) setIsLoading(false)});
+              } else {
+                // If USER_UPDATED with no session, likely a sign-out scenario
+                setIsAuthenticated(false);
+                setUserData(null);
+                setIsLoading(false)
+              }
+              break;
+          default:
+            // Handle any unexpected event, don't sign out
+            console.log('[useAuth] Unhandled auth event:', event);
+            if (session?.user) {
+              //If session exists keep the user logged in
+              setIsAuthenticated(true);
+              fetchAndUpsertUserProfile(session.user.id).finally(() => { if(mounted) setIsLoading(false)});
+            } else {
+              setIsAuthenticated(false)
+              setUserData(null)
+              setIsLoading(false)
+            }
+        }
     });
 
     return () => {
