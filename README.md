@@ -8,7 +8,7 @@
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="React" width="50" height="50"/> React
 
-<img src="https://vitejs.dev/logo.svg" alt="Vite" width="50" height="50"/> Vite
+<img src="https://images-cdn.openxcell.com/wp-content/uploads/2024/07/24154156/dango-inner-2.webp" alt="NextJS" height="50"/> NextJS
 
 <img src="https://avatars.githubusercontent.com/u/54469796?s=400&v=4" alt="Supabase" width="50" height="50"/> Supabase
 
