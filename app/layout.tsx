@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from '@/services/analytics/analytics';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -128,6 +128,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <SpeedInsights />
       </body>
     </html>
   );
