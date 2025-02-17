@@ -3,15 +3,17 @@ import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+
 import { Analytics } from '@/services/analytics/analytics';
 
 const inter = Inter({ subsets: ['latin'] });
-const playfair = Playfair_Display({ 
+const playfair = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-playfair',
-  display: 'swap'
+  display: 'swap',
+  weight: ['500'], 
+  style: ['italic', 'normal']
 });
-
 export const metadata: Metadata = {
   metadataBase: new URL('https://apprenticewatch.com'),
   title: {
