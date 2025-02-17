@@ -32,7 +32,7 @@ export const CVGuide = () => {
       </Helmet>
 
       {/* Hero Section */}
-      <motion.section {...fadeIn} className="px-4 py-16 text-center bg-gradient-to-r from-blue-500 to-purple-600">
+      <motion.section {...fadeIn} className="px-4 py-32 text-center bg-gradient-to-r from-blue-500 to-purple-600 -mb-12">
         <h1 className="text-4xl font-bold text-white mb-4">CV Writing Guide</h1>
         <p className="text-xl text-white">"The most important thing about a CV is making a strong first impression"</p>
       </motion.section>
@@ -595,7 +595,7 @@ export const CVGuide = () => {
                 </h3>
                 <p><a href="https://www.youtube.com/watch?v=Tt08KmFfIYQ" className="text-blue-600 hover:text-red-400">Write an Incredible Resume: 5 Golden Rules!</a></p>
                 <p><a href="https://www.ncl.ac.uk/careers/making-applications/applications/cvs/" className="text-blue-600 hover:text-blue-800 underline">How to write a CV | Newcastle University</a></p>
-                <p className ="text-gray-700 dark:text-gray-300"><a href="https://www.telegraph.co.uk/money/jobs/how-to-write-cv/" className="text-blue-600 hover:text-blue-800 underline">How to write a CV |<i>The Telegraph</i></a> (Sign-Up Required)</p>
+                <p className ="text-gray-700 dark:text-gray-300"><a href="https://www.telegraph.co.uk/money/jobs/how-to-write-cv/" className="text-blue-600 hover:text-blue-800 underline">How to write a CV |<i> The Telegraph</i></a> (Sign-Up Required)</p>
               </div>
             </div>
           }
