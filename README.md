@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ApprenticeWatch
 
-## Getting Started
+![ApprenticeWatch Branding](https://apprenticewatch.com/media/apprentice-watch.png)
 
-First, run the development server:
+**ApprenticeWatch** is a platform designed to make it easy for users to discover apprenticeships in one place, save time, and access valuable features like AI-powered CV optimisation (coming soon!). Our mission is to help you find the right apprenticeship opportunities quickly and efficiently.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun run dev
-```
+## Technologies Used
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="React" width="50" height="50"/> React
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<img src="https://vitejs.dev/logo.svg" alt="Vite" width="50" height="50"/> Vite
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+<img src="https://avatars.githubusercontent.com/u/54469796?s=400&v=4" alt="Supabase" width="50" height="50"/> Supabase
 
-## Learn More
+<img src="https://firebase.google.com/static/images/brand-guidelines/logo-logomark.png" alt="Firebase" width="50" height="50"/> Firebase
 
-To learn more about Next.js, take a look at the following resources:
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Google_Gemini_logo.svg/2560px-Google_Gemini_logo.svg.png" alt="Google Gemini" height="50"/> 
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- Discover apprenticeships from top companies across the UK.
+- Save time by finding opportunities all in one place.
+- Get AI-powered CV optimisation.
+- Real-time notifications about new apprenticeships.
 
-## Deploy on Vercel
+## Contribution
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Feel free to explore the code, suggest improvements, or contribute to the development of ApprenticeWatch. However, please note that **personal branding, media, and assets associated with ApprenticeWatch are owned by ApprenticeWatch and its rightful owners**. These assets are not to be used as your own, redistributed, or modified for commercial purposes without explicit permission.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Legal
+
+Please review our [Terms of Service](https://apprenticewatch.com/terms) and [Privacy Policy](https://apprenticewatch.com/privacy) for more details on using the platform.
+
+## License
+
+This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/), which allows you to explore and modify the code, but **does not permit commercial use** or the redistribution of branding and media.
+
+---
+
+For more information, visit our website at [apprenticewatch.com](https://apprenticewatch.com).
