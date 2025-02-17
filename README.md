@@ -10,6 +10,8 @@
 
 <img src="https://images-cdn.openxcell.com/wp-content/uploads/2024/07/24154156/dango-inner-2.webp" alt="NextJS" height="50"/> NextJS
 
+<img src="https://github.com/user-attachments/assets/e9a0757e-1c79-4bf5-8f85-7f027147d7fa" alt="Vercel" height="50"/> Vercel
+
 <img src="https://avatars.githubusercontent.com/u/54469796?s=400&v=4" alt="Supabase" width="50" height="50"/> Supabase
 
 <img src="https://firebase.google.com/static/images/brand-guidelines/logo-logomark.png" alt="Firebase" width="50" height="50"/> Firebase
