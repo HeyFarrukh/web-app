@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto; /* This ensures main content takes up available space */
+}
+
+footer {
+  flex-shrink: 0; /* This prevents the footer from shrinking */
+}
+
+/* Scroll Animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 40s linear infinite;
+  display: inline-flex;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Slow Spin Animation */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  h2 {
+    font-size: 1.75rem !important;
+  }
+  
+  .grid {
+    gap: 1rem !important;
+  }
+}
+
+/* Mobile Touch Handling */
+@media (hover: none) {
+  .hover\:scale-105:hover {
+    transform: none !important;
+  }
+}
+
+/* Prose Customization */
+.prose {
+  max-width: none !important;
+}
+
+.prose h1 {
+  @apply text-4xl font-bold text-gray-900 dark:text-white mb-8;
+}
+
+.prose h2 {
+  @apply text-2xl font-semibold text-orange-600 dark:text-orange-400 mt-8 mb-4;
+}
+
+.prose h3 {
+  @apply text-xl font-medium text-gray-800 dark:text-gray-200 mt-6 mb-3;
+}
+
+.prose p {
+  @apply text-gray-700 dark:text-gray-300 mb-4;
+}
+
+.prose strong {
+  @apply text-gray-900 dark:text-white;
+}
+
+.prose ul, .prose ol {
+  @apply text-gray-700 dark:text-gray-300 my-4;
+}
+
+.prose li {
+  @apply mb-2;
+}
+
+.prose li::marker {
+  @apply text-orange-500 dark:text-orange-400;
+}
+
+.prose a {
+  @apply text-orange-600 dark:text-orange-400 no-underline hover:text-orange-700 dark:hover:text-orange-300;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-orange-500 pl-4 italic;
+}
