@@ -56,7 +56,7 @@ class VacancyService {
     };
   }
 
-  async getTotalActiveVacancies(): Promise<number> {
+    async getTotalActiveVacancies(): Promise<number> {
     try {
       console.log('[VacancyService] Fetching total active vacancies');
       const now = new Date().toISOString();
@@ -118,22 +118,21 @@ class VacancyService {
         if (!isNaN(levelNumber)) {
           query = query.eq('course_level', levelNumber);
         } else {
-          console.warn(`[VacancyService] Invalid level filter value: ${filters.level}`); //Still a good idea.
+          console.warn(`[VacancyService] Invalid level filter value: ${filters.level}`);
         }
       }
 
-      // Pagination: Calculate 'from' and 'to' *after* applying filters.  Crucial change
       if (isNaN(page) || page < 1) {
         page = 1;
       }
       if (isNaN(pageSize) || pageSize < 1) {
-        pageSize = 10; // Or some other reasonable default
+        pageSize = 10;
       }
 
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       query = query.range(from, to);
-      query = query.order('posted_date', { ascending: false }); //Order needs to be here
+      query = query.order('posted_date', { ascending: false });
 
       const { data, error, count } = await query;
 
@@ -144,7 +143,7 @@ class VacancyService {
       console.log("[VacancyService] Supabase Data:", data);
       return {
         vacancies: data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [],
-        total: count || 0 // Use count from the query, which is now filtered.
+        total: count || 0
       };
     } catch (error: any) {
       console.error("Error in getVacancies:", error);
@@ -152,25 +151,34 @@ class VacancyService {
     }
   }
 
-  async getVacancyById(id: string): Promise<ListingType> {
+  async getVacancyById(id: string): Promise<ListingType | null> { // Return type changed!
     try {
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .select('*')
-        .eq('id', id)
-        .single();
+        .eq('id', id); // Removed .single()!
 
-      if (error) throw error;
-      if (!data) throw new Error('Vacancy not found');
+      if (error) {
+        console.error('Supabase error:', error); // Log the Supabase error
+        throw error; // Re-throw for higher-level handling (if needed)
+      }
 
-      return this.transformListing(data as SupabaseListing);
+      // ✅  Handle the case where no data is returned.
+      if (!data || data.length === 0) {
+        console.log(`[VacancyService] No vacancy found for ID: ${id}`);
+        return null; // Return null if no listing is found.
+      }
+
+      // If data is found, transform and return it.
+      return this.transformListing(data[0] as SupabaseListing);
+
     } catch (error) {
       console.error('Error getting vacancy by ID:', error);
-      throw error;
+      throw error; // Or return null, depending on how you want to handle errors
     }
   }
 
-  async getAvailableLocations(): Promise<string[]> {
+    async getAvailableLocations(): Promise<string[]> {
     try {
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
@@ -212,19 +220,17 @@ class VacancyService {
     }
   }
 
-  // --- CRUD Methods with Revalidation ---
-
-  async addVacancy(newVacancyData: any) { // Replace 'any' with a proper type
+    async addVacancy(newVacancyData: any) {
     const { data, error } = await supabase.from(this.TABLE_NAME).insert([newVacancyData]).select();
     if (error) {
       console.error("Error adding vacancy:", error);
       throw error;
     }
     await this.revalidateCache(`/apprenticeships`);
-    return data; // Usually a good idea to return the added data
+    return data;
   }
 
-  async updateVacancy(id: string, updatedVacancyData: any) { // Replace 'any'
+  async updateVacancy(id: string, updatedVacancyData: any) {
     const { data, error } = await supabase
       .from(this.TABLE_NAME)
       .update(updatedVacancyData)
@@ -236,7 +242,7 @@ class VacancyService {
       throw error;
     }
     await this.revalidateCache(`/apprenticeships/${id}`);
-    await this.revalidateCache(`/apprenticeships`); // Revalidate main page too
+    await this.revalidateCache(`/apprenticeships`);
     return data;
   }
 
@@ -252,35 +258,32 @@ class VacancyService {
     }
     await this.revalidateCache(`/apprenticeships`);
   }
-
-  // Private method to handle revalidation
-  private async revalidateCache(path: string) {
+    private async revalidateCache(path: string) {
     if (!this.REVALIDATION_SECRET) {
-      console.error("REVALIDATION_SECRET_TOKEN is not set.");
-      return; // Or throw an error, depending on your needs
+        console.error("REVALIDATION_SECRET_TOKEN is not set.");
+        return;
     }
     try {
-      const res = await fetch(`${this.REVALIDATION_URL}?path=${path}&secret=${this.REVALIDATION_SECRET}`, {
-        method: 'POST'
-      });
+        const res = await fetch(`${this.REVALIDATION_URL}?path=${path}&secret=${this.REVALIDATION_SECRET}`, {
+            method: 'POST'
+        });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error(`Revalidation failed for ${path}. Status: ${res.status} ${res.statusText}. Response: ${errorText}`);
-        return;
-      }
-      const json = await res.json();  //Try to get JSON, even on error (it might contain useful info).
-      if (json.revalidated) {
-        console.log(`Successfully revalidated path: ${path}`);
-      } else {
-        console.error(`Revalidation failed (but no server error) for ${path}. Response:`, json); //Log full response
-      }
+        if (!res.ok) {
+           const errorText = await res.text();
+           console.error(`Revalidation failed for ${path}. Status: ${res.status} ${res.statusText}. Response: ${errorText}`);
+          return;
+        }
+        const json = await res.json();
+        if (json.revalidated) {
+            console.log(`Successfully revalidated path: ${path}`);
+        } else {
+             console.error(`Revalidation failed (but no server error) for ${path}. Response:`, json);
+        }
 
     } catch (error) {
-      console.error(`Error revalidating path: ${path}`, error);
+        console.error(`Error revalidating path: ${path}`, error);
     }
-  }
-
+}
 }
 
 export const vacancyService = new VacancyService();
