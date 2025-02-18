@@ -6,15 +6,11 @@ import { vacancyService } from '@/services/supabase/vacancyService';
 
 interface ListingsFilterProps {
   onFilterChange: (filters: { search: string; location: string; level: string }) => void;
-  initialFilters: { search: string; location: string; level: string }; // Add this
+  initialFilters: { search: string; location: string; level: string };
 }
 
-export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange }) => {
-  const [filters, setFilters] = useState({
-    search: '',
-    location: '',
-    level: ''
-  });
+export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, initialFilters }) => {
+  const [filters, setFilters] = useState(initialFilters);
   const [locations, setLocations] = useState<string[]>([]);
   const [levels, setLevels] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,16 +38,9 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange }
   const handleFilterChange = (field: string, value: string) => {
     const newFilters = { ...filters, [field]: value };
     setFilters(newFilters);
-    onFilterChange(newFilters);
+    onFilterChange(newFilters); // Call onFilterChange directly
   };
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      onFilterChange(filters);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [filters.search, onFilterChange]);
+  // Removed the useEffect with the timeout
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md space-y-4">
@@ -65,13 +54,13 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange }
         />
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
       </div>
-      
+
       <div className="space-y-4">
         <div>
           <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Location
           </label>
-          <select 
+          <select
             id="location"
             value={filters.location}
             onChange={(e) => handleFilterChange('location', e.target.value)}
@@ -84,12 +73,12 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange }
             ))}
           </select>
         </div>
-        
+
         <div>
           <label htmlFor="level" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Apprenticeship Level
           </label>
-          <select 
+          <select
             id="level"
             value={filters.level}
             onChange={(e) => handleFilterChange('level', e.target.value)}
