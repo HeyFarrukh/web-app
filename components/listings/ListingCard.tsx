@@ -41,9 +41,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6">
       <div className="flex items-start space-x-4">
-        <img 
-          src={getLogoUrl(listing.employerName)} 
-          alt={listing.employerName} 
+        <img
+          src={getLogoUrl(listing.employerName)}
+          alt={listing.employerName}
           className="w-16 h-16 rounded-lg object-contain bg-white"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
@@ -95,13 +95,6 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           </div>
         </div>
       </div>
-
-      <a 
-        href="https://logo.dev" 
-        className="invisible"
-      >
-        Logos provided by Logo.dev
-      </a>
     </div>
   );
 };

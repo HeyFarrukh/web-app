@@ -4,18 +4,21 @@ import { ListingType } from '@/types/listing';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { Metadata } from 'next';
 
-// Pre-render all apprenticeship details at build time
+export const dynamicParams = false; //  Force dynamic rendering
+
+
 export async function generateStaticParams() {
-  const vacancies = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} });
-  return vacancies.vacancies.map(vacancy => ({
-    id: vacancy.id.toString() 
+  const {vacancies} = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} }); //Fetch ALL at build time
+  return vacancies.map((vacancy) => ({
+      id: vacancy.id.toString(),
   }));
 }
+// Remove generateStaticParams entirely
 
-// ✅ Keep generateMetadata 
+// ✅ Keep generateMetadata
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const listing = await vacancyService.getVacancyById(params.id);
-  
+
   return {
     title: `${listing.title} at ${listing.employerName} | ApprenticeWatch`,
     description: `Apply for the ${listing.title} apprenticeship at ${listing.employerName}. Level ${listing.course.level} opportunity in ${listing.address.addressLine3}. Learn more and apply now on ApprenticeWatch.`,
@@ -82,7 +85,6 @@ export default async function ApprenticeshipDetail({ params }: { params: { id: s
     return (
       <>
         <ListingDetails listing={listing} />
-        {/* ✅ Inject JSON-LD into the page */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingSchema) }} />
       </>
     );

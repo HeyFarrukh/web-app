@@ -4,6 +4,8 @@ import { Analytics } from '@/services/analytics/analytics';
 
 class VacancyService {
   private readonly TABLE_NAME = 'vacancies';
+  private readonly REVALIDATION_URL = '/api/revalidate';
+  private readonly REVALIDATION_SECRET = process.env.REVALIDATION_SECRET_TOKEN;
 
   private transformListing(listing: SupabaseListing): ListingType {
     return {
@@ -92,14 +94,15 @@ class VacancyService {
     };
   }) {
     try {
+      console.log("[VacancyService] getVacancies called with filters:", filters);
       const now = new Date().toISOString();
       let query = supabase
         .from(this.TABLE_NAME)
         .select('*', { count: 'exact' })
         .eq('is_active', true)
-        .gt('closing_date', now)
-        .order('posted_date', { ascending: false });
+        .gt('closing_date', now);
 
+      // Apply filters *BEFORE* pagination
       if (filters.search) {
         query = query.or(
           `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%`
@@ -107,26 +110,44 @@ class VacancyService {
       }
 
       if (filters.location) {
-        query = query.eq('address_line3', filters.location);
+        query = query.ilike('address_line3', `%${filters.location}%`);
       }
 
       if (filters.level) {
-        query = query.eq('course_level', parseInt(filters.level));
+        const levelNumber = parseInt(filters.level, 10);
+        if (!isNaN(levelNumber)) {
+          query = query.eq('course_level', levelNumber);
+        } else {
+          console.warn(`[VacancyService] Invalid level filter value: ${filters.level}`); //Still a good idea.
+        }
+      }
+
+      // Pagination: Calculate 'from' and 'to' *after* applying filters.  Crucial change
+      if (isNaN(page) || page < 1) {
+        page = 1;
+      }
+      if (isNaN(pageSize) || pageSize < 1) {
+        pageSize = 10; // Or some other reasonable default
       }
 
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
+      query = query.range(from, to);
+      query = query.order('posted_date', { ascending: false }); //Order needs to be here
 
-      const { data, error, count } = await query.range(from, to);
+      const { data, error, count } = await query;
 
-      if (error) throw error;
-
+      if (error) {
+        console.error("[VacancyService] Supabase query error:", error);
+        throw error;
+      }
+      console.log("[VacancyService] Supabase Data:", data);
       return {
         vacancies: data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [],
-        total: count || 0
+        total: count || 0 // Use count from the query, which is now filtered.
       };
-    } catch (error) {
-      console.error('Error getting vacancies:', error);
+    } catch (error: any) {
+      console.error("Error in getVacancies:", error);
       throw error;
     }
   }
@@ -179,15 +200,87 @@ class VacancyService {
 
       const levels = Array.from(new Set(
         data?.map(d => d.course_level)
-          .filter(level => level != null)
+          .filter(level => level != null)  // Filter out null values
+          .map(level => parseInt(level, 10)) // Parse to number
+          .filter(level => !isNaN(level))  // Remove any NaN values that got through.
       )) as number[];
-      
+
       return levels.sort((a, b) => a - b);
     } catch (error) {
       console.error('Error getting available levels:', error);
       throw error;
     }
   }
+
+  // --- CRUD Methods with Revalidation ---
+
+  async addVacancy(newVacancyData: any) { // Replace 'any' with a proper type
+    const { data, error } = await supabase.from(this.TABLE_NAME).insert([newVacancyData]).select();
+    if (error) {
+      console.error("Error adding vacancy:", error);
+      throw error;
+    }
+    await this.revalidateCache(`/apprenticeships`);
+    return data; // Usually a good idea to return the added data
+  }
+
+  async updateVacancy(id: string, updatedVacancyData: any) { // Replace 'any'
+    const { data, error } = await supabase
+      .from(this.TABLE_NAME)
+      .update(updatedVacancyData)
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      console.error("Error updating vacancy:", error);
+      throw error;
+    }
+    await this.revalidateCache(`/apprenticeships/${id}`);
+    await this.revalidateCache(`/apprenticeships`); // Revalidate main page too
+    return data;
+  }
+
+  async deleteVacancy(id: string) {
+    const { error } = await supabase
+      .from(this.TABLE_NAME)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error("Error deleting vacancy:", error);
+      throw error;
+    }
+    await this.revalidateCache(`/apprenticeships`);
+  }
+
+  // Private method to handle revalidation
+  private async revalidateCache(path: string) {
+    if (!this.REVALIDATION_SECRET) {
+      console.error("REVALIDATION_SECRET_TOKEN is not set.");
+      return; // Or throw an error, depending on your needs
+    }
+    try {
+      const res = await fetch(`${this.REVALIDATION_URL}?path=${path}&secret=${this.REVALIDATION_SECRET}`, {
+        method: 'POST'
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`Revalidation failed for ${path}. Status: ${res.status} ${res.statusText}. Response: ${errorText}`);
+        return;
+      }
+      const json = await res.json();  //Try to get JSON, even on error (it might contain useful info).
+      if (json.revalidated) {
+        console.log(`Successfully revalidated path: ${path}`);
+      } else {
+        console.error(`Revalidation failed (but no server error) for ${path}. Response:`, json); //Log full response
+      }
+
+    } catch (error) {
+      console.error(`Error revalidating path: ${path}`, error);
+    }
+  }
+
 }
 
 export const vacancyService = new VacancyService();
