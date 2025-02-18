@@ -6,7 +6,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 export const dynamicParams = false;
-export const revalidate = 3660;
+export const revalidate = 0;
 
 export async function generateStaticParams() {
   const { vacancies } = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} });
