@@ -4,6 +4,8 @@ import { Analytics } from '@/services/analytics/analytics';
 
 class VacancyService {
   private readonly TABLE_NAME = 'vacancies';
+  private readonly REVALIDATION_URL = '/api/revalidate';
+  private readonly REVALIDATION_SECRET = process.env.REVALIDATION_SECRET_TOKEN;
 
   private transformListing(listing: SupabaseListing): ListingType {
     return {
@@ -54,7 +56,7 @@ class VacancyService {
     };
   }
 
-  async getTotalActiveVacancies(): Promise<number> {
+    async getTotalActiveVacancies(): Promise<number> {
     try {
       console.log('[VacancyService] Fetching total active vacancies');
       const now = new Date().toISOString();
@@ -92,14 +94,15 @@ class VacancyService {
     };
   }) {
     try {
+      console.log("[VacancyService] getVacancies called with filters:", filters);
       const now = new Date().toISOString();
       let query = supabase
         .from(this.TABLE_NAME)
         .select('*', { count: 'exact' })
         .eq('is_active', true)
-        .gt('closing_date', now)
-        .order('posted_date', { ascending: false });
+        .gt('closing_date', now);
 
+      // Apply filters *BEFORE* pagination
       if (filters.search) {
         query = query.or(
           `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%`
@@ -107,49 +110,75 @@ class VacancyService {
       }
 
       if (filters.location) {
-        query = query.eq('address_line3', filters.location);
+        query = query.ilike('address_line3', `%${filters.location}%`);
       }
 
       if (filters.level) {
-        query = query.eq('course_level', parseInt(filters.level));
+        const levelNumber = parseInt(filters.level, 10);
+        if (!isNaN(levelNumber)) {
+          query = query.eq('course_level', levelNumber);
+        } else {
+          console.warn(`[VacancyService] Invalid level filter value: ${filters.level}`);
+        }
+      }
+
+      if (isNaN(page) || page < 1) {
+        page = 1;
+      }
+      if (isNaN(pageSize) || pageSize < 1) {
+        pageSize = 10;
       }
 
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
+      query = query.range(from, to);
+      query = query.order('posted_date', { ascending: false });
 
-      const { data, error, count } = await query.range(from, to);
+      const { data, error, count } = await query;
 
-      if (error) throw error;
-
+      if (error) {
+        console.error("[VacancyService] Supabase query error:", error);
+        throw error;
+      }
+      console.log("[VacancyService] Supabase Data:", data);
       return {
         vacancies: data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [],
         total: count || 0
       };
-    } catch (error) {
-      console.error('Error getting vacancies:', error);
+    } catch (error: any) {
+      console.error("Error in getVacancies:", error);
       throw error;
     }
   }
 
-  async getVacancyById(id: string): Promise<ListingType> {
+  async getVacancyById(id: string): Promise<ListingType | null> { // Return type changed!
     try {
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .select('*')
-        .eq('id', id)
-        .single();
+        .eq('id', id); // Removed .single()!
 
-      if (error) throw error;
-      if (!data) throw new Error('Vacancy not found');
+      if (error) {
+        console.error('Supabase error:', error); // Log the Supabase error
+        throw error; // Re-throw for higher-level handling (if needed)
+      }
 
-      return this.transformListing(data as SupabaseListing);
+      // ✅  Handle the case where no data is returned.
+      if (!data || data.length === 0) {
+        console.log(`[VacancyService] No vacancy found for ID: ${id}`);
+        return null; // Return null if no listing is found.
+      }
+
+      // If data is found, transform and return it.
+      return this.transformListing(data[0] as SupabaseListing);
+
     } catch (error) {
       console.error('Error getting vacancy by ID:', error);
-      throw error;
+      throw error; // Or return null, depending on how you want to handle errors
     }
   }
 
-  async getAvailableLocations(): Promise<string[]> {
+    async getAvailableLocations(): Promise<string[]> {
     try {
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
@@ -179,15 +208,82 @@ class VacancyService {
 
       const levels = Array.from(new Set(
         data?.map(d => d.course_level)
-          .filter(level => level != null)
+          .filter(level => level != null)  // Filter out null values
+          .map(level => parseInt(level, 10)) // Parse to number
+          .filter(level => !isNaN(level))  // Remove any NaN values that got through.
       )) as number[];
-      
+
       return levels.sort((a, b) => a - b);
     } catch (error) {
       console.error('Error getting available levels:', error);
       throw error;
     }
   }
+
+    async addVacancy(newVacancyData: any) {
+    const { data, error } = await supabase.from(this.TABLE_NAME).insert([newVacancyData]).select();
+    if (error) {
+      console.error("Error adding vacancy:", error);
+      throw error;
+    }
+    await this.revalidateCache(`/apprenticeships`);
+    return data;
+  }
+
+  async updateVacancy(id: string, updatedVacancyData: any) {
+    const { data, error } = await supabase
+      .from(this.TABLE_NAME)
+      .update(updatedVacancyData)
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      console.error("Error updating vacancy:", error);
+      throw error;
+    }
+    await this.revalidateCache(`/apprenticeships/${id}`);
+    await this.revalidateCache(`/apprenticeships`);
+    return data;
+  }
+
+  async deleteVacancy(id: string) {
+    const { error } = await supabase
+      .from(this.TABLE_NAME)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error("Error deleting vacancy:", error);
+      throw error;
+    }
+    await this.revalidateCache(`/apprenticeships`);
+  }
+    private async revalidateCache(path: string) {
+    if (!this.REVALIDATION_SECRET) {
+        console.error("REVALIDATION_SECRET_TOKEN is not set.");
+        return;
+    }
+    try {
+        const res = await fetch(`${this.REVALIDATION_URL}?path=${path}&secret=${this.REVALIDATION_SECRET}`, {
+            method: 'POST'
+        });
+
+        if (!res.ok) {
+           const errorText = await res.text();
+           console.error(`Revalidation failed for ${path}. Status: ${res.status} ${res.statusText}. Response: ${errorText}`);
+          return;
+        }
+        const json = await res.json();
+        if (json.revalidated) {
+            console.log(`Successfully revalidated path: ${path}`);
+        } else {
+             console.error(`Revalidation failed (but no server error) for ${path}. Response:`, json);
+        }
+
+    } catch (error) {
+        console.error(`Error revalidating path: ${path}`, error);
+    }
+}
 }
 
 export const vacancyService = new VacancyService();

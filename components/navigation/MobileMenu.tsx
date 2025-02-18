@@ -76,17 +76,19 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <button
-                      onClick={() => handleNavigation(to)}
-                      className={`w-full text-left py-4 px-4 rounded-xl ${
-                        special
-                          ? 'bg-orange-500/10 text-orange-500'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-800'
-                      } transition-colors flex items-center space-x-2`}
-                    >
-                      {Icon && <Icon className="w-5 h-5" />}
-                      <span className="text-lg font-medium">{label}</span>
-                    </button>
+                    <Link href={to}>
+                      <button
+                        onClick={() => handleNavigation(to)}
+                        className={`w-full text-left py-4 px-4 rounded-xl ${
+                          special
+                            ? 'bg-orange-500/10 text-orange-500'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-800'
+                        } transition-colors flex items-center space-x-2`}
+                      >
+                        {Icon && <Icon className="w-5 h-5" />}
+                        <span className="text-lg font-medium">{label}</span>
+                      </button>
+                    </Link>
                   </motion.div>
                 ))}
               </nav>
