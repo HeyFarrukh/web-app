@@ -8,7 +8,7 @@ import { Metadata } from 'next';
 export const dynamicParams = false;
 
 // ✅ revalidate: Set to 24 hours (86400 seconds).
-export const revalidate = 86400;
+export const revalidate = 0;
 
 // ✅ Keep generateStaticParams:  Fetch IDs at build time.
 export async function generateStaticParams() {
