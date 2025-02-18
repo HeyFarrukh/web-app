@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Building2, MapPin, GraduationCap, 
   Clock, Calendar, Timer, Mail, Phone, Globe, Users, 
-  Check, X, Briefcase, PoundSterling 
+  Check, X, Briefcase, PoundSterling, Clipboard 
 } from 'lucide-react';
 import { ListingType } from '@/types/listing';
 import { formatDate } from '@/utils/dateUtils';
@@ -175,30 +175,39 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             </section>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6 sm:space-y-8">
+            {/* Sidebar */}
+            <div className="space-y-6 sm:space-y-8">
             {/* Application Details */}
             <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Application Details
+              Application Details
               </h2>
               <div className="space-y-4">
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Posted</div>
-                  <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.postedDate)}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Closing Date</div>
-                  <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.closingDate)}</div>
-                </div>
+              <div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Posted</div>
+                <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.postedDate)}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">Closing Date</div>
+                <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.closingDate)}</div>
+              </div>
+              <div className="flex items-center space-x-2">
                 <a
-                  href={listing.vacancyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
+                href={listing.vacancyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
                 >
-                  Apply Now
+                Apply Now
                 </a>
+                <button
+                  onClick={() => navigator.clipboard.writeText(listing.vacancyUrl)}
+                  className="text-orange-500 hover:text-orange-600"
+                  title="Copy to clipboard"
+                >
+                  <Clipboard className="w-6 h-6 transition-transform transform hover:scale-125" />
+                </button>
+              </div>
               </div>
             </section>
 
