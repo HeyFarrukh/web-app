@@ -16,30 +16,27 @@ interface FilterParams {
   level: string;
 }
 
-export default function Apprenticeships() { // This is now a named export
+export default function Listings() { // No more initialListings prop
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Initialize state from URL params *once* on component mount.
   const [currentPage, setCurrentPage] = useState(() => {
     const page = searchParams.get('page');
     return page ? parseInt(page, 10) : 1;
   });
 
-  const [listings, setListings] = useState<ListingType[]>([]);
+  const [listings, setListings] = useState<ListingType[]>([]); // Initialize as empty array
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize filters from URL params *once* on component mount.
   const [filters, setFilters] = useState<FilterParams>({
     search: searchParams.get('search') || '',
     location: searchParams.get('location') || '',
     level: searchParams.get('level') || ''
   });
 
-  // Consolidated useEffect for fetching data
   useEffect(() => {
     const fetchListings = async () => {
       try {
@@ -63,7 +60,6 @@ export default function Apprenticeships() { // This is now a named export
     fetchListings();
   }, [currentPage, filters]);
 
-  // Function to construct the query string
   const createQueryString = (params: Record<string, string>) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     Object.entries(params).forEach(([key, value]) => {
@@ -76,17 +72,15 @@ export default function Apprenticeships() { // This is now a named export
     return newSearchParams.toString();
   };
 
-  // Handle page changes
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     const queryString = createQueryString({ page: newPage.toString() });
     router.push(`${pathname}?${queryString}`, { scroll: false });
   };
 
-  // Handle filter changes
   const handleFilterChange = (newFilters: FilterParams) => {
     setFilters(newFilters);
-    setCurrentPage(1); // Reset to page 1 when filters change
+    setCurrentPage(1);
     const queryString = createQueryString({
       ...newFilters,
       page: '1',

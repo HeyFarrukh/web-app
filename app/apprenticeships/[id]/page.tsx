@@ -4,16 +4,16 @@ import { ListingType } from '@/types/listing';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { Metadata } from 'next';
 
-export const dynamicParams = false; //  Force dynamic rendering
+// ✅  dynamicParams: FALSE.  This is the crucial setting.
+export const dynamicParams = false;
 
-
+// ✅ Keep generateStaticParams:  Fetch IDs at build time.
 export async function generateStaticParams() {
-  const {vacancies} = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} }); //Fetch ALL at build time
+  const { vacancies } = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} }); //Fetch ALL at build time
   return vacancies.map((vacancy) => ({
-      id: vacancy.id.toString(),
+    id: vacancy.id.toString(),
   }));
 }
-// Remove generateStaticParams entirely
 
 // ✅ Keep generateMetadata
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
@@ -34,7 +34,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     }
   };
 }
-
 
 export default async function ApprenticeshipDetail({ params }: { params: { id: string } }) {
   try {
