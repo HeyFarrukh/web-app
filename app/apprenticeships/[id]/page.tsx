@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'; // Import notFound
 export const dynamicParams = false;
 export const revalidate = 86400; // Keep revalidate for existing listings
 
+// ✅ Bring back generateStaticParams:  Fetch IDs at build time.
 export async function generateStaticParams() {
   const { vacancies } = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} });
   return vacancies.map((vacancy) => ({
@@ -16,8 +17,13 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  try { // Add try-catch here
+  try {
     const listing = await vacancyService.getVacancyById(params.id);
+
+    // ✅ Check for null *before* accessing properties
+    if (!listing) {
+      notFound(); // Correctly trigger 404 and fallback to SSR
+    }
 
     return {
       title: `${listing.title} at ${listing.employerName} | ApprenticeWatch`,
@@ -34,9 +40,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       }
     };
   } catch (error) {
-      console.error("Error in generateMetadata:", error);
-      notFound(); // Important: Throw notFound here too
-      return {}; //satisfy TS
+    console.error("Error in generateMetadata:", error);
+    notFound(); // Handle errors during metadata generation
+    return {}; //satisfy TS
   }
 }
 
@@ -44,63 +50,62 @@ export default async function ApprenticeshipDetail({ params }: { params: { id: s
   try {
     const listing = await vacancyService.getVacancyById(params.id);
 
-    // ✅ If listing is found, render the details.
-    if (listing) {
-      const jobPostingSchema = {
-        "@context": "https://schema.org",
-        "@type": "JobPosting",
-        "title": listing.title,
-        "description": listing.description,
-        "datePosted": listing.postedDate,
-        "validThrough": listing.closingDate || "2025-12-31",
-        "employmentType": "FULL TIME",
-        "hiringOrganization": {
-          "@type": "Organization",
-          "name": listing.employerName,
-          "sameAs": listing.employerWebsiteUrl || undefined
-        },
-        "jobLocation": {
-          "@type": "Place",
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": listing.address.addressLine1 || "Unknown Street",
-            "addressLocality": listing.address.addressLine3 || "Unknown City",
-            "addressRegion": listing.address.addressLine3 || "Unknown Region",
-            "postalCode": listing.address.postcode || "00000",
-            "addressCountry": "UK"
-          }
-        },
-        "educationRequirements": {
-          "@type": "EducationalOccupationalCredential",
-          "credentialCategory": `Level ${listing.course.level} Apprenticeship`
-        },
-        "numberOfPositions": listing.numberOfPositions || 1,
-        "employmentUnit": {
-          "@type": "Organization",
-          "name": listing.providerName
-        },
-        "baseSalary": listing.wage.wageType === 'Competitive Salary' ? undefined : {
-          "@type": "MonetaryAmount",
-          "currency": "GBP",
-          "value": listing.wage.wageAdditionalInformation || "Negotiable",
-          "unitText": listing.wage.wageUnit || "YEAR"
-        },
-        "jobBenefits": listing.wage.wageAdditionalInformation || undefined
-      };
-
-      return (
-        <>
-          <ListingDetails listing={listing} />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingSchema) }} />
-        </>
-      );
-    } else {
-      // ✅ If listing is NOT found, trigger 404.
-      notFound();
+    // ✅ Check for null *before* accessing properties
+    if (!listing) {
+      notFound();  // Correctly trigger 404 and fallback to SSR
     }
+
+    const jobPostingSchema = {
+      "@context": "https://schema.org",
+      "@type": "JobPosting",
+      "title": listing.title,
+      "description": listing.description,
+      "datePosted": listing.postedDate,
+      "validThrough": listing.closingDate || "2025-12-31",
+      "employmentType": "FULL TIME",
+      "hiringOrganization": {
+        "@type": "Organization",
+        "name": listing.employerName,
+        "sameAs": listing.employerWebsiteUrl || undefined
+      },
+      "jobLocation": {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": listing.address.addressLine1 || "Unknown Street",
+          "addressLocality": listing.address.addressLine3 || "Unknown City",
+          "addressRegion": listing.address.addressLine3 || "Unknown Region",
+          "postalCode": listing.address.postcode || "00000",
+          "addressCountry": "UK"
+        }
+      },
+      "educationRequirements": {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": `Level ${listing.course.level} Apprenticeship`
+      },
+      "numberOfPositions": listing.numberOfPositions || 1,
+      "employmentUnit": {
+        "@type": "Organization",
+        "name": listing.providerName
+      },
+      "baseSalary": listing.wage.wageType === 'Competitive Salary' ? undefined : {
+        "@type": "MonetaryAmount",
+        "currency": "GBP",
+        "value": listing.wage.wageAdditionalInformation || "Negotiable",
+        "unitText": listing.wage.wageUnit || "YEAR"
+      },
+      "jobBenefits": listing.wage.wageAdditionalInformation || undefined
+    };
+
+    return (
+      <>
+        <ListingDetails listing={listing} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingSchema) }} />
+      </>
+    );
   } catch (error) {
     console.error('Error fetching listing:', error);
-      notFound(); // Throw not found on error
-    return <div>Failed to load apprenticeship details. Please try again later.</div>; // This will likely never be shown
+    notFound(); // Handle errors during component rendering
+    return <div>Failed to load apprenticeship details. Please try again later.</div>; //This will likely never render
   }
 }
