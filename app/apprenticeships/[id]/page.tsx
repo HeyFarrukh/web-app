@@ -7,8 +7,8 @@ import { Metadata } from 'next';
 // ✅  dynamicParams: FALSE.  Correct for on-demand generation.
 export const dynamicParams = false;
 
-// ✅ revalidate = 0:  Disable caching.  THIS IS THE KEY FIX.
-export const revalidate = 0;
+// ✅ revalidate: Set to 24 hours (86400 seconds).
+export const revalidate = 86400;
 
 // ✅ Keep generateStaticParams:  Fetch IDs at build time.
 export async function generateStaticParams() {
