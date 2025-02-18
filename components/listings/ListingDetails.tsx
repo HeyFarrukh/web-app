@@ -57,7 +57,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-6 sm:mb-8">
