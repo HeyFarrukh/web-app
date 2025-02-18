@@ -4,8 +4,11 @@ import { ListingType } from '@/types/listing';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { Metadata } from 'next';
 
-// ✅  dynamicParams: FALSE.  This is the crucial setting.
+// ✅  dynamicParams: FALSE.  Correct for on-demand generation.
 export const dynamicParams = false;
+
+// ✅ revalidate = 0:  Disable caching.  THIS IS THE KEY FIX.
+export const revalidate = 0;
 
 // ✅ Keep generateStaticParams:  Fetch IDs at build time.
 export async function generateStaticParams() {

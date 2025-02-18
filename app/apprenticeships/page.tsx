@@ -6,4 +6,4 @@ export default function ApprenticeshipsPage() {
     );
   }
   
-  export const dynamic = 'force-dynamic'; // Re-add this line
+  export const dynamic = 'force-dynamic'; // Always SSR this page
