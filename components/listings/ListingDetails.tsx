@@ -88,37 +88,37 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               className="absolute top-full mt-2 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 space-y-2"
               >
               <button
-                className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400"
-                onClick={() => {
-                navigator.clipboard.writeText(listing.vacancyUrl);
-                setShowDropdown(false);
-                }}
-                aria-label="Copy Link"
+              className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400"
+              onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              setShowDropdown(false);
+              }}
+              aria-label="Copy Link"
               >
-                <Clipboard className="w-5 h-5" aria-hidden="true" />
-                <span>Copy Link</span>
+              <Clipboard className="w-5 h-5" aria-hidden="true" />
+              <span>Copy Link</span>
               </button>
               <a
-                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(listing.vacancyUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400"
-                aria-label="Share on WhatsApp"
-                onClick={() => setShowDropdown(false)}
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(window.location.href)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400"
+              aria-label="Share on WhatsApp"
+              onClick={() => setShowDropdown(false)}
               >
-                <WhatsApp className="w-5 h-5" aria-hidden="true" />
-                <span>WhatsApp</span>
+              <WhatsApp className="w-5 h-5" aria-hidden="true" />
+              <span>WhatsApp</span>
               </a>
               <a
-                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(listing.vacancyUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400"
-                aria-label="Share on LinkedIn"
-                onClick={() => setShowDropdown(false)}
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400"
+              aria-label="Share on LinkedIn"
+              onClick={() => setShowDropdown(false)}
               >
-                <Linkedin className="w-5 h-5" aria-hidden="true" />
-                <span>LinkedIn</span>
+              <Linkedin className="w-5 h-5" aria-hidden="true" />
+              <span>LinkedIn</span>
               </a>
               </motion.div>
             )}
