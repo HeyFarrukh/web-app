@@ -72,58 +72,6 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
             <span>Back to Apprenticeships</span>
           </Link>
-          <div className="relative flex justify-center items-center">
-            <button
-              className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
-              aria-label="Share"
-              onClick={() => setShowDropdown(!showDropdown)}
-            >
-              <span>Share</span>
-              <Share className="w-6 h-6" aria-hidden="true" />
-            </button>
-            {showDropdown && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 space-y-2 w-48 max-w-full"
-                style={{ maxWidth: 'calc(100vw - 2rem)' }}
-              >
-                <button
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400"
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    setShowDropdown(false);
-                  }}
-                  aria-label="Copy Link"
-                >
-                  <Clipboard className="w-5 h-5" aria-hidden="true" />
-                  <span>Copy Link</span>
-                </button>
-                <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(window.location.href)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400"
-                  aria-label="Share on WhatsApp"
-                  onClick={() => setShowDropdown(false)}
-                >
-                  <WhatsApp className="w-5 h-5" aria-hidden="true" />
-                  <span>WhatsApp</span>
-                </a>
-                <a
-                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400"
-                  aria-label="Share on LinkedIn"
-                  onClick={() => setShowDropdown(false)}
-                >
-                  <Linkedin className="w-5 h-5" aria-hidden="true" />
-                  <span>LinkedIn</span>
-                </a>
-              </motion.div>
-            )}
-          </div>
         </div>
 
         {/* Header */}
