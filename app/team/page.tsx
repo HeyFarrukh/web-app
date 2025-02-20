@@ -26,7 +26,7 @@ const teamMembers: TeamMember[] = [
     role: "Founder",
     type: "founder",
     image: "/media/farrukh-av.png",
-    description: "I know firsthand how frustrating it can be to keep up with apprenticeship opportunities scattered across different websites. That's why I'm on a mission to make the process easier, clearer, and less stressful for young professionals. I'm not just talking about change—I'm building something that actually makes a difference.",
+    description: "I got tired of the endless search for apprenticeships—scattered websites, outdated listings, and zero clarity. So I built ApprenticeWatch with an incredible team that shares the same vision. Our goal? To make finding opportunities simple and stress-free. If something’s broken, you fix it—and that’s exactly what we’re doing. This isn’t just another platform; it’s a game-changer for anyone serious about kickstarting their career.",
     links: {
       github: "https://github.com/HeyFarrukh?utm_source=apprentice-watch",
       linkedin: "https://www.linkedin.com/in/farrukh-ahmad-9547b1260?utm_source=apprentice-watch",
@@ -40,7 +40,7 @@ const teamMembers: TeamMember[] = [
     role: "Co-Founder",
     type: "founder",
     image: "/media/jamal-av.png",
-    description: "As a friend of both founders, I really connected with their vision and saw firsthand how challenging the apprenticeship application process can be. I joined the team because I genuinely believe in what they're building, and I wanted to use my experience in development and operations to help turn that vision into reality.",
+    description: "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change. I'm focused on expanding the platform's presence and ensuring that every young professional has access to the opportunities they need to succeed—because no one should miss out due to a lack of visibility. ",
     links: {
       github: "https://github.com",
       linkedin: "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
