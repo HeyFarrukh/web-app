@@ -18,7 +18,9 @@ import {
   Building2,
   NotebookText,
   FileStack,
-  Files
+  Files,
+  FileQuestion,
+  Braces
 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 
@@ -61,6 +63,21 @@ export const CVGuide = () => {
             </div>
           </motion.div>
 
+          <Section
+            id="why"
+            icon={<FileQuestion />}
+            title="Why Your CV Sucks"
+            content={
+              <div className="text-gray-700 dark:text-gray-300">
+                <p>In the world of apprenticeship applications, first impressions are everything. Your Curriculum Vitae (CV) is your first opportunity, your first chance to leave an imprint of yourself, and traverse through the application process. A well-crafted CV is not just a list of your experiences—it's a powerful story of who you are, what you've achieved, and where you're going. </p>
+                <p>Your CV is more than just a document; it's your personal brand, and in the competitive world of job hunting, it’s the first thing potential employers will see. So, how do you make yours stand out in a sea of applicants?</p>
+                <p>Think of it as the chance to strategically <a href="https://online.hbs.edu/blog/post/personal-branding-at-work">brand</a> yourself: Highlight the skills, experiences, and achievements that speak directly to the role and its requirements. Whether it’s adjusting the emphasis on your education or tweaking the wording in your personal statement, building and customising a quality CV shows recruiters that you’ve put in the effort to align your experience with their needs.</p>
+                <p>Here's a template from an award-winning recruitment agency, from which many template examples throughout this guide are sourced from: <a href="/cv-guide-resources/dartmouth.pdf" target="_blank" rel="noopener noreferrer">Dartmouth CV</a></p>
+              </div>
+            }
+          />
+
+
 
           <Section 
             id="master-cv"
@@ -68,7 +85,7 @@ export const CVGuide = () => {
             title="Master CV Concept"
             content={
               <div className="text-gray-700 dark:text-gray-300">
-                <p>If anything, your details are the one part of your CV that should stay the same, regardless of the company you’re applying to. In other words, it should go unchanged from the <a href="https://www.jobteaser.com/en/advices/153-why-you-should-always-keep-a-master-cv" className="text-blue-600 hover:text-blue-800 underline">Master CV</a> - a resume that has absolutely everything that you would ever want to include in an application. To simplify things, your master CV should emphasise your strongest skills, and be centered around your ideal company</p>
+                <p>If anything, your details are the one part of your CV that should stay the same, regardless of the company you’re applying to. In other words, it should go unchanged from the <a href="https://www.jobteaser.com/en/advices/153-why-you-should-always-keep-a-master-cv" className="text-orange-600 hover:text-orange-800 underline">Master CV</a> - a resume that has absolutely everything that you would ever want to include in an application. To simplify things, your master CV should emphasise your strongest skills, and be centered around your ideal company.</p>
                 <p>However, each CV should be tailored to the job description and culture of the company in order to emphasise your points, and showcase why you could be a perfect fit for the vacancy. This includes everything from the subjects highlighted in education, down to the headlined skills & achievements, and the personal statement.</p>
                 <p>A personal statement is not a must-have for a CV, especially when you have many experiences to draw from. Nonetheless, a personal statement or career objective could be expected by recruiters, or useful when differentiating from other applicants. In certain industries, such as hospitality, a personal statement can act as a prerequisite to an interview, giving insight to your character and goals. If anything, use it to showcase your motivation behind working "here" rather than anywhere else. Research !</p>
               </div>
@@ -131,23 +148,23 @@ export const CVGuide = () => {
             <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Quick Tips for Your CV</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-blue-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">Try to keep each point between 1 and 2 lines.</span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-blue-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-purple-700 dark:text-purple-400">What you did & how (skills/job description) → Measurable impact (quantified).</span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-blue-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">Use keywords which emphasise the soft skills essential for the role, e.g. “Co-ordinated the team...”, “Analysed survey responses to identify trends…”.</span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-blue-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">When adapting the master CV to an application, consider the culture of the company and the job description.</span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-blue-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">Don’t lie!</span>
               </li>
             </ul>
@@ -180,7 +197,7 @@ export const CVGuide = () => {
                     </td>
                     <td className="py-0 text-right" colSpan={1} rowSpan={1}>
                       <p className="m-1 leading-tight">
-                        <span className="text-gray-700 italic dark:text-gray-300 italic">Jan 2024</span>
+                        <span className="text-gray-700 italic dark:text-gray-300 italic">Feb 2025</span>
                       </p>
                     </td>
                   </tr>
@@ -200,6 +217,64 @@ export const CVGuide = () => {
               </div>
             }
           />
+
+          <Section 
+            icon={<Braces />}
+            title="Student Example:"
+            content={
+              <div>
+                <table className="w-full border-collapse mb-4">
+                  <tr>
+                    <td className="py-0 font-semibold" colSpan={1} rowSpan={1}>
+                      <p className="m-1 leading-tight">
+                        <span className="text-gray-800 dark:text-gray-200">Sans AI Hackathon</span>
+                      </p>
+                    </td>
+                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                      <p className="m-1 leading-tight">
+                        <span className="text-gray-600 dark:text-gray-400">London, UK</span>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-0" colSpan={1} rowSpan={1}>
+                      <p className="m-1 leading-tight">
+                        <span className="text-gray-700 italic dark:text-gray-300 italic">Participant</span>
+                      </p>
+                    </td>
+                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                      <p className="m-1 leading-tight">
+                        <span className="text-gray-700 italic dark:text-gray-300 italic">November 2024</span>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>
+                    <span className="text-gray-700 dark:text-gray-300">Built a smart home energy monitor using Python and Raspberry Pi, presenting findings of up to 40% increased efficiency to a panel of 5 judges.</span>
+                  </li>
+                  <li>
+                    <span className="text-gray-700 dark:text-gray-300">Integrated various sensors to collect data on electricity usage, then processed the data to create actionable insights; creating a working prototype that tracked energy usage with 95% accuracy.</span>
+                  </li>
+                </ul>
+                <div className="text-gray-700 dark:text-gray-300">
+                  <p><br />Even if you haven’t had any desirable internships or the most relevant work experience, you still have experience! Think about:</p>
+                </div>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>
+                    <span className="text-gray-700 dark:text-gray-300">Volunteering: Did you help at a charity or school event?</span>
+                  </li>
+                  <li>
+                    <span className="text-gray-700 dark:text-gray-300">School projects: Have you worked on coding projects, presentations, or group work?</span>
+                  </li>
+                  <li>
+                    <span className="text-gray-700 dark:text-gray-300">Part-time jobs or hobbies: Do you create websites, edit videos, or manage social media?</span>
+                  </li>
+                </ul>
+              </div>
+            }
+          />
+
 
           {/* Tailoring Tips Section */}
           <div className="mt-8 p-6 bg-gray-100 dark:bg-gray-800 rounded-lg mb-12">
@@ -400,7 +475,7 @@ export const CVGuide = () => {
                 </div>
                 <div>
                   <h3 className="font-bold mb-2">Activities & Interests</h3>
-                  <p className="text-gray-700 dark:text-gray-300">Mixed Martial Arts, Piano, Cooking, Breathing, <a href="https://www.totaljobs.com/advice/how-to-write-your-hobbies-and-interests-on-your-cv" className="text-blue-600 hover:text-blue-800 underline">anything interesting about yourself!</a> Be prepared to talk about these too, as they make you stand out in the memory of a hiring manager after meeting multiple people for a role.</p>
+                  <p className="text-gray-700 dark:text-gray-300">Mixed Martial Arts, Piano, Cooking, Breathing, <a href="https://www.totaljobs.com/advice/how-to-write-your-hobbies-and-interests-on-your-cv" className="text-orange-600 hover:text-orange-800 underline">anything interesting about yourself!</a> Be prepared to talk about these too, as they make you stand out in the memory of a hiring manager after meeting multiple people for a role.</p>
                 </div>
               </div>
             }
@@ -418,7 +493,7 @@ export const CVGuide = () => {
                   <h3 className="font-bold mb-2">Technical Skills</h3>
                   <div className="flex flex-wrap gap-2">
                     {['Python', 'JavaScript', 'HTML', 'Java'].map(skill => (
-                      <span key={skill} className="px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-sm dark:text-gray-300">
+                      <span key={skill} className="px-3 py-1 bg-orange-100 dark:bg-amber-700 rounded-full text-sm dark:text-gray-300">
                         {skill}
                       </span>
                     ))}
@@ -448,49 +523,49 @@ export const CVGuide = () => {
             <h3 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-200">Final Tips</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-purple-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
                   The most important thing about a CV is making a strong first impression
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-purple-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
-                  Consistency is key !! This includes formatting, <a href="https://www.themuse.com/advice/finally-the-answer-to-how-much-does-my-resume-font-matter" className="text-blue-600 hover:text-blue-800 ">fonts</a> and no mistakes
+                  Consistency is key !! This includes formatting, <a href="https://www.themuse.com/advice/finally-the-answer-to-how-much-does-my-resume-font-matter" className="text-orange-500 hover:text-orange-600 ">fonts</a> and no mistakes
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-purple-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
                   Keep it under 2 pages at <b>most.</b> In investment banking, a one-page CV is standard
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-purple-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
                   Do not add LinkedIn & Github if your profile is ‘bare bones’ - empty
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-purple-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
-                Always <a href="/optimise-cv" className="text-blue-600 hover:text-blue-800 " >tailor a CV</a> to the job description and company culture, whilst avoiding sounding verbose and inauthentic. Be as clear and concise as possible.
+                Always <a href="/optimise-cv" className="text-orange-500 hover:text-orange-600 " >tailor a CV</a> to the job description and company culture, whilst avoiding sounding verbose and inauthentic. Be as clear and concise as possible.
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-purple-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
-                  Avoid broad skills or <a href = "https://www.indeed.com/career-advice/resumes-cover-letters/buzzwords-to-avoid-in-resume" className="text-blue-600 hover:text-blue-800 ">clichés</a>, but replace it with how it may have related to the task or action. e.g. “Teamworker” → “Collaborated on a project..”
+                  Avoid broad skills or <a href = "https://www.indeed.com/career-advice/resumes-cover-letters/buzzwords-to-avoid-in-resume" className="text-orange-500 hover:text-orange-600 ">clichés</a>, but replace it with how it may have related to the task or action. e.g. “Teamworker” → “Collaborated on a project..”
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-purple-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
-                  Include <a href = "http://cheekyscientist.com/how-to-ensure-your-resume-makes-a-winning-first-impression/" className="text-blue-600 hover:text-blue-800">appropriate sections</a>
+                  Include <a href = "http://cheekyscientist.com/how-to-ensure-your-resume-makes-a-winning-first-impression/" className="text-orange-500 hover:text-orange-600">appropriate sections</a>
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <ClipboardCheck className="text-purple-500 flex-shrink-0" size={20} />
+                <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
                   Save application CV’s as .pdf’s and name them: “First Last [Company] CV”
                 </span>
@@ -505,12 +580,12 @@ export const CVGuide = () => {
             content={
               <div className="space-y-6">
                 <p>
-                  <a href="/original-example.pdf" target="_blank" rel="noopener noreferrer">
+                  <a href="/cv-guide-resources/original-example.pdf" target="_blank" rel="noopener noreferrer">
                     Original-version.pdf
                   </a>
                 </p>
                 <p>
-                  <a href="/guide-example.pdf" target="_blank" rel="noopener noreferrer">
+                  <a href="/cv-guide-resources/guide-example.pdf" target="_blank" rel="noopener noreferrer">
                     Improved-version.pdf
                   </a>
                 </p>
@@ -612,7 +687,7 @@ export const CVGuide = () => {
                   </h3>
                   <ul className="list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-300">
                     <li>
-                      Applicant Tracking Systems (ATS) scan <a href="https://create.microsoft.com/en-us/templates/ats-resumes" className= "text-blue-600 hover:text-blue-800 underline">CVs</a> for relevant keywords.
+                      Applicant Tracking Systems (ATS) scan <a href="https://create.microsoft.com/en-us/templates/ats-resumes" className= "text-orange-600 hover:text-orange-800 underline">CVs</a> for relevant keywords.
                     </li>
                     <li>
                       Find keywords in the job description and incorporate them naturally.
@@ -626,12 +701,13 @@ export const CVGuide = () => {
                 {/*Additional Resources*/}
                 <div>
                   <h3 className="text-xl font-bold mb-2 text-gray-800 dark:text-gray-200 flex items-center">
-                    <Link2 className="mr-2 text-blue-600 dark:text-blue-400" size={20} />
+                    <Link2 className="mr-2 text-orange-600 dark:text-orange-400" size={20} />
                     Additional Resources
                   </h3>
-                  <p><a href="https://www.youtube.com/watch?v=Tt08KmFfIYQ" className="text-blue-600 hover:text-red-400">Write an Incredible Resume: 5 Golden Rules!</a></p>
-                  <p><a href="https://www.ncl.ac.uk/careers/making-applications/applications/cvs/" className="text-blue-600 hover:text-blue-800 underline">How to write a CV | Newcastle University</a></p>
-                  <p className ="text-gray-700 dark:text-gray-300"><a href="https://www.telegraph.co.uk/money/jobs/how-to-write-cv/" className="text-blue-600 hover:text-blue-800 underline">How to write a CV |<i> The Telegraph</i></a> (Sign-Up Required)</p>
+                  <p><a href="https://www.youtube.com/watch?v=Tt08KmFfIYQ" className="text-orange-600 hover:text-red-400">Write an Incredible Resume: 5 Golden Rules!</a></p>
+                  <p><a href="https://www.ncl.ac.uk/careers/making-applications/applications/cvs/" className="text-orange-600 hover:text-orange-800 underline">How to write a CV | Newcastle University</a></p>
+                  <p className ="text-gray-700 dark:text-gray-300"><a href="https://www.telegraph.co.uk/money/jobs/how-to-write-cv/" className="text-orange-600 hover:text-orange-800 underline">How to write a CV |<i> The Telegraph</i></a> (Sign-Up Required)</p>
+                  <p className ="text-gray-700 dark:text-gray-300">Always remember: your CV is a form of your personal brand - a first chance to show recruiters why you're the one to fill the vacancy. You should always tweak it, even if only a little, based on the job description and values of where you're applying. Need help? Try our CV Optimiser and let our AI give you instant feedback. </p>
                   <p className ="text-gray-700 dark:text-gray-300">Good luck with your applications!</p>
                 </div>
               </div>
@@ -675,7 +751,7 @@ const Section = ({ id, icon, title, content }: SectionProps) => (
     className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg"
   >
     <div className="flex items-center gap-2 mb-4">
-      <span className="text-blue-600 dark:text-blue-400">
+      <span className="text-orange-600 dark:text-orange-400">
         {icon}
       </span>
       <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h2>

@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Briefcase, GraduationCap, Trophy, Code, BookMarked, Bot, NotebookText, Files } from 'lucide-react';
+import { FileText, Briefcase, GraduationCap, Trophy, Code, BookMarked, Bot, NotebookText, Files, FileQuestion } from 'lucide-react';
 import Link from 'next/link'; // Import Link component from next/link
 
 export const Sidebar = () => {
   const links = [
+    { icon: <FileQuestion />, label: 'Where to Start', href: '#why' },
     { icon: <FileText />, label: 'Master CV', href: '#master-cv' },
     { icon: <Briefcase />, label: 'Professional', href: '#professional' },
     { icon: <GraduationCap />, label: 'Education', href: '#education' },
@@ -48,7 +49,7 @@ export const Sidebar = () => {
             <li key={index}>
               {link.href.startsWith('/') ? (
                 // For external routes, use the Link component
-                <Link href={link.href} className="flex items-center gap-2 font-bold text-orange-500 dark:text-orange-400 hover:text-orange-700 dark:hover:text-amber-400 transition-colours" >
+                <Link href={link.href} className="flex items-center gap-2 font-bold text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-amber-400 transition-colours" >
                     {link.icon}
                     <span>{link.label}</span>
                 </Link>
@@ -57,7 +58,7 @@ export const Sidebar = () => {
                 <a 
                   href={link.href} 
                   onClick={(e) => handleLinkClick(e, link.href)} 
-                  className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-orange-700 dark:hover:text-amber-500 transition-colors"
                 >
                   {link.icon}
                   <span>{link.label}</span>
