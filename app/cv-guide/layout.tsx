@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'CV Guide - ApprenticeWatch',
+  title: 'CV Guide',
   description: 'Read the ApprenticeWatch CV Guide ! Molded by industry to help you make it to the next stage, and secure an apprenticeship.',
   alternates: {
     canonical: 'https://apprenticewatch.com/cv-guide'

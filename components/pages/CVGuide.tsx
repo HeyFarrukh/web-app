@@ -15,9 +15,12 @@ import {
   Code,
   FileBadge,
   Link2,
-  Building2
+  Building2,
+  NotebookText,
+  FileStack,
+  Files
 } from 'lucide-react';
-import { Sidebar } from './Sidebar'; // Import the Sidebar component
+import { Sidebar } from './Sidebar';
 
 export const CVGuide = () => {
   const fadeIn = {
@@ -235,7 +238,7 @@ export const CVGuide = () => {
               <li className="flex items-start gap-2">
                 <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
-                  If it’s hard to quantify your work, use “Action” & “Result” from the <a href = "https://uk.indeed.com/career-advice/interviewing/starr-method" className="text-orange-600 hover:text-orange-800 ">STARR framework</a>, and estimate the impact of what you did
+                  If it’s hard to quantify your work, use “Action” & “Result” from the <a href = "https://uk.indeed.com/career-advice/interviewing/starr-method" className="text-orange-400 hover:text-orange-600 ">STARR framework</a>, and estimate the impact of what you did
                 </span>
               </li>
             </ul>
@@ -494,6 +497,26 @@ export const CVGuide = () => {
               </li>
             </ul>
           </div>
+
+          <Section
+            id="example-pdf"
+            icon={<Files />}
+            title="CV Comparison: Pre- and Post-Guide + ApprenticeWatch AI"
+            content={
+              <div className="space-y-6">
+                <p>
+                  <a href="/original-example.pdf" target="_blank" rel="noopener noreferrer">
+                    Original-version.pdf
+                  </a>
+                </p>
+                <p>
+                  <a href="/guide-example.pdf" target="_blank" rel="noopener noreferrer">
+                    Improved-version.pdf
+                  </a>
+                </p>
+              </div>
+            }
+          />
 
           <Section 
             id="overview"

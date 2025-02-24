@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Briefcase, GraduationCap, Trophy, Code, BookMarked, Bot } from 'lucide-react';
+import { FileText, Briefcase, GraduationCap, Trophy, Code, BookMarked, Bot, NotebookText, Files } from 'lucide-react';
 import Link from 'next/link'; // Import Link component from next/link
 
 export const Sidebar = () => {
@@ -12,6 +12,7 @@ export const Sidebar = () => {
     { icon: <GraduationCap />, label: 'Education', href: '#education' },
     { icon: <Trophy />, label: 'Leadership/Activities', href: '#leadership' },
     { icon: <Code />, label: 'Skills/Interests', href: '#skills' },
+    { icon: <Files />, label: 'CV Comparisons', href: '#example-pdf' },
     { icon: <BookMarked />, label: 'Overview', href: '#overview' },
     { icon: <Bot />, label: 'Try CV Optimiser', href: '/optimise-cv' }, // This is an external route
   ];
@@ -47,7 +48,7 @@ export const Sidebar = () => {
             <li key={index}>
               {link.href.startsWith('/') ? (
                 // For external routes, use the Link component
-                <Link href={link.href} className="flex items-center gap-2 font-bold text-orange-500 dark:text-orange-500 hover:text-orange-700 dark:hover:text-amber-400 transition-colours" >
+                <Link href={link.href} className="flex items-center gap-2 font-bold text-orange-500 dark:text-orange-400 hover:text-orange-700 dark:hover:text-amber-400 transition-colours" >
                     {link.icon}
                     <span>{link.label}</span>
                 </Link>
