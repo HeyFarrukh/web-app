@@ -23,7 +23,7 @@
 - Discover apprenticeships from top companies across the UK.
 - Save time by finding opportunities all in one place.
 - Get AI-powered CV optimisation.
-- Real-time notifications about new apprenticeships. [COMING SOON]
+- Real-time notifications about new apprenticeships. [COMING SOON!]
 
 ## Contribution
 
