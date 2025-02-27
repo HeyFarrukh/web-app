@@ -60,10 +60,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
               <Building2 className="w-4 h-4" />
               <span>{listing.employerName}</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <MapPin className="w-4 h-4" />
-              <span>{listing.address.addressLine3}</span>
-            </div>
+            {listing.address.addressLine3 && (
+              <div className="flex items-center space-x-1">
+                <MapPin className="w-4 h-4" />
+                <span>{listing.address.addressLine3}</span>
+              </div>
+            )}
             <div className="flex items-center space-x-1">
               <GraduationCap className="w-4 h-4" />
               <span>Level {listing.course.level}</span>

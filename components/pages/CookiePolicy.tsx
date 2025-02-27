@@ -4,9 +4,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export const CookiePolicy = () => {
+  const contactEmail = "privacy@apprenticewatch.com"; // Add this line
+
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
-  <motion.div 
+      <motion.div 
         className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -45,9 +47,11 @@ export const CookiePolicy = () => {
             <p>In addition to this, different browsers provide different methods to block and delete cookies used by websites. You can change the settings of your browser to block/delete the cookies. To find out more about how to manage and delete cookies, visit wikipedia.org, www.allaboutcookies.org.</p>
             <h2>Contact Us</h2>
             <p>If you have any questions about this Cookie Policy, You can contact us:</p>
-            <ul>
-            <li>By email: privacy@apprenticewatch.com</li>
-          </ul>
+            {contactEmail && (
+              <ul>
+                <li>By email: {contactEmail}</li>
+              </ul>
+            )}
           </div>
         </div>
       </motion.div>
