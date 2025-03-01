@@ -13,6 +13,7 @@ import { ListingType } from '@/types/listing';
 import { formatDate } from '@/utils/dateUtils';
 import { companies } from './companyData';
 import { Analytics } from '@/services/analytics/analytics';
+import { ListingMap } from './ListingMap';
 
 interface InfoCardProps {
   icon: React.ElementType;
@@ -265,7 +266,16 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                 <MapPin className="w-5 h-5 text-orange-500 mr-2" aria-hidden="true" />
                 Location
               </h2>
-              <address className="not-italic text-gray-700 dark:text-gray-200">
+              <div className="mb-4">
+                <ListingMap 
+                  latitude={listing.location.latitude} 
+                  longitude={listing.location.longitude}
+                  employerName={listing.employerName}
+                  title={listing.title}
+                  address={listing.address}
+                />
+              </div>
+              <address className="not-italic text-gray-700 dark:text-gray-200 mt-4">
                 {listing.address.addressLine1}<br />
                 {listing.address.addressLine2 && <>{listing.address.addressLine2}<br /></>}
                 {listing.address.addressLine3}<br />
@@ -280,7 +290,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   Contact Information
                 </h2>
                 <div className="space-y-3">
-                  {listing.employerContactEmail && (
+                  {listing.employerContactEmail && listing.employerContactEmail.trim() !== '' && (
                     <a
                       href={`mailto:${listing.employerContactEmail}`}
                       className="flex items-center space-x-2 text-orange-500 hover:text-orange-600 break-all"
@@ -290,7 +300,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                       <span>{listing.employerContactEmail}</span>
                     </a>
                   )}
-                  {listing.employerContactPhone && (
+                  {listing.employerContactPhone && listing.employerContactPhone.trim() !== '' && (
                     <a
                       href={`tel:${listing.employerContactPhone}`}
                       className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
@@ -300,7 +310,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                       <span>{listing.employerContactPhone}</span>
                     </a>
                   )}
-                  {listing.employerWebsiteUrl && (
+                  {listing.employerWebsiteUrl && listing.employerWebsiteUrl.trim() !== '' && (
                     <a
                       href={listing.employerWebsiteUrl}
                       target="_blank"
