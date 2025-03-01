@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Hero } from '@/components/Hero';
 import { WeGetIt } from '@/components/WeGetIt';
 import { Roadmap } from '@/components/Roadmap';
+import { HomePageTracker } from '@/components/pages/HomePageTracker';
 
 export const metadata: Metadata = {
   title: 'ApprenticeWatch - Discover Every Apprenticeship Opportunity',
@@ -35,6 +36,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
+      <HomePageTracker />
       <Hero />
       <WeGetIt />
       <Roadmap />

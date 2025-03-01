@@ -9,6 +9,8 @@ import { ListingType } from '@/types/listing';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { ListingsMap } from '@/components/listings/ListingsMap';
 import { List, Map as MapIcon } from 'lucide-react';
+import { ApprenticeshipListingsTracker } from '@/components/pages/ApprenticeshipListingsTracker';
+import { Analytics } from '@/services/analytics/analytics';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -39,6 +41,44 @@ export default function Listings() {
     location: searchParams.get('location') || '',
     level: searchParams.get('level') || ''
   });
+
+  // Track view mode changes
+  const handleViewModeChange = (mode: 'list' | 'map') => {
+    if (typeof window !== 'undefined') {
+      Analytics.event('ui_interaction', 'view_mode_change', mode);
+    }
+    setViewMode(mode);
+  };
+
+  // Enhanced filter change handler with analytics
+  const handleFilterChange = (newFilters: FilterParams) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+    
+    // Track filter changes
+    if (typeof window !== 'undefined') {
+      // Track search term if present
+      if (newFilters.search) {
+        Analytics.event('search', 'apprenticeship_search', newFilters.search);
+      }
+      
+      // Track location filter if present
+      if (newFilters.location) {
+        Analytics.event('filter', 'location_filter', newFilters.location);
+      }
+      
+      // Track level filter if present
+      if (newFilters.level) {
+        Analytics.event('filter', 'level_filter', newFilters.level);
+      }
+    }
+    
+    const queryString = createQueryString({
+      ...newFilters,
+      page: '1',
+    });
+    router.push(`${pathname}?${queryString}`, { scroll: false });
+  };
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -95,20 +135,11 @@ export default function Listings() {
     router.push(`${pathname}?${queryString}`, { scroll: false });
   };
 
-  const handleFilterChange = (newFilters: FilterParams) => {
-    setFilters(newFilters);
-    setCurrentPage(1);
-    const queryString = createQueryString({
-      ...newFilters,
-      page: '1',
-    });
-    router.push(`${pathname}?${queryString}`, { scroll: false });
-  };
-
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <ApprenticeshipListingsTracker />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">
@@ -117,14 +148,14 @@ export default function Listings() {
           <div className="flex items-center">
             <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm">
               <button
-                onClick={() => setViewMode('list')}
+                onClick={() => handleViewModeChange('list')}
                 className={`p-2 rounded-l-lg ${viewMode === 'list' ? 'bg-orange-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}
                 aria-label="List View"
               >
                 <List className="w-5 h-5" />
               </button>
               <button
-                onClick={() => setViewMode('map')}
+                onClick={() => handleViewModeChange('map')}
                 className={`p-2 rounded-r-lg ${viewMode === 'map' ? 'bg-orange-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}
                 aria-label="Map View"
               >

@@ -44,8 +44,17 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
   useEffect(() => {
     // Track apprenticeship view
-    Analytics.event('apprenticeship', 'view_details', `${listing.title} - ${listing.employerName}`);
+    if (typeof window !== 'undefined') {
+      Analytics.event('apprenticeship', 'view_details', `${listing.title} - ${listing.employerName}`);
+    }
   }, [listing]);
+
+  const handleApplyClick = () => {
+    // Track apply button click
+    if (typeof window !== 'undefined') {
+      Analytics.event('apprenticeship', 'apply_click', `${listing.title} - ${listing.employerName}`);
+    }
+  };
 
   const getLogoUrl = (employerName: string) => {
     const normalizedEmployerName = employerName.toLowerCase();
@@ -273,6 +282,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   rel="noopener noreferrer"
                   className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
                   aria-label="Apply Now"
+                  onClick={handleApplyClick}
                 >
                   Apply Now
                 </a>
