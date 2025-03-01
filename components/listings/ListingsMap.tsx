@@ -99,11 +99,6 @@ export const ListingsMap: React.FC<ListingsMapProps> = ({ listings }) => {
       ]
     });
     
-    // Add minimal attribution (only Mapbox, removing OpenStreetMap contributors)
-    map.current.addControl(new mapboxgl.AttributionControl({
-      customAttribution: 'Mapbox'
-    }));
-    
     // Add navigation controls
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
     
