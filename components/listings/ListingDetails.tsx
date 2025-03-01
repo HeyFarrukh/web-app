@@ -13,6 +13,7 @@ import { ListingType } from '@/types/listing';
 import { formatDate } from '@/utils/dateUtils';
 import { companies } from './companyData';
 import { Analytics } from '@/services/analytics/analytics';
+import { ListingMap } from './ListingMap';
 
 interface InfoCardProps {
   icon: React.ElementType;
@@ -67,11 +68,11 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   // Helper to check if any address fields are valid
   const hasValidAddressFields = (): boolean => {
     if (!listing.address) return false;
-    
+
     return (
-      isValidString(listing.address.addressLine1) || 
-      isValidString(listing.address.addressLine2) || 
-      isValidString(listing.address.addressLine3) || 
+      isValidString(listing.address.addressLine1) ||
+      isValidString(listing.address.addressLine2) ||
+      isValidString(listing.address.addressLine3) ||
       isValidString(listing.address.postcode)
     );
   };
@@ -285,6 +286,9 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   <MapPin className="w-5 h-5 text-orange-500 mr-2" aria-hidden="true" />
                   Location
                 </h2>
+                  <ListingMap
+                      listing={listing} // Pass the entire listing object
+                  />
                 <address className="not-italic text-gray-700 dark:text-gray-200">
                   {isValidString(listing.address.addressLine1) && (
                     <>{listing.address.addressLine1}<br /></>
@@ -303,49 +307,49 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             )}
 
             {/* Contact Information - Only show if at least one valid contact method exists */}
-            {(isValidString(listing.employerContactEmail) || 
-              isValidString(listing.employerContactPhone) || 
+            {(isValidString(listing.employerContactEmail) ||
+              isValidString(listing.employerContactPhone) ||
               isValidString(listing.employerWebsiteUrl)) && (
-              <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Contact Information
-                </h2>
-                <div className="space-y-3">
-                  {isValidString(listing.employerContactEmail) && (
-                    <a
-                      href={`mailto:${listing.employerContactEmail}`}
-                      className="flex items-center space-x-2 text-orange-500 hover:text-orange-600 break-all"
-                      aria-label={`Email ${listing.employerContactEmail}`}
-                    >
-                      <Mail className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                      <span>{listing.employerContactEmail}</span>
-                    </a>
-                  )}
-                  {isValidString(listing.employerContactPhone) && (
-                    <a
-                      href={`tel:${listing.employerContactPhone}`}
-                      className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
-                      aria-label={`Call ${listing.employerContactPhone}`}
-                    >
-                      <Phone className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                      <span>{listing.employerContactPhone}</span>
-                    </a>
-                  )}
-                  {isValidString(listing.employerWebsiteUrl) && (
-                    <a
-                      href={listing.employerWebsiteUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
-                      aria-label="Company Website"
-                    >
-                      <Globe className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                      <span>Company Website</span>
-                    </a>
-                  )}
-                </div>
-              </section>
-            )}
+                <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    Contact Information
+                  </h2>
+                  <div className="space-y-3">
+                    {isValidString(listing.employerContactEmail) && (
+                      <a
+                        href={`mailto:${listing.employerContactEmail}`}
+                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-600 break-all"
+                        aria-label={`Email ${listing.employerContactEmail}`}
+                      >
+                        <Mail className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                        <span>{listing.employerContactEmail}</span>
+                      </a>
+                    )}
+                    {isValidString(listing.employerContactPhone) && (
+                      <a
+                        href={`tel:${listing.employerContactPhone}`}
+                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
+                        aria-label={`Call ${listing.employerContactPhone}`}
+                      >
+                        <Phone className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                        <span>{listing.employerContactPhone}</span>
+                      </a>
+                    )}
+                    {isValidString(listing.employerWebsiteUrl) && (
+                      <a
+                        href={listing.employerWebsiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
+                        aria-label="Company Website"
+                      >
+                        <Globe className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                        <span>Company Website</span>
+                      </a>
+                    )}
+                  </div>
+                </section>
+              )}
           </div>
         </div>
       </div>
