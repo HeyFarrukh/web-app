@@ -4,6 +4,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export const Privacy = () => {
+  const email = "privacy@apprenticewatch.com";
+
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
       <motion.div 
@@ -212,7 +214,7 @@ export const Privacy = () => {
             <h2>Contact Us</h2>
             <p>If you have any questions about this Privacy Policy, You can contact us:</p>
             <ul>
-            <li>By email: privacy@apprenticewatch.com</li>
+              {email && <li>By email: {email}</li>}
             </ul>
           </div>
         </div>
