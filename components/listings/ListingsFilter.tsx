@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { vacancyService } from '@/services/supabase/vacancyService';
+import { Analytics } from '@/services/analytics/analytics';
 
 interface ListingsFilterProps {
   onFilterChange: (filters: { search: string; location: string; level: string }) => void;
@@ -38,10 +39,30 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
   const handleFilterChange = (field: string, value: string) => {
     const newFilters = { ...filters, [field]: value };
     setFilters(newFilters);
+    
+    // Track specific filter interactions with more detailed analytics
+    if (typeof window !== 'undefined') {
+      // Only track when a value is selected (not when cleared)
+      if (value) {
+        if (field === 'location') {
+          Analytics.event('filter_detail', 'location_selected', value);
+        } else if (field === 'level') {
+          Analytics.event('filter_detail', 'level_selected', value);
+        } else if (field === 'search') {
+          // Only track search when user has typed at least 3 characters
+          if (value.length >= 3) {
+            Analytics.event('search_detail', 'search_term_entered', value);
+          }
+        }
+      } else {
+        // Track when filters are cleared
+        Analytics.event('filter_detail', `${field}_cleared`, 'Filter Cleared');
+      }
+    }
+    
     onFilterChange(newFilters); // Call onFilterChange directly
   };
-  // Removed the useEffect with the timeout
-
+  
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md space-y-4">
       <div className="relative">

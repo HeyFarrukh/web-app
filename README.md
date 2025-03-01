@@ -18,6 +18,8 @@
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Google_Gemini_logo.svg/2560px-Google_Gemini_logo.svg.png" alt="Google Gemini" height="50"/> 
 
+<img src="https://www.gstatic.com/analytics-suite/header/suite/v2/ic_analytics.svg" alt="Google Analytics" height="50"/> Google Analytics
+
 ## Features
 
 - Discover apprenticeships from top companies across the UK.

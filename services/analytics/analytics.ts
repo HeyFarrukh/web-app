@@ -1,33 +1,27 @@
-import ReactGA from 'react-ga4';
+import { event as gaEvent } from '@/components/GoogleAnalytics';
 
 const TRACKING_ID = process.env.NEXT_PUBLIC_GA_TRACKING_ID;
 
 export const Analytics = {
   initialize: () => {
-    if (TRACKING_ID) {
-      ReactGA.initialize(TRACKING_ID);
-      console.log('Google Analytics initialized');
-    } else {
-      console.warn('Google Analytics Tracking ID not found');
+    // Initialization is now handled by the GoogleAnalytics component
+    if (typeof window !== 'undefined' && !TRACKING_ID) {
+      console.warn('Google Analytics ID not found');
     }
   },
 
   pageview: (path: string, title?: string) => {
-    if (TRACKING_ID) {
-      ReactGA.send({
-        hitType: 'pageview',
-        page: path,
-        title: title
-      });
-    }
+    // Pageviews are automatically tracked by the GoogleAnalytics component
+    // This method is kept for backward compatibility
   },
 
-  event: (category: string, action: string, label?: string) => {
-    if (TRACKING_ID) {
-      ReactGA.event({
+  event: (category: string, action: string, label?: string, value?: number) => {
+    if (typeof window !== 'undefined') {
+      gaEvent({
         category,
         action,
-        label
+        label,
+        value
       });
     }
   }
