@@ -77,7 +77,6 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     );
   };
 
-
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -280,23 +279,17 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               </div>
             </section>
 
-            {/* Location - Use remote logic to hide section if address is invalid, and incorporate map */}
-            {hasValidAddressFields() && listing.location && listing.location.latitude && listing.location.longitude && (
+            {/* Location - Only show if there are valid address fields */}
+            {hasValidAddressFields() && (
               <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                   <MapPin className="w-5 h-5 text-orange-500 mr-2" aria-hidden="true" />
                   Location
                 </h2>
-                <div className="mb-4">
                   <ListingMap
-                    latitude={listing.location.latitude}
-                    longitude={listing.location.longitude}
-                    employerName={listing.employerName}
-                    title={listing.title}
-                    address={listing.address}
+                      listing={listing} // Pass the entire listing object
                   />
-                </div>
-                <address className="not-italic text-gray-700 dark:text-gray-200 mt-4">
+                <address className="not-italic text-gray-700 dark:text-gray-200">
                   {isValidString(listing.address.addressLine1) && (
                     <>{listing.address.addressLine1}<br /></>
                   )}
@@ -313,7 +306,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               </section>
             )}
 
-            {/* Contact Information */}
+            {/* Contact Information - Only show if at least one valid contact method exists */}
             {(isValidString(listing.employerContactEmail) ||
               isValidString(listing.employerContactPhone) ||
               isValidString(listing.employerWebsiteUrl)) && (
