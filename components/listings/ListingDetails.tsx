@@ -13,6 +13,7 @@ import { ListingType } from '@/types/listing';
 import { formatDate } from '@/utils/dateUtils';
 import { companies } from './companyData';
 import { Analytics } from '@/services/analytics/analytics';
+import { ListingMap } from './ListingMap';
 
 interface InfoCardProps {
   icon: React.ElementType;
@@ -43,8 +44,17 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
   useEffect(() => {
     // Track apprenticeship view
-    Analytics.event('apprenticeship', 'view_details', `${listing.title} - ${listing.employerName}`);
+    if (typeof window !== 'undefined') {
+      Analytics.event('apprenticeship', 'view_details', `${listing.title} - ${listing.employerName}`);
+    }
   }, [listing]);
+
+  const handleApplyClick = () => {
+    // Track apply button click
+    if (typeof window !== 'undefined') {
+      Analytics.event('apprenticeship', 'apply_click', `${listing.title} - ${listing.employerName}`);
+    }
+  };
 
   const getLogoUrl = (employerName: string) => {
     const normalizedEmployerName = employerName.toLowerCase();
@@ -57,6 +67,23 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     }
 
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(employerName)}&background=random`;
+  };
+
+  // Helper function to check if a string is not empty or undefined
+  const isValidString = (str: string | undefined | null): boolean => {
+    return Boolean(str && str !== 'undefined' && str.trim() !== '');
+  };
+
+  // Helper to check if any address fields are valid
+  const hasValidAddressFields = (): boolean => {
+    if (!listing.address) return false;
+
+    return (
+      isValidString(listing.address.addressLine1) ||
+      isValidString(listing.address.addressLine2) ||
+      isValidString(listing.address.addressLine3) ||
+      isValidString(listing.address.postcode)
+    );
   };
 
   return (
@@ -195,9 +222,11 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   <div className="text-gray-800 dark:text-gray-100">
                     {listing.hoursPerWeek} hours per week
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    {listing.workingWeekDescription}
-                  </div>
+                  {isValidString(listing.workingWeekDescription) && (
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      {listing.workingWeekDescription}
+                    </div>
+                  )}
                 </InfoCard>
 
                 <InfoCard icon={Calendar} title="Duration">
@@ -253,68 +282,84 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   rel="noopener noreferrer"
                   className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
                   aria-label="Apply Now"
+                  onClick={handleApplyClick}
                 >
                   Apply Now
                 </a>
               </div>
             </section>
 
-            {/* Location */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <MapPin className="w-5 h-5 text-orange-500 mr-2" aria-hidden="true" />
-                Location
-              </h2>
-              <address className="not-italic text-gray-700 dark:text-gray-200">
-                {listing.address.addressLine1}<br />
-                {listing.address.addressLine2 && <>{listing.address.addressLine2}<br /></>}
-                {listing.address.addressLine3}<br />
-                {listing.address.postcode}
-              </address>
-            </section>
-
-            {/* Contact Information */}
-            {(listing.employerContactEmail || listing.employerContactPhone || listing.employerWebsiteUrl) && (
+            {/* Location - Only show if there are valid address fields */}
+            {hasValidAddressFields() && (
               <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Contact Information
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                  <MapPin className="w-5 h-5 text-orange-500 mr-2" aria-hidden="true" />
+                  Location
                 </h2>
-                <div className="space-y-3">
-                  {listing.employerContactEmail && (
-                    <a
-                      href={`mailto:${listing.employerContactEmail}`}
-                      className="flex items-center space-x-2 text-orange-500 hover:text-orange-600 break-all"
-                      aria-label={`Email ${listing.employerContactEmail}`}
-                    >
-                      <Mail className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                      <span>{listing.employerContactEmail}</span>
-                    </a>
+                  <ListingMap
+                      listing={listing} // Pass the entire listing object
+                  />
+                <address className="not-italic text-gray-700 dark:text-gray-200">
+                  {isValidString(listing.address.addressLine1) && (
+                    <>{listing.address.addressLine1}<br /></>
                   )}
-                  {listing.employerContactPhone && (
-                    <a
-                      href={`tel:${listing.employerContactPhone}`}
-                      className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
-                      aria-label={`Call ${listing.employerContactPhone}`}
-                    >
-                      <Phone className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                      <span>{listing.employerContactPhone}</span>
-                    </a>
+                  {isValidString(listing.address.addressLine2) && (
+                    <>{listing.address.addressLine2}<br /></>
                   )}
-                  {listing.employerWebsiteUrl && (
-                    <a
-                      href={listing.employerWebsiteUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
-                      aria-label="Company Website"
-                    >
-                      <Globe className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                      <span>Company Website</span>
-                    </a>
+                  {isValidString(listing.address.addressLine3) && (
+                    <>{listing.address.addressLine3}<br /></>
                   )}
-                </div>
+                  {isValidString(listing.address.postcode) && (
+                    <>{listing.address.postcode}</>
+                  )}
+                </address>
               </section>
             )}
+
+            {/* Contact Information - Only show if at least one valid contact method exists */}
+            {(isValidString(listing.employerContactEmail) ||
+              isValidString(listing.employerContactPhone) ||
+              isValidString(listing.employerWebsiteUrl)) && (
+                <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    Contact Information
+                  </h2>
+                  <div className="space-y-3">
+                    {isValidString(listing.employerContactEmail) && (
+                      <a
+                        href={`mailto:${listing.employerContactEmail}`}
+                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-600 break-all"
+                        aria-label={`Email ${listing.employerContactEmail}`}
+                      >
+                        <Mail className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                        <span>{listing.employerContactEmail}</span>
+                      </a>
+                    )}
+                    {isValidString(listing.employerContactPhone) && (
+                      <a
+                        href={`tel:${listing.employerContactPhone}`}
+                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
+                        aria-label={`Call ${listing.employerContactPhone}`}
+                      >
+                        <Phone className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                        <span>{listing.employerContactPhone}</span>
+                      </a>
+                    )}
+                    {isValidString(listing.employerWebsiteUrl) && (
+                      <a
+                        href={listing.employerWebsiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
+                        aria-label="Company Website"
+                      >
+                        <Globe className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                        <span>Company Website</span>
+                      </a>
+                    )}
+                  </div>
+                </section>
+              )}
           </div>
         </div>
       </div>

@@ -23,7 +23,7 @@ class GeminiService {
 
   constructor() {
     this.genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 
   private readonly SYSTEM_PROMPT = `You are to assume the role of a CV Optimiser. You work for the company ApprenticeWatch which provides its users with all apprenticeships in one place with the ambition of streamlining the apprenticeship application process from finding an apprenticeship to applying.

@@ -4,7 +4,13 @@ import { Inter, Playfair_Display } from 'next/font/google';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import dynamic from 'next/dynamic';
 import { Analytics } from '@/services/analytics/analytics';
+
+// Import Google Analytics component with no SSR
+const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), {
+  ssr: false,
+});
 
 const inter = Inter({ subsets: ['latin'] });
 const playfair = Playfair_Display({
@@ -129,6 +135,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <SpeedInsights />
+        <GoogleAnalytics />
       </body>
     </html>
   );

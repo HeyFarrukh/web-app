@@ -56,7 +56,7 @@ class VacancyService {
     };
   }
 
-    async getTotalActiveVacancies(): Promise<number> {
+  async getTotalActiveVacancies(): Promise<number> {
     try {
       console.log('[VacancyService] Fetching total active vacancies');
       const now = new Date().toISOString();
@@ -67,7 +67,7 @@ class VacancyService {
         .gt('closing_date', now);
 
       if (error) {
-        console.error('[VacancyService] Error fetching total vacancies:', error);
+        console.error('[VacancyService] Error getting total vacancies:', error);
         Analytics.event('error', 'vacancy_count_error', error.message);
         throw error;
       }
@@ -163,7 +163,7 @@ class VacancyService {
         throw error; // Re-throw for higher-level handling (if needed)
       }
 
-      // ✅  Handle the case where no data is returned.
+      //  Handle the case where no data is returned.
       if (!data || data.length === 0) {
         console.log(`[VacancyService] No vacancy found for ID: ${id}`);
         return null; // Return null if no listing is found.
@@ -173,25 +173,32 @@ class VacancyService {
       return this.transformListing(data[0] as SupabaseListing);
 
     } catch (error) {
-      console.error('Error getting vacancy by ID:', error);
+      console.error('Error in getVacancyById:', error);
       throw error; // Or return null, depending on how you want to handle errors
     }
   }
 
-    async getAvailableLocations(): Promise<string[]> {
+  async getAvailableLocations(): Promise<string[]> {
     try {
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .select('address_line3')
         .eq('is_active', true)
-        .not('address_line3', 'is', null);
+        .gt('closing_date', new Date().toISOString());
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching locations:', error);
+        throw error;
+      }
 
-      const locations = Array.from(new Set(data?.map(d => d.address_line3))) as string[];
+      const locations = Array.from(new Set(
+        data?.map(d => d.address_line3)
+          .filter(loc => loc && loc.trim() !== '')
+      )) as string[];
+
       return locations.sort();
     } catch (error) {
-      console.error('Error getting available locations:', error);
+      console.error('Error in getAvailableLocations:', error);
       throw error;
     }
   }
@@ -202,9 +209,12 @@ class VacancyService {
         .from(this.TABLE_NAME)
         .select('course_level')
         .eq('is_active', true)
-        .not('course_level', 'is', null);
+        .gt('closing_date', new Date().toISOString());
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching levels:', error);
+        throw error;
+      }
 
       const levels = Array.from(new Set(
         data?.map(d => d.course_level)
@@ -215,17 +225,18 @@ class VacancyService {
 
       return levels.sort((a, b) => a - b);
     } catch (error) {
-      console.error('Error getting available levels:', error);
+      console.error('Error in getAvailableLevels:', error);
       throw error;
     }
   }
 
-    async addVacancy(newVacancyData: any) {
+  async addVacancy(newVacancyData: any) {
     const { data, error } = await supabase.from(this.TABLE_NAME).insert([newVacancyData]).select();
     if (error) {
       console.error("Error adding vacancy:", error);
       throw error;
     }
+    console.log("Vacancy added successfully:", data);
     await this.revalidateCache(`/apprenticeships`);
     return data;
   }
@@ -241,24 +252,23 @@ class VacancyService {
       console.error("Error updating vacancy:", error);
       throw error;
     }
+    console.log("Vacancy updated successfully:", data);
     await this.revalidateCache(`/apprenticeships/${id}`);
     await this.revalidateCache(`/apprenticeships`);
     return data;
   }
 
   async deleteVacancy(id: string) {
-    const { error } = await supabase
-      .from(this.TABLE_NAME)
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from(this.TABLE_NAME).delete().eq('id', id);
     if (error) {
       console.error("Error deleting vacancy:", error);
       throw error;
     }
+    console.log("Vacancy deleted successfully");
     await this.revalidateCache(`/apprenticeships`);
   }
-    private async revalidateCache(path: string) {
+
+  private async revalidateCache(path: string) {
     if (!this.REVALIDATION_SECRET) {
         console.error("REVALIDATION_SECRET_TOKEN is not set.");
         return;
@@ -283,7 +293,56 @@ class VacancyService {
     } catch (error) {
         console.error(`Error revalidating path: ${path}`, error);
     }
-}
+  }
+
+  async getAllVacanciesForMap(filters: {
+    search?: string;
+    location?: string;
+    level?: string;
+  } = {}): Promise<ListingType[]> {
+    try {
+      console.log("[VacancyService] getAllVacanciesForMap called with filters:", filters);
+      const now = new Date().toISOString();
+      let query = supabase
+        .from(this.TABLE_NAME)
+        .select('*')  // Select all fields to ensure transformListing works correctly
+        .eq('is_active', true)
+        .gt('closing_date', now);
+
+      // Apply filters
+      if (filters.search) {
+        query = query.or(
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%`
+        );
+      }
+
+      if (filters.location) {
+        query = query.ilike('address_line3', `%${filters.location}%`);
+      }
+
+      if (filters.level) {
+        const levelNumber = parseInt(filters.level, 10);
+        if (!isNaN(levelNumber)) {
+          query = query.eq('course_level', levelNumber);
+        } else {
+          console.warn(`[VacancyService] Invalid level filter value: ${filters.level}`);
+        }
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("[VacancyService] Supabase query error:", error);
+        throw error;
+      }
+      
+      console.log(`[VacancyService] Found ${data?.length || 0} vacancies for map`);
+      return data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [];
+    } catch (error: any) {
+      console.error("Error in getAllVacanciesForMap:", error);
+      throw error;
+    }
+  }
 }
 
 export const vacancyService = new VacancyService();
