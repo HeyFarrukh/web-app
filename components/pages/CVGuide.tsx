@@ -101,24 +101,24 @@ export const CVGuide = () => {
                 <table className="w-full border-collapse mb-4">
                   <tr>
                     <td className="py-0 font-semibold" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-800 dark:text-gray-200">Most Recent Relevant Work Experience Firm</span>
                       </p>
                     </td>
                     <td className="py-0 text-right" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-600 dark:text-gray-400">Location, Country</span>
                       </p>
                     </td>
                   </tr>
                   <tr>
                     <td className="py-0" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Role/Event</span>
                       </p>
                     </td>
                     <td className="py-0 text-right" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Start (Month, Year) - End/“Present”</span>
                       </p>
                     </td>
@@ -179,24 +179,24 @@ export const CVGuide = () => {
                 <table className="w-full border-collapse mb-4">
                   <tr>
                     <td className="py-0 font-semibold" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-800 dark:text-gray-200">PA Consulting</span>
                       </p>
                     </td>
                     <td className="py-0 text-right" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-600 dark:text-gray-400">London, UK</span>
                       </p>
                     </td>
                   </tr>
                   <tr>
                     <td className="py-0" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Data Scientist Intern</span>
                       </p>
                     </td>
                     <td className="py-0 text-right" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Feb 2025</span>
                       </p>
                     </td>
@@ -226,24 +226,24 @@ export const CVGuide = () => {
                 <table className="w-full border-collapse mb-4">
                   <tr>
                     <td className="py-0 font-semibold" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-800 dark:text-gray-200">Sans AI Hackathon</span>
                       </p>
                     </td>
                     <td className="py-0 text-right" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-600 dark:text-gray-400">London, UK</span>
                       </p>
                     </td>
                   </tr>
                   <tr>
                     <td className="py-0" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Participant</span>
                       </p>
                     </td>
                     <td className="py-0 text-right" colSpan={1} rowSpan={1}>
-                      <p className="m-1 leading-tight">
+                      <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">November 2024</span>
                       </p>
                     </td>
@@ -561,7 +561,7 @@ export const CVGuide = () => {
               <li className="flex items-start gap-2">
                 <ClipboardCheck className="text-orange-500 flex-shrink-0" size={20} />
                 <span className="text-gray-700 dark:text-gray-300">
-                  Include <a href = "http://cheekyscientist.com/how-to-ensure-your-resume-makes-a-winning-first-impression/" className="text-orange-500 hover:text-orange-600">appropriate sections</a>
+                  Include <a href = "http://cheekyscientist.com/how-to-ensure-your-resume-makes-a-winning-first-impression/" className="text-orange-600 hover:text-orange-600">appropriate sections</a>
                 </span>
               </li>
               <li className="flex items-start gap-2">
@@ -580,7 +580,7 @@ export const CVGuide = () => {
             content={
               <div className="space-y-6">
                 <p>
-                  <a href="/cv-guide-resources/original-example.pdf" target="_blank" rel="noopener noreferrer">
+                  <a href="/cv-guide-resources/original-cv.pdf" target="_blank" rel="noopener noreferrer">
                     Original-version.pdf
                   </a>
                 </p>
@@ -748,7 +748,7 @@ const Section = ({ id, icon, title, content }: SectionProps) => (
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg"
+    className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg section-container"
   >
     <div className="flex items-center gap-2 mb-4">
       <span className="text-orange-600 dark:text-orange-400">

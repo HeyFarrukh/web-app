@@ -1,11 +1,42 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Briefcase, GraduationCap, Trophy, Code, BookMarked, Bot, NotebookText, Files, FileQuestion } from 'lucide-react';
 import Link from 'next/link'; // Import Link component from next/link
 
 export const Sidebar = () => {
+
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  useEffect(() => {
+    const sections = document.querySelectorAll('.section-container');
+    //console.log('Sections found:', sections.length); // Debug: Check if sections are found
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          //console.log('Entry:', entry.target.id, entry.isIntersecting) // Debug: Log intersection events
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: '-50px 0px -50px 0px', // Adjust this value as needed; higher = bigger boundary
+        threshold: 0.3, // Adjust this value as needed; lower = as soon as in view
+      }
+    );
+  
+    sections.forEach((section) => {
+      observer.observe(section);
+    });
+  
+    return () => {
+      sections.forEach((section) => {
+        observer.unobserve(section);
+      });
+    };
+  }, []);
+
   const links = [
     { icon: <FileQuestion />, label: 'Where to Start', href: '#why' },
     { icon: <FileText />, label: 'Master CV', href: '#master-cv' },
@@ -58,7 +89,11 @@ export const Sidebar = () => {
                 <a 
                   href={link.href} 
                   onClick={(e) => handleLinkClick(e, link.href)} 
-                  className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-orange-700 dark:hover:text-amber-500 transition-colors"
+                  className={`flex items-center gap-2 ${
+                    activeSection === link.href.substring(1) 
+                      ? 'text-orange-600 dark:text-orange-400' 
+                      : 'text-gray-700 dark:text-gray-300'
+                  } hover:text-blue-700 dark:hover:text-blue-500 transition-colors`}
                 >
                   {link.icon}
                   <span>{link.label}</span>
