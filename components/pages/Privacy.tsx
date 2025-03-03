@@ -8,7 +8,7 @@ export const Privacy = () => {
 
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <motion.div 
+      <motion.div
         className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -23,36 +23,36 @@ export const Privacy = () => {
             prose-strong:text-gray-900 dark:prose-strong:text-white
             prose-ul:text-gray-700 dark:prose-ul:text-gray-300
             prose-li:marker:text-orange-500 dark:prose-li:marker:text-orange-400
-            prose-a:text-orange-600 dark:prose-a:text-orange-400 
+            prose-a:text-orange-600 dark:prose-a:text-orange-400
             prose-a:no-underline hover:prose-a:text-orange-700 dark:hover:prose-a:text-orange-300
           ">
             <h1>Privacy Policy</h1>
-            <p>Last updated: January 02, 2025</p>
-            <p>This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
-            <p>We use Your Personal data to provide and improve the Service. By using the Service, You agree to the collection and use of information in accordance with this Privacy Policy.</p>
+            <p>Last updated: March 03, 2025</p>
+            <p>This Privacy Policy explains how we collect, use, and look after your information when you use ApprenticeWatch. Your privacy is important to us, and this policy outlines your rights and how the law protects you.</p>
+            <p>We use your personal data to provide and improve our service to you. By using ApprenticeWatch, you're agreeing to the collection and use of information as described in this Privacy Policy.</p>
             <h2>Interpretation and Definitions</h2>
             <h3>Interpretation</h3>
-            <p>The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear in singular or in plural.</p>
+            <p>The words with capital letters have specific meanings, as defined below. These definitions apply whether the words are singular or plural.</p>
             <h3>Definitions</h3>
             <p>For the purposes of this Privacy Policy:</p>
             <ul>
             <li>
-            <p><strong>Account</strong> means a unique account created for You to access our Service or parts of our Service.</p>
+            <p><strong>Account</strong> means your unique account, which allows you to access certain features of ApprenticeWatch.</p>
             </li>
             <li>
-            <p><strong>Affiliate</strong> means an entity that controls, is controlled by or is under common control with a party, where &quot;control&quot; means ownership of 50% or more of the shares, equity interest or other securities entitled to vote for election of directors or other managing authority.</p>
+            <p><strong>Affiliate</strong> means an entity that controls, is controlled by, or is under common control with another party.  "Control" means owning 50% or more of the shares or other securities that can vote for the election of directors or managing authority.</p>
             </li>
             <li>
-            <p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to ApprenticeWatch.</p>
+            <p><strong>Company</strong> (referred to as "the Company", "We", "Us" or "Our") refers to ApprenticeWatch. ApprenticeWatch is a self-owned entity.</p>
             </li>
             <li>
-            <p><strong>Cookies</strong> are small files that are placed on Your computer, mobile device or any other device by a website, containing the details of Your browsing history on that website among its many uses.</p>
+            <p><strong>Cookies</strong> are small files placed on your computer, mobile device, or other device by a website. They contain details of your browsing activity on that website and are used for various purposes.</p>
             </li>
             <li>
             <p><strong>Country</strong> refers to:  United Kingdom</p>
             </li>
             <li>
-            <p><strong>Device</strong> means any device that can access the Service such as a computer, a cellphone or a digital tablet.</p>
+            <p><strong>Device</strong> means any device that can access ApprenticeWatch, such as a computer, phone, or tablet.</p>
             </li>
             <li>
             <p><strong>Personal Data</strong> is any information that relates to an identified or identifiable individual.</p>
@@ -61,13 +61,13 @@ export const Privacy = () => {
             <p><strong>Service</strong> refers to the Website.</p>
             </li>
             <li>
-            <p><strong>Service Provider</strong> means any natural or legal person who processes the data on behalf of the Company. It refers to third-party companies or individuals employed by the Company to facilitate the Service, to provide the Service on behalf of the Company, to perform services related to the Service or to assist the Company in analyzing how the Service is used.</p>
+            <p><strong>Service Provider</strong> means any person or company who processes data on our behalf. This includes third-party companies or individuals who help us to provide, improve, or analyse ApprenticeWatch.</p>
             </li>
             <li>
-            <p><strong>Third-party Social Media Service</strong> refers to any website or any social network website through which a User can log in or create an account to use the Service.</p>
+            <p><strong>Third-party Social Media Service</strong> refers to any website or social network through which you can log in or create an account to use ApprenticeWatch.</p>
             </li>
             <li>
-            <p><strong>Usage Data</strong> refers to data collected automatically, either generated by the use of the Service or from the Service infrastructure itself (for example, the duration of a page visit).</p>
+            <p><strong>Usage Data</strong> refers to data collected automatically when you use ApprenticeWatch. This might include information generated by your use of the service or from the service infrastructure itself (for example, how long you visit a page).</p>
             </li>
             <li>
             <p><strong>Website</strong> refers to ApprenticeWatch, accessible from <a href="https://apprenticewatch.com" rel="external nofollow noopener" target="_blank">https://apprenticewatch.com</a></p>
@@ -79,7 +79,7 @@ export const Privacy = () => {
             <h2>Collecting and Using Your Personal Data</h2>
             <h3>Types of Data Collected</h3>
             <h4>Personal Data</h4>
-            <p>While using Our Service, We may ask You to provide Us with certain personally identifiable information that can be used to contact or identify You. Personally identifiable information may include, but is not limited to:</p>
+            <p>When you use ApprenticeWatch, we may ask you to provide certain information that can be used to identify or contact you. This may include:</p>
             <ul>
             <li>
             <p>Email address</p>
@@ -87,33 +87,35 @@ export const Privacy = () => {
             <li>
             <p>First name and last name</p>
             </li>
+             <li>
+            <p>Your public profile picture. This helps us to personalise your experience and improve the service.</p>
+            </li>
+            <li>
+            <p>CV Text and Job Description (when you use the CV Optimisation feature)</p>
+            </li>
             <li>
             <p>Usage Data</p>
             </li>
             </ul>
             <h4>Usage Data</h4>
-            <p>Usage Data is collected automatically when using the Service.</p>
-            <p>Usage Data may include information such as Your Device&apos;s Internet Protocol address (e.g. IP address), browser type, browser version, the pages of our Service that You visit, the time and date of Your visit, the time spent on those pages, unique device identifiers and other diagnostic data.</p>
-            <p>When You access the Service by or through a mobile device, We may collect certain information automatically, including, but not limited to, the type of mobile device You use, Your mobile device unique ID, the IP address of Your mobile device, Your mobile operating system, the type of mobile Internet browser You use, unique device identifiers and other diagnostic data.</p>
-            <p>We may also collect information that Your browser sends whenever You visit our Service or when You access the Service by or through a mobile device.</p>
+            <p>Usage Data is collected automatically when you use ApprenticeWatch.</p>
+            <p>This may include your device's IP address, browser type, browser version, the pages you visit, the time and date of your visit, how long you spend on those pages, unique device identifiers, and other diagnostic data.</p>
+            <p>If you access ApprenticeWatch through a mobile device, we may collect information about the type of device you use, your device's unique ID, your device's IP address, your mobile operating system, the type of mobile internet browser you use, and other diagnostic data.</p>
+            <p>We may also collect information that your browser sends whenever you visit ApprenticeWatch.</p>
             <h4>Information from Third-Party Social Media Services</h4>
-            <p>The Company allows You to create an account and log in to use the Service through the following Third-party Social Media Services:</p>
+            <p>We allow you to create an account and log in using Google:</p>
             <ul>
             <li>Google</li>
-            <li>Facebook</li>
-            <li>Instagram</li>
-            <li>Twitter</li>
-            <li>LinkedIn</li>
             </ul>
-            <p>If You decide to register through or otherwise grant us access to a Third-Party Social Media Service, We may collect Personal data that is already associated with Your Third-Party Social Media Service&apos;s account, such as Your name, Your email address, Your activities or Your contact list associated with that account.</p>
-            <p>You may also have the option of sharing additional information with the Company through Your Third-Party Social Media Service&apos;s account. If You choose to provide such information and Personal Data, during registration or otherwise, You are giving the Company permission to use, share, and store it in a manner consistent with this Privacy Policy.</p>
+            <p>If you choose to register or log in through Google, we may collect personal data already associated with your Google account, such as your name and email address. We do this to make it easier for you to create and use your ApprenticeWatch account.</p>
+            <p>You may also be able to share additional information with us through your Google account. If you choose to provide this information, you're giving us permission to use, share, and store it in line with this Privacy Policy.</p>
             <h4>Tracking Technologies and Cookies</h4>
-            <p>We use Cookies and similar tracking technologies to track the activity on Our Service and store certain information. Tracking technologies used are beacons, tags, and scripts to collect and track information and to improve and analyze Our Service. The technologies We use may include:</p>
+            <p>We use cookies and similar technologies to track activity on ApprenticeWatch and store certain information. These technologies help us to improve and analyse our service. They include:</p>
             <ul>
-            <li><strong>Cookies or Browser Cookies.</strong> A cookie is a small file placed on Your Device. You can instruct Your browser to refuse all Cookies or to indicate when a Cookie is being sent. However, if You do not accept Cookies, You may not be able to use some parts of our Service. Unless you have adjusted Your browser setting so that it will refuse Cookies, our Service may use Cookies.</li>
-            <li><strong>Web Beacons.</strong> Certain sections of our Service and our emails may contain small electronic files known as web beacons (also referred to as clear gifs, pixel tags, and single-pixel gifs) that permit the Company, for example, to count users who have visited those pages or opened an email and for other related website statistics (for example, recording the popularity of a certain section and verifying system and server integrity).</li>
+            <li><strong>Cookies or Browser Cookies.</strong>  A cookie is a small file placed on your device. You can set your browser to refuse all cookies or to notify you when a cookie is being sent. However, if you don't accept cookies, some parts of ApprenticeWatch may not work properly.</li>
+            <li><strong>Web Beacons.</strong>  Certain parts of ApprenticeWatch and our emails may contain small electronic files known as web beacons. These allow us to count users who have visited those pages or opened an email, and gather website statistics (for example, understanding the popularity of a particular section and ensuring the system is working correctly).</li>
             </ul>
-            <p>Cookies can be &quot;Persistent&quot; or &quot;Session&quot; Cookies. Persistent Cookies remain on Your personal computer or mobile device when You go offline, while Session Cookies are deleted as soon as You close Your web browser. Learn more about cookies on the <a href="https://www.freeprivacypolicy.com/blog/sample-privacy-policy-template/#Use_Of_Cookies_And_Tracking" target="_blank">Free Privacy Policy website</a> article.</p>
+            <p>Cookies can be "Persistent" or "Session" Cookies. Persistent Cookies remain on Your personal computer or mobile device when You go offline, while Session Cookies are deleted as soon as You close Your web browser.</p>
             <p>We use both Session and Persistent Cookies for the purposes set out below:</p>
             <ul>
             <li>
@@ -132,87 +134,111 @@ export const Privacy = () => {
             <p><strong>Functionality Cookies</strong></p>
             <p>Type: Persistent Cookies</p>
             <p>Administered by: Us</p>
-            <p>Purpose: These Cookies allow us to remember choices You make when You use the Website, such as remembering your login details or language preference. The purpose of these Cookies is to provide You with a more personal experience and to avoid You having to re-enter your preferences every time You use the Website.</p>
+            <p>Purpose: These cookies remember your login details so you don't have to log in again each time you visit. This makes your experience smoother and more convenient.</p>
             </li>
             </ul>
             <p>For more information about the cookies we use and your choices regarding cookies, please visit our Cookies Policy or the Cookies section of our Privacy Policy.</p>
             <h3>Use of Your Personal Data</h3>
-            <p>The Company may use Personal Data for the following purposes:</p>
+            <p>We use your personal data for a number of reasons, including:</p>
             <ul>
             <li>
-            <p><strong>To provide and maintain our Service</strong>, including to monitor the usage of our Service.</p>
+            <p><strong>To provide and maintain ApprenticeWatch</strong>, and to monitor how it's being used.</p>
             </li>
             <li>
-            <p><strong>To manage Your Account:</strong> to manage Your registration as a user of the Service. The Personal Data You provide can give You access to different functionalities of the Service that are available to You as a registered user.</p>
+            <p><strong>To manage your account:</strong> The personal data you provide allows you to access different features of ApprenticeWatch as a registered user.</p>
             </li>
             <li>
-            <p><strong>For the performance of a contract:</strong> the development, compliance and undertaking of the purchase contract for the products, items or services You have purchased or of any other contract with Us through the Service.</p>
+            <p><strong>To fulfil a contract:</strong> This includes managing any purchases you make or any other agreements you have with us through ApprenticeWatch.</p>
             </li>
             <li>
-            <p><strong>To contact You:</strong> To contact You by email, telephone calls, SMS, or other equivalent forms of electronic communication, such as a mobile application&apos;s push notifications regarding updates or informative communications related to the functionalities, products or contracted services, including the security updates, when necessary or reasonable for their implementation.</p>
+            <p><strong>To contact you:</strong> We may contact you by email, phone, or other electronic means with updates or information about ApprenticeWatch, including security updates where necessary.</p>
             </li>
             <li>
-            <p><strong>To provide You</strong> with news, special offers and general information about other goods, services and events which we offer that are similar to those that you have already purchased or enquired about unless You have opted not to receive such information.</p>
+            <p><strong>To provide you</strong> with news, special offers and general information about other goods, services and events which we offer that are similar to those that you have already purchased or enquired about unless You have opted not to receive such information.</p>
             </li>
             <li>
-            <p><strong>To manage Your requests:</strong> To attend and manage Your requests to Us.</p>
+            <p><strong>To manage your requests:</strong>  To handle any queries or requests you send to us.</p>
             </li>
             <li>
-            <p><strong>For business transfers:</strong> We may use Your information to evaluate or conduct a merger, divestiture, restructuring, reorganization, dissolution, or other sale or transfer of some or all of Our assets, whether as a going concern or as part of bankruptcy, liquidation, or similar proceeding, in which Personal Data held by Us about our Service users is among the assets transferred.</p>
+            <p><strong>For business transfers:</strong> If we are involved in a merger, sale, or other transfer of assets, your information may be transferred as part of that transaction.</p>
+            </li>
+             <li>
+            <p><strong>To improve our AI model:</strong>  The CV text and job descriptions you provide help us to improve the accuracy and effectiveness of our CV Optimisation feature.  By analysing this data, we can refine our services and provide better support to our users.</p>
             </li>
             <li>
             <p><strong>For other purposes</strong>: We may use Your information for other purposes, such as data analysis, identifying usage trends, determining the effectiveness of our promotional campaigns and to evaluate and improve our Service, products, services, marketing and your experience.</p>
             </li>
             </ul>
-            <p>We may share Your personal information in the following situations:</p>
+            <p>We may share your personal information in the following situations:</p>
             <ul>
-            <li><strong>With Service Providers:</strong> We may share Your personal information with Service Providers to monitor and analyze the use of our Service,  to contact You.</li>
+            <li><strong>With Service Providers:</strong> We may share Your personal information with Service Providers to monitor and analyse the use of our Service,  to contact You.</li>
             <li><strong>For business transfers:</strong> We may share or transfer Your personal information in connection with, or during negotiations of, any merger, sale of Company assets, financing, or acquisition of all or a portion of Our business to another company.</li>
             <li><strong>With Affiliates:</strong> We may share Your information with Our affiliates, in which case we will require those affiliates to honor this Privacy Policy. Affiliates include Our parent company and any other subsidiaries, joint venture partners or other companies that We control or that are under common control with Us.</li>
             <li><strong>With business partners:</strong> We may share Your information with Our business partners to offer You certain products, services or promotions.</li>
             <li><strong>With other users:</strong> when You share personal information or otherwise interact in the public areas with other users, such information may be viewed by all users and may be publicly distributed outside. If You interact with other users or register through a Third-Party Social Media Service, Your contacts on the Third-Party Social Media Service may see Your name, profile, pictures and description of Your activity. Similarly, other users will be able to view descriptions of Your activity, communicate with You and view Your profile.</li>
             <li><strong>With Your consent</strong>: We may disclose Your personal information for any other purpose with Your consent.</li>
             </ul>
+             <h3>Google Analytics 4</h3>
+            <p>We use Google Analytics 4 (GA4) to help us understand how people are using ApprenticeWatch. GA4 collects data about things like which pages are visited, how users interact with the 'apply' button on apprenticeship listings, what search terms are used, and which filters are applied. This information helps us to understand what's most important to our users, prioritise certain apprenticeships, and improve the overall experience.</p>
+            <p>You can find out more about how Google uses data collected through GA4 in their privacy policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>.</p>
+            <h3>Mapbox</h3>
+            <p>We use Mapbox to display interactive maps on ApprenticeWatch. When you use the map, Mapbox may collect information such as your location and IP address.  We recommend that you review Mapbox's privacy policy and terms of service for more details on how they handle your data.</p>
+            <p>Mapbox Privacy Policy: <a href="https://www.mapbox.com/legal/privacy#product-privacy-policy" target="_blank" rel="noopener noreferrer">https://www.mapbox.com/legal/privacy#product-privacy-policy</a></p>
+            <p>Mapbox Legal FAQ: <a href="https://www.mapbox.com/legal/legal-faq" target="_blank" rel="noopener noreferrer">https://www.mapbox.com/legal/legal-faq</a></p>
+             <h3>Google Gemini AI API</h3>
+            <p>Our CV Optimisation feature uses the Google Gemini AI API to analyse your CV and job description. When you use this feature, your CV text and job description are sent to Google for analysis. According to Google, this data isn't stored or used to train their models. However, we encourage you to read the Google Gemini privacy policy for more information.</p>
+            <p><a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">https://ai.google.dev/gemini-api/terms</a></p>
+            <h3>Data Storage</h3>
+             <p>All data ApprenticeWatch stores about you is held securely in data centres located in London, United Kingdom.</p>
             <h3>Retention of Your Personal Data</h3>
-            <p>The Company will retain Your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use Your Personal Data to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, and enforce our legal agreements and policies.</p>
-            <p>The Company will also retain Usage Data for internal analysis purposes. Usage Data is generally retained for a shorter period of time, except when this data is used to strengthen the security or to improve the functionality of Our Service, or We are legally obligated to retain this data for longer time periods.</p>
+            <p>We will only keep your personal data for as long as we need it for the purposes set out in this Privacy Policy. We will also retain and use your data where necessary to comply with our legal obligations, resolve disputes, and enforce our agreements.</p>
+             <p>CV text and job descriptions submitted for the CV Optimisation feature are retained indefinitely. This data is valuable to us as it helps us to continuously improve our AI algorithm and provide a better service to our users.</p>
+            <p>We also retain Usage Data for internal analysis. This data is generally kept for a shorter period, unless it's needed to improve security or functionality, or if we're legally required to keep it for longer.</p>
             <h3>Transfer of Your Personal Data</h3>
-            <p>Your information, including Personal Data, is processed at the Company&apos;s operating offices and in any other places where the parties involved in the processing are located. It means that this information may be transferred to — and maintained on — computers located outside of Your state, province, country or other governmental jurisdiction where the data protection laws may differ than those from Your jurisdiction.</p>
-            <p>Your consent to this Privacy Policy followed by Your submission of such information represents Your agreement to that transfer.</p>
-            <p>The Company will take all steps reasonably necessary to ensure that Your data is treated securely and in accordance with this Privacy Policy and no transfer of Your Personal Data will take place to an organization or a country unless there are adequate controls in place including the security of Your data and other personal information.</p>
+            <p>Your information, including personal data, is processed at our offices and in other locations where the parties involved in the processing are based. This means your data may be transferred to and stored on computers outside of your local area, where data protection laws may be different.</p>
+            <p>By agreeing to this Privacy Policy and submitting your information, you're consenting to this transfer.</p>
+            <p>We will take all reasonable steps to ensure that your data is treated securely and in line with this Privacy Policy. We won't transfer your personal data to an organisation or country unless there are adequate controls in place to protect it.</p>
             <h3>Delete Your Personal Data</h3>
-            <p>You have the right to delete or request that We assist in deleting the Personal Data that We have collected about You.</p>
-            <p>Our Service may give You the ability to delete certain information about You from within the Service.</p>
-            <p>You may update, amend, or delete Your information at any time by signing in to Your Account, if you have one, and visiting the account settings section that allows you to manage Your personal information. You may also contact Us to request access to, correct, or delete any personal information that You have provided to Us.</p>
-            <p>Please note, however, that We may need to retain certain information when we have a legal obligation or lawful basis to do so.</p>
+            <p>You have the right to request that we delete your personal data.</p>
+            <p>You may be able to delete some of your information directly through your ApprenticeWatch account.</p>
+            <p>You can also contact us to request access to, correct, or delete any personal information you've provided to us.</p>
+             <p>To request deletion of your CV text and job description data, please contact us at <a href={`mailto:${email}`}>{email}</a> and your request will be honoured.</p>
+            <p>Please note that we may need to retain certain information if we have a legal obligation to do so.</p>
             <h3>Disclosure of Your Personal Data</h3>
             <h4>Business Transactions</h4>
-            <p>If the Company is involved in a merger, acquisition or asset sale, Your Personal Data may be transferred. We will provide notice before Your Personal Data is transferred and becomes subject to a different Privacy Policy.</p>
+            <p>If we are involved in a merger, acquisition, or asset sale, your personal data may be transferred. We will notify you before this happens and before your data becomes subject to a different privacy policy.</p>
             <h4>Law enforcement</h4>
-            <p>Under certain circumstances, the Company may be required to disclose Your Personal Data if required to do so by law or in response to valid requests by public authorities (e.g. a court or a government agency).</p>
+            <p>We may be required to disclose your personal data if required by law or in response to valid requests from public authorities (e.g. a court or government agency).</p>
             <h4>Other legal requirements</h4>
-            <p>The Company may disclose Your Personal Data in the good faith belief that such action is necessary to:</p>
+            <p>We may disclose your personal data if we believe it's necessary to:</p>
             <ul>
             <li>Comply with a legal obligation</li>
-            <li>Protect and defend the rights or property of the Company</li>
-            <li>Prevent or investigate possible wrongdoing in connection with the Service</li>
-            <li>Protect the personal safety of Users of the Service or the public</li>
+            <li>Protect our rights or property</li>
+            <li>Prevent or investigate potential wrongdoing related to ApprenticeWatch</li>
+            <li>Protect the personal safety of ApprenticeWatch users or the public</li>
             <li>Protect against legal liability</li>
             </ul>
             <h3>Security of Your Personal Data</h3>
-            <p>The security of Your Personal Data is important to Us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While We strive to use commercially acceptable means to protect Your Personal Data, We cannot guarantee its absolute security.</p>
-            <h2>Children&apos;s Privacy</h2>
-            <p>Our Service does not address anyone under the age of 13. We do not knowingly collect personally identifiable information from anyone under the age of 13. If You are a parent or guardian and You are aware that Your child has provided Us with Personal Data, please contact Us. If We become aware that We have collected Personal Data from anyone under the age of 13 without verification of parental consent, We take steps to remove that information from Our servers.</p>
-            <p>If We need to rely on consent as a legal basis for processing Your information and Your country requires consent from a parent, We may require Your parent&apos;s consent before We collect and use that information.</p>
+            <p>We take the security of your personal data seriously. However, no method of transmission over the internet or electronic storage is completely secure. While we do our best to protect your data, we cannot guarantee its absolute security.</p>
+            <h2>Children's Privacy</h2>
+            <p>ApprenticeWatch is not intended for anyone under the age of 13. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal data, please contact us. If we become aware that we have collected data from a child under 13 without parental consent, we will take steps to remove the information from our servers.</p>
+            <p>If we need to rely on consent as a legal basis for processing Your information and Your country requires consent from a parent, We may require Your parent's consent before We collect and use that information.</p>
             <h2>Links to Other Websites</h2>
-            <p>Our Service may contain links to other websites that are not operated by Us. If You click on a third party link, You will be directed to that third party&apos;s site. We strongly advise You to review the Privacy Policy of every site You visit.</p>
-            <p>We have no control over and assume no responsibility for the content, privacy policies or practices of any third party sites or services.</p>
+            <p>ApprenticeWatch may contain links to other websites that we don't operate. If you click on a third-party link, you'll be directed to their site. We strongly advise you to review the privacy policy of any website you visit.</p>
+            <p>We have no control over and are not responsible for the content, privacy policies, or practices of any third-party sites or services.</p>
             <h2>Changes to this Privacy Policy</h2>
-            <p>We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page.</p>
-            <p>We will let You know via email and/or a prominent notice on Our Service, prior to the change becoming effective and update the &quot;Last updated&quot; date at the top of this Privacy Policy.</p>
-            <p>You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.</p>
+            <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page.</p>
+            <p>We'll update the "Last updated" date at the top of this policy.</p>
+            <p>We encourage you to review this Privacy Policy regularly to stay informed about any changes. Changes are effective when they are posted on this page.</p>
+            <h2>Legal Basis for Processing Personal Data</h2>
+            <p>We process your personal data based on the following legal bases:</p>
+            <ul>
+                <li><strong>Performance of a contract:</strong>  We process your data to provide you with the services you request, such as the CV Optimisation feature.</li>
+                <li><strong>Legitimate interests:</strong> We process your data to improve our AI models and provide a better user experience. We believe this is in our legitimate interest and does not unduly infringe on your privacy rights.</li>
+                <li><strong>Consent:</strong> Where required by law, we will obtain your consent to process your data.</li>
+            </ul>
             <h2>Contact Us</h2>
-            <p>If you have any questions about this Privacy Policy, You can contact us:</p>
+            <p>If you have any questions about this Privacy Policy, please contact us:</p>
             <ul>
               {email && <li>By email: {email}</li>}
             </ul>
