@@ -652,7 +652,7 @@ export const CVGuide = () => {
                     <li>Result: What was the outcome?</li>
                     <li>Reflection: What did you learn from this experience?</li>
                   </ul>
-                  <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
                     <p className="text-green-600 dark:text-green-400">
                       ✅ "Developed a Python script to automate data collection, reducing manual work by 60%."
                     </p>
