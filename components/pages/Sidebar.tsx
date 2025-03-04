@@ -11,25 +11,42 @@ export const Sidebar = () => {
   useEffect(() => {
     const sections = document.querySelectorAll('.section-container');
     //console.log('Sections found:', sections.length); // Debug: Check if sections are found
+    const visibilityMap = new Map(); // Track visibility of each section
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           //console.log('Entry:', entry.target.id, entry.isIntersecting) // Debug: Log intersection events
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+          // Update the visibility ratio for the section
+          visibilityMap.set(entry.target.id, entry.intersectionRatio);
+        });
+
+        // Find the section with the highest visibility ratio
+        let mostVisibleSection = null;
+        let highestRatio = 0;
+
+        visibilityMap.forEach((ratio, id) => {
+          if (ratio > highestRatio) {
+            highestRatio = ratio;
+            mostVisibleSection = id;
           }
         });
+
+        // Update the active section
+        if (mostVisibleSection) {
+          setActiveSection(mostVisibleSection);
+        }
       },
       {
         rootMargin: '-50px 0px -50px 0px', // Adjust this value as needed; higher = bigger boundary
-        threshold: 0.3, // Adjust this value as needed; lower = as soon as in view
+        threshold: Array.from({ length: 100 }, (_, i) => i * 0.01), // Track visibility at 1% intervals
       }
     );
-  
+
     sections.forEach((section) => {
       observer.observe(section);
     });
-  
+
     return () => {
       sections.forEach((section) => {
         observer.unobserve(section);
