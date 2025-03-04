@@ -21,7 +21,7 @@ const footerSections = [
       { label: 'Apprenticeships', href: '/apprenticeships' },
       { label: 'Optimise CV', href: '/optimise-cv' },
       { label: 'Success Stories', href: '/success-stories' },
-      { label: 'FAQ', href: '/faq' }
+      { label: 'CV Guide', href: '/cv-guide' }
     ]
   },
   {
