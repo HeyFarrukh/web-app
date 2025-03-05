@@ -61,6 +61,9 @@ export const CVGuide = () => {
                 <p>+44 1234567890 | <a href="mailto:jamal@apprenticewatch.com" className="text-blue-600 hover:text-blue-800 underline">Email</a></p>
               </div>
             </div>
+            <div>
+              <p className="italic text-gray-700 dark:text-gray-300"><br />Reviewed by apprentices and hiring managers at Accenture, HSBC, and Digital Catapult.</p>
+            </div>
           </motion.div>
 
           <Section
@@ -98,32 +101,32 @@ export const CVGuide = () => {
             title="Work Experience/Professional"
             content={
               <div>
-                <table className="w-full border-collapse mb-4">
-                  <tr>
-                    <td className="py-0 font-semibold" colSpan={1} rowSpan={1}>
+                <div className="flex flex-col mb-4">
+                  <div className="flex justify-between py-0">
+                    <div className="py-0 font-semibold text-sm">
                       <p className="m-0 leading-tight">
-                        <span className="text-gray-700 dark:text-gray-300">Most Recent Relevant Work Experience Firm</span>
+                        <span className="text-gray-800 dark:text-gray-200">Most Recent Relevant Work Experience Firm</span>
                       </p>
-                    </td>
-                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-0 text-right text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-700 dark:text-gray-300">Location, Country</span>
                       </p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-0" colSpan={1} rowSpan={1}>
+                    </div>
+                  </div>
+                  <div className="flex justify-between py-0">
+                    <div className="py-0 text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Role/Event</span>
                       </p>
-                    </td>
-                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-0 text-right text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Start (Month, Year) - End/“Present”</span>
                       </p>
-                    </td>
-                  </tr>
-                </table>
+                    </div>
+                  </div>
+                </div>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
                     <span className="text-gray-700 dark:text-gray-300">Talk about the impact of your work with measurable impacts if possible. If it was a workshop or other type of professional event, display the attributes, professional behaviours, and skills you learnt or refined.</span>
@@ -176,32 +179,32 @@ export const CVGuide = () => {
             title="Example for Consulting or Tech:"
             content={
               <div>
-                <table className="w-full border-collapse mb-4">
-                  <tr>
-                    <td className="py-0 font-semibold" colSpan={1} rowSpan={1}>
+                <div className="flex flex-col mb-4">
+                  <div className="flex justify-between py-0">
+                    <div className="py-0 font-semibold text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-800 dark:text-gray-200">PA Consulting</span>
                       </p>
-                    </td>
-                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-0 text-right text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-700 dark:text-gray-300">London, UK</span>
                       </p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-0" colSpan={1} rowSpan={1}>
+                    </div>
+                  </div>
+                  <div className="flex justify-between py-0">
+                    <div className="py-0 text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Data Scientist Intern</span>
                       </p>
-                    </td>
-                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-0 text-right text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Feb 2025</span>
                       </p>
-                    </td>
-                  </tr>
-                </table>
+                    </div>
+                  </div>
+                </div>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
                     <span className="text-gray-700 dark:text-gray-300">Led the development of an AI application dedicated to monitoring legislative regulatory changes, substantially reducing administrative overhead and repetitive tasks by 90%.</span>
@@ -223,32 +226,32 @@ export const CVGuide = () => {
             title="Student Example:"
             content={
               <div>
-                <table className="w-full border-collapse mb-4">
-                  <tr>
-                    <td className="py-0 font-semibold" colSpan={1} rowSpan={1}>
+                <div className="flex flex-col mb-4">
+                  <div className="flex justify-between py-0">
+                    <div className="py-0 font-semibold text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-800 dark:text-gray-200">Sans AI Hackathon</span>
                       </p>
-                    </td>
-                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-0 text-right text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-700 dark:text-gray-300">London, UK</span>
                       </p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-0" colSpan={1} rowSpan={1}>
+                    </div>
+                  </div>
+                  <div className="flex justify-between py-0">
+                    <div className="py-0 text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">Participant</span>
                       </p>
-                    </td>
-                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-0 text-right text-sm">
                       <p className="m-0 leading-tight">
                         <span className="text-gray-700 italic dark:text-gray-300 italic">November 2024</span>
                       </p>
-                    </td>
-                  </tr>
-                </table>
+                    </div>
+                  </div>
+                </div>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
                     <span className="text-gray-700 dark:text-gray-300">Built a smart home energy monitor using Python and Raspberry Pi, presenting findings of up to 40% increased efficiency to a panel of 5 judges.</span>
@@ -327,21 +330,21 @@ export const CVGuide = () => {
             content={
               <div>
                 {/* Sixth Form/College */}
-                <table className="w-full border-collapse mb-4">
-                  <tr>
-                    <td className="py-0" colSpan={1} rowSpan={1}>
+                <div className="flex flex-col mb-4">
+                  <div className="flex justify-between py-0">
+                    <div className="py-0 text-sm">
                       <p className="m-0 leading-tight">
                         <span className="font-semibold text-gray-800 dark:text-gray-200">Sixth Form/College</span>
                         <span className="text-gray-700 dark:text-gray-300"> | Location, Country</span>
                       </p>
-                    </td>
-                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-0 text-right text-sm">
                       <p>
                         <span className="text-gray-700 italic dark:text-gray-300">Start (Year) - End</span>
                       </p>
-                    </td>
-                  </tr>
-                </table>
+                    </div>
+                  </div>
+                </div>
                 <div className="pl-6 mb-4">
                   <p className="leading-tight text-gray-700 dark:text-gray-300">
                     (Qualification): [Subject] ‘Grade’, …
@@ -352,21 +355,21 @@ export const CVGuide = () => {
                 </div>
 
                 {/* Secondary School */}
-                <table className="w-full border-collapse mb-4">
-                  <tr>
-                    <td className="py-0" colSpan={1} rowSpan={1}>
+                <div className="flex flex-col mb-4">
+                  <div className="flex justify-between py-0">
+                    <div className="py-0 text-sm">
                       <p className="m-0 leading-tight">
                         <span className="font-semibold text-gray-800 dark:text-gray-200">Secondary School (if different)</span>
                         <span className="text-gray-700 dark:text-gray-300"> | Location, Country</span>
                       </p>
-                    </td>
-                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-0 text-right text-sm">
                       <p>
                         <span className="text-gray-700 italic dark:text-gray-300">Start (Year) - End</span>
                       </p>
-                    </td>
-                  </tr>
-                </table>
+                    </div>
+                  </div>
+                </div>
                 <div className="pl-6">
                   <p className="leading-tight text-gray-700 dark:text-gray-300">
                     (Qualification): [Subject] ‘Grade’, …
@@ -386,21 +389,21 @@ export const CVGuide = () => {
             content={
               <div> 
                 {/* Sixth Form/College */}
-                <table className="w-full border-collapse mb-4">
-                  <tr>
-                    <td className="py-0" colSpan={1} rowSpan={1}>
+                <div className="flex flex-col mb-4">
+                  <div className="flex justify-between py-0">
+                    <div className="py-0 text-sm">
                       <p className="m-0 leading-tight">
                         <span className="font-semibold text-gray-800 dark:text-gray-200">Ada, the National College of Digital Skills</span>
                         <span className="text-gray-700 dark:text-gray-300"> | London, UK</span>
                       </p>
-                    </td>
-                    <td className="py-0 text-right" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-0 text-right text-sm">
                       <p>
                         <span className="text-gray-700 italic dark:text-gray-300">2023-2025</span>
                       </p>
-                    </td>
-                  </tr>
-                </table>
+                    </div>
+                  </div>
+                </div>
                 <div className="pl-6 mb-4">
                   <p className="leading-tight text-gray-700 dark:text-gray-300">
                     <i>BTEC National Diploma:</i> Computer Science  D*D*
@@ -438,25 +441,25 @@ export const CVGuide = () => {
                 </p>
 
                 {/* Activities Table */}
-                <table className="w-full border-collapse">
-                  <tr>
-                    <td className="py-2" colSpan={1} rowSpan={1}>
+                <div className="flex flex-col mb-4">
+                  <div className="flex justify-between py-0 gap-x-0">
+                    <div className="py-2 text-sm">
                       <p className="m-0 leading-tight text-gray-700 dark:text-gray-300">Basketball Coaching</p>
                       <p className="text-gray-700 dark:text-gray-300">Music Performance</p>
                       <p className="text-gray-700 dark:text-gray-300">Music Production</p>
-                    </td>
-                    <td className="py-2" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-2 text-sm">
                       <p className="m-0 leading-tight text-gray-700 dark:text-gray-300">3D Modelling Club</p>
                       <p className="text-gray-700 dark:text-gray-300">Programming Club</p>
                       <p className="text-gray-700 dark:text-gray-300">Boxing Marketing</p>
-                    </td>
-                    <td className="py-2" colSpan={1} rowSpan={1}>
+                    </div>
+                    <div className="py-2 text-sm">
                       <p className="m-0 leading-tight text-gray-700 dark:text-gray-300">Chess</p>
                       <p className="text-gray-700 dark:text-gray-300">Choir</p>
                       <p className="text-gray-700 dark:text-gray-300">Gaming</p>
-                    </td>
-                  </tr>
-                </table>
+                    </div>
+                  </div>
+                </div>
               </div>
             }
           />

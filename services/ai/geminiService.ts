@@ -47,7 +47,7 @@ Output must be in the following JSON structure ONLY, with NO markdown formatting
       "impact": "high" | "medium" | "low",
       "context": string,
       "suggestions": string[],
-      "optimisedContent": string (provide complete rewritten section that matches the user's writing style)
+      "optimisedContent": string (provide complete rewritten section that matches the user's writing style, and balances brevity with depth)
     }
   ]
 }
@@ -55,7 +55,7 @@ Output must be in the following JSON structure ONLY, with NO markdown formatting
 Categories must include:
 - Relevance (match to job requirements)
 - Impact (strength of achievements)
-- Clarity (readability)
+- Clarity (readability and brevity)
 - Keywords (industry terms)
 
 Analyze ALL common CV sections including but not limited to:
@@ -85,11 +85,18 @@ CRITICAL REQUIREMENTS:
 - Use British English spelling and terminology at all times
 - Ensure optimised content matches the user's writing style and tone
 - Maintain the language structure of the user's CV
+- Use the golden template for optimising experience: What they did and the impact it made
+- Factor in how soft skills made an impact in an experience
+- Do not suggest adding more of the same achievements
 - Do not make the content sound AI-generated
 - Focus on making the CV align with apprenticeship requirements
 - Only provide feedback on sections that need improvement
 - Analyze any additional sections present in the user's CV even if not listed above
 
+IMPORTANT: Ensure your recommendations focus only on genuine areas for improvement that are aligned with the job description and marking criteria.
+IMPORTANT: Do not use buzzwords or cliches
+IMPORTANT: Optimise experience sections in the format of what they did, and the impact it had.
+IMPORTANT: Focus on the quality and impact of the experience through clear and concise descriptions.
 IMPORTANT: Response must be valid JSON only, with no additional text or markdown formatting.`;
 
   async analyzeCV(cvText: string, jobDescription: string): Promise<AIAnalysisResponse> {
