@@ -133,6 +133,12 @@ export default function Listings() {
     setCurrentPage(newPage);
     const queryString = createQueryString({ page: newPage.toString() });
     router.push(`${pathname}?${queryString}`, { scroll: false });
+    
+    // Scroll to the top of the page with smooth scrolling
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
