@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, Building2, MapPin, GraduationCap,
   Clock, Calendar, Timer, Mail, Phone, Globe, Users,
@@ -43,7 +43,9 @@ interface ListingDetailsProps {
 export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const [showDropdown, setShowDropdown] = React.useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const referringPage = searchParams.get('fromPage') || '1';
+  const scrollToId = searchParams.get('scrollToId');
 
   useEffect(() => {
     // Track apprenticeship view
@@ -94,14 +96,17 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <Link
-            href={`/apprenticeships?page=${referringPage}`}
+          <button
+            onClick={() => {
+              const url = `/apprenticeships?page=${referringPage}${scrollToId ? `&scrollToId=${scrollToId}` : ''}`;
+              router.push(url);
+            }}
             className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
             aria-label="Back to Apprenticeships"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
             <span>Back to Apprenticeships</span>
-          </Link>
+          </button>
           <div className="relative flex justify-center items-center">
             <button
               className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"

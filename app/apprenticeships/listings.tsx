@@ -117,6 +117,21 @@ export default function Listings() {
     fetchListings();
   }, [currentPage, filters, viewMode]);
 
+  // Handle scrolling to specific listing when returning from detail page
+  useEffect(() => {
+    if (!loading) {
+      const scrollToId = searchParams.get('scrollToId');
+      if (scrollToId) {
+        setTimeout(() => {
+          const element = document.getElementById(`listing-${scrollToId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300); // Small delay to ensure the DOM is fully rendered
+      }
+    }
+  }, [loading, searchParams]);
+
   const createQueryString = (params: Record<string, string>) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     Object.entries(params).forEach(([key, value]) => {
