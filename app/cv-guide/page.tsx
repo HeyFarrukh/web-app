@@ -1,7 +1,18 @@
 'use client';
 
-import { CVGuide } from '@/components/pages/CVGuide';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function CVGuidePage() {
-  return <CVGuide />;
+  const router = useRouter();
+  
+  useEffect(() => {
+    router.push('/resources/cv-guide');
+  }, [router]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-lg">Redirecting to new CV Guide...</p>
+    </div>
+  );
 }

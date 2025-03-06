@@ -1,0 +1,67 @@
+---
+// Import necessary components
+import { ViewTransitions } from 'astro:transitions';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "ApprenticeWatch Resources - Articles, Guides, and More" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <title>{title} | ApprenticeWatch</title>
+    <ViewTransitions />
+  </head>
+  <body class="min-h-screen bg-white dark:bg-gray-900">
+    <div class="flex flex-col min-h-screen">
+      <header class="bg-gray-900 text-white py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center">
+            <a href="/" class="text-3xl font-extrabold">
+              <span class="text-white">APPRENTICE</span>
+              <span class="text-orange-500">WATCH</span>
+            </a>
+            <nav class="hidden md:flex space-x-8">
+              <a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a>
+              <a href="/resources" class="text-orange-500 font-medium">Resources</a>
+              <a href="/about" class="text-gray-300 hover:text-white transition-colors">About</a>
+              <a href="/contact" class="text-gray-300 hover:text-white transition-colors">Contact</a>
+            </nav>
+            <button class="md:hidden text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1">
+        <slot />
+      </main>
+
+      <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div class="text-center">
+            <p>© {new Date().getFullYear()} ApprenticeWatch. All rights reserved.</p>
+            <div class="mt-4">
+              <a href="/" class="text-gray-400 hover:text-orange-500 transition-colors mx-2">Home</a>
+              <a href="/resources" class="text-gray-400 hover:text-orange-500 transition-colors mx-2">Resources</a>
+              <a href="/privacy" class="text-gray-400 hover:text-orange-500 transition-colors mx-2">Privacy Policy</a>
+              <a href="/terms" class="text-gray-400 hover:text-orange-500 transition-colors mx-2">Terms of Service</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

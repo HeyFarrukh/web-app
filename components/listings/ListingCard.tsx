@@ -40,7 +40,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   };
 
   const searchParams = useSearchParams();
-  const currentPage = searchParams.get('page') || '1';
+  const currentPage = searchParams?.get('page') || '1';
 
   return (
     <div 

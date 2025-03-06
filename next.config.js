@@ -17,6 +17,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true, // Disables ESLint during build
   },
+  // We don't need the rewrites anymore as Astro files will be in the public directory
 };
 
 module.exports = nextConfig;

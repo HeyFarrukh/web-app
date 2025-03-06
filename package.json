@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node server.js",
     "lint": "next lint",
     "export": "next export",
-    "deploy": "next build && firebase deploy"
+    "deploy": "next build && firebase deploy",
+    "build:all": "npm run build"
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.0",

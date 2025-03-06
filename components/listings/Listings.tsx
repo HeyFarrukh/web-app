@@ -17,7 +17,7 @@ export const Listings = () => {
   
   // Initialize state from URL parameters
   const [currentPage, setCurrentPage] = useState(() => {
-    const page = searchParams.get('page');
+    const page = searchParams?.get('page');
     return page ? parseInt(page) : 1;
   });
   
@@ -26,14 +26,14 @@ export const Listings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    location: searchParams.get('location') || '',
-    level: searchParams.get('level') || ''
+    search: searchParams?.get('search') || '',
+    location: searchParams?.get('location') || '',
+    level: searchParams?.get('level') || ''
   });
 
   // Create a function to update URL and maintain state
   const createQueryString = (newParams: Record<string, string>) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || '');
     
     // Update or remove parameters
     Object.entries(newParams).forEach(([key, value]) => {
