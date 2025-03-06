@@ -11,6 +11,7 @@ import { ListingsMap } from '@/components/listings/ListingsMap';
 import { List, Map as MapIcon } from 'lucide-react';
 import { ApprenticeshipListingsTracker } from '@/components/pages/ApprenticeshipListingsTracker';
 import { Analytics } from '@/services/analytics/analytics';
+import { PulseAnimation } from '@/components/ui/PulseAnimation';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -35,12 +36,12 @@ export default function Listings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-
   const [filters, setFilters] = useState<FilterParams>({
     search: searchParams.get('search') || '',
     location: searchParams.get('location') || '',
     level: searchParams.get('level') || ''
   });
+  const [showMapAnimation, setShowMapAnimation] = useState(true);
 
   // Track view mode changes
   const handleViewModeChange = (mode: 'list' | 'map') => {
@@ -48,6 +49,15 @@ export default function Listings() {
       Analytics.event('ui_interaction', 'view_mode_change', mode);
     }
     setViewMode(mode);
+    
+    // If user switches to map view, don't show the animation anymore
+    if (mode === 'map') {
+      setShowMapAnimation(false);
+      // Mark as seen in localStorage to prevent showing again
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('feature-hint-map-view', 'true');
+      }
+    }
   };
 
   // Enhanced filter change handler with analytics
@@ -117,6 +127,21 @@ export default function Listings() {
     fetchListings();
   }, [currentPage, filters, viewMode]);
 
+  // Handle scrolling to specific listing when returning from detail page
+  useEffect(() => {
+    if (!loading) {
+      const scrollToId = searchParams.get('scrollToId');
+      if (scrollToId) {
+        setTimeout(() => {
+          const element = document.getElementById(`listing-${scrollToId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300); // Small delay to ensure the DOM is fully rendered
+      }
+    }
+  }, [loading, searchParams]);
+
   const createQueryString = (params: Record<string, string>) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     Object.entries(params).forEach(([key, value]) => {
@@ -133,6 +158,12 @@ export default function Listings() {
     setCurrentPage(newPage);
     const queryString = createQueryString({ page: newPage.toString() });
     router.push(`${pathname}?${queryString}`, { scroll: false });
+    
+    // Scroll to the top of the page with smooth scrolling
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
@@ -142,10 +173,17 @@ export default function Listings() {
       <ApprenticeshipListingsTracker />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">
-            Available Apprenticeships
-          </h1>
-          <div className="flex items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-0">
+              Available Apprenticeships
+            </h1>
+            {currentPage > 1 && (
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base mt-1">
+                Page {currentPage} of {totalPages}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center mt-4 sm:mt-0">
             <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm">
               <button
                 onClick={() => handleViewModeChange('list')}
@@ -154,13 +192,25 @@ export default function Listings() {
               >
                 <List className="w-5 h-5" />
               </button>
-              <button
-                onClick={() => handleViewModeChange('map')}
-                className={`p-2 rounded-r-lg ${viewMode === 'map' ? 'bg-orange-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}
-                aria-label="Map View"
-              >
-                <MapIcon className="w-5 h-5" />
-              </button>
+              {viewMode === 'list' && showMapAnimation ? (
+                <PulseAnimation persistKey="map-view">
+                  <button
+                    onClick={() => handleViewModeChange('map')}
+                    className="p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                    aria-label="Map View"
+                  >
+                    <MapIcon className="w-5 h-5" />
+                  </button>
+                </PulseAnimation>
+              ) : (
+                <button
+                  onClick={() => handleViewModeChange('map')}
+                  className="p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                  aria-label="Map View"
+                >
+                  <MapIcon className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
         </div>

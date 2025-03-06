@@ -4,13 +4,21 @@ import { motion } from 'framer-motion';
 import { CompanyLogos } from './CompanyLogos';
 import { SearchBar } from './search/SearchBar';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export const Hero = () => {
   const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/apprenticeships');
+    
+    // Only navigate if there's a search term
+    if (searchTerm.trim()) {
+      router.push(`/apprenticeships?search=${encodeURIComponent(searchTerm.trim())}`);
+    } else {
+      router.push('/apprenticeships');
+    }
   };
 
   return (
@@ -48,7 +56,11 @@ export const Hero = () => {
           </motion.p>
           
           <div className="max-w-3xl mx-auto mb-12">
-            <SearchBar onSubmit={handleSearch} />
+            <SearchBar 
+              onSubmit={handleSearch} 
+              value={searchTerm}
+              onChange={setSearchTerm}
+            />
           </div>
           
           <CompanyLogos />
