@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import {
   ArrowLeft, Building2, MapPin, GraduationCap,
   Clock, Calendar, Timer, Mail, Phone, Globe, Users,
@@ -41,6 +42,8 @@ interface ListingDetailsProps {
 
 export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const [showDropdown, setShowDropdown] = React.useState(false);
+  const searchParams = useSearchParams();
+  const referringPage = searchParams.get('fromPage') || '1';
 
   useEffect(() => {
     // Track apprenticeship view
@@ -92,7 +95,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
         {/* Navigation */}
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <Link
-            href="/apprenticeships"
+            href={`/apprenticeships?page=${referringPage}`}
             className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
             aria-label="Back to Apprenticeships"
           >

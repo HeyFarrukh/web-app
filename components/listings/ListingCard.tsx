@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Building2, MapPin, GraduationCap, Clock, PoundSterling } from 'lucide-react';
 import { ListingType } from '@/types/listing';
 import { formatDate } from '@/utils/dateUtils';
@@ -37,6 +38,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
 
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(employerName)}&background=random`;
   };
+
+  const searchParams = useSearchParams();
+  const currentPage = searchParams.get('page') || '1';
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6">
@@ -86,7 +90,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
 
           <div className="mt-4 flex items-center justify-between">
             <Link
-              href={`/apprenticeships/${listing.id}`}
+              href={`/apprenticeships/${listing.id}?fromPage=${currentPage}`}
               className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
             >
               View Details
