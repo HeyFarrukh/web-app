@@ -11,6 +11,7 @@ import { ListingsMap } from '@/components/listings/ListingsMap';
 import { List, Map as MapIcon } from 'lucide-react';
 import { ApprenticeshipListingsTracker } from '@/components/pages/ApprenticeshipListingsTracker';
 import { Analytics } from '@/services/analytics/analytics';
+import { PulseAnimation } from '@/components/ui/PulseAnimation';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -40,6 +41,7 @@ export default function Listings() {
     location: searchParams.get('location') || '',
     level: searchParams.get('level') || ''
   });
+  const [showMapAnimation, setShowMapAnimation] = useState(true);
 
   // Track view mode changes
   const handleViewModeChange = (mode: 'list' | 'map') => {
@@ -47,6 +49,15 @@ export default function Listings() {
       Analytics.event('ui_interaction', 'view_mode_change', mode);
     }
     setViewMode(mode);
+    
+    // If user switches to map view, don't show the animation anymore
+    if (mode === 'map') {
+      setShowMapAnimation(false);
+      // Mark as seen in localStorage to prevent showing again
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('feature-hint-map-view', 'true');
+      }
+    }
   };
 
   // Enhanced filter change handler with analytics
@@ -181,13 +192,25 @@ export default function Listings() {
               >
                 <List className="w-5 h-5" />
               </button>
-              <button
-                onClick={() => handleViewModeChange('map')}
-                className={`p-2 rounded-r-lg ${viewMode === 'map' ? 'bg-orange-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}
-                aria-label="Map View"
-              >
-                <MapIcon className="w-5 h-5" />
-              </button>
+              {viewMode === 'list' && showMapAnimation ? (
+                <PulseAnimation persistKey="map-view">
+                  <button
+                    onClick={() => handleViewModeChange('map')}
+                    className="p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                    aria-label="Map View"
+                  >
+                    <MapIcon className="w-5 h-5" />
+                  </button>
+                </PulseAnimation>
+              ) : (
+                <button
+                  onClick={() => handleViewModeChange('map')}
+                  className="p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                  aria-label="Map View"
+                >
+                  <MapIcon className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
         </div>
