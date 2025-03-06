@@ -35,7 +35,6 @@ export default function Listings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-
   const [filters, setFilters] = useState<FilterParams>({
     search: searchParams.get('search') || '',
     location: searchParams.get('location') || '',
@@ -163,10 +162,17 @@ export default function Listings() {
       <ApprenticeshipListingsTracker />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">
-            Available Apprenticeships
-          </h1>
-          <div className="flex items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-0">
+              Available Apprenticeships
+            </h1>
+            {currentPage > 1 && (
+              <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base mt-1">
+                Page {currentPage} of {totalPages}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center mt-4 sm:mt-0">
             <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm">
               <button
                 onClick={() => handleViewModeChange('list')}
