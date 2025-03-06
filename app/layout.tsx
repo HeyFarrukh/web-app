@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import dynamic from 'next/dynamic';
 import { Analytics } from '@/services/analytics/analytics';
+import Script from 'next/script';
 
 // Import Google Analytics component with no SSR
 const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), {
@@ -127,6 +128,11 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
+        <Script
+          id="tally-js"
+          src="https://tally.so/widgets/embed.js"
+          strategy="lazyOnload"
+        />
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
         <Navbar />

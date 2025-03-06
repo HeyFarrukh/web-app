@@ -5,6 +5,15 @@ import { motion } from 'framer-motion';
 import { Award, Users, Briefcase, Cpu, ArrowRight } from 'lucide-react';
 import { Analytics } from '@/services/analytics/analytics';
 
+// Declare the Tally global variable
+declare global {
+  interface Window {
+    Tally: {
+      openPopup: (formId: string, options?: any) => void;
+    };
+  }
+}
+
 const benefits = [
   {
     icon: Award,
@@ -37,6 +46,34 @@ export const JoinUs = () => {
   const handleApplyClick = () => {
     // Track ambassador application click
     Analytics.event('ambassador', 'apply_click');
+    
+    // Open Tally Form popup
+    if (typeof window !== 'undefined' && window.Tally) {
+      window.Tally.openPopup('woverX', {
+        layout: 'modal', // Open as a centered modal
+        width: 540,
+        autoClose: 3000,
+        emoji: {
+          text: '🎉',
+          animation: 'tada'
+        },
+        hiddenFields: {
+          source: 'ambassador_application'
+        },
+        onOpen: () => {
+          console.log('Tally Form opened');
+          Analytics.event('ambassador', 'form_opened');
+        },
+        onClose: () => {
+          console.log('Tally Form closed');
+          Analytics.event('ambassador', 'form_closed');
+        },
+        onSubmit: () => {
+          console.log('Tally Form submitted');
+          Analytics.event('ambassador', 'form_submitted');
+        }
+      });
+    }
   };
 
   return (
