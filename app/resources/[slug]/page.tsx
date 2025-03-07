@@ -177,7 +177,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               prose-a:text-orange-500 hover:prose-a:text-orange-600
               prose-img:rounded-xl prose-img:shadow-md
               prose-blockquote:border-orange-500 prose-blockquote:bg-orange-50 dark:prose-blockquote:bg-orange-900/10 prose-blockquote:rounded-r-lg prose-blockquote:py-2 prose-blockquote:px-6
-              prose-code:text-orange-500 dark:prose-code:text-orange-400 prose-code:bg-orange-50 dark:prose-code:bg-orange-900/10 prose-code:rounded prose-code:px-1">
+              prose-code:text-orange-500 dark:prose-code:text-orange-400 prose-code:bg-orange-50 dark:prose-code:bg-orange-900/10 prose-code:rounded prose-code:px-1
+              prose-pre:bg-gray-50 dark:prose-pre:bg-gray-700/50 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-600 
+              prose-pre:rounded-xl prose-pre:shadow-sm">
               <div dangerouslySetInnerHTML={{ __html: article.contentHtml }} />
             </article>
           </div>
