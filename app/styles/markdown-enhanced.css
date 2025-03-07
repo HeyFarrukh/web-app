@@ -24,6 +24,33 @@
   justify-content: center;
   vertical-align: middle;
   margin: 0 0.2em;
+  font-size: 1.1em;
+  color: #4a5568;
+}
+
+.dark .article-content .icon {
+  color: #e2e8f0;
+}
+
+.article-content .icon i {
+  line-height: 1;
+}
+
+/* Icon specific colors */
+.article-content .icon .fa-check {
+  color: #10b981;
+}
+
+.article-content .icon .fa-lightbulb {
+  color: #fbbf24;
+}
+
+.article-content .icon .fa-warning {
+  color: #ef4444;
+}
+
+.article-content .icon .fa-twitter {
+  color: #1da1f2;
 }
 
 /* Task lists - special styling not covered by Tailwind prose */
