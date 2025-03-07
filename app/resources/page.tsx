@@ -72,6 +72,25 @@ const ArticleCard = ({ article }: { article: ReturnType<typeof getAllArticlesMet
   </Link>
 );
 
+// Company logos for credibility section
+const partnerLogos = [
+  { 
+    name: 'Accenture', 
+    url: '/assets/logos/accenture.svg',
+    width: 120
+  },
+  { 
+    name: 'Digital Catapult', 
+    url: '/assets/logos/Digital_Catapult.svg',
+    width: 160
+  },
+  { 
+    name: 'HSBC', 
+    url: '/assets/logos/HSBC.svg',
+    width: 120
+  }
+];
+
 export default function ResourcesPage() {
   const allArticles = getAllArticlesMetadata();
   
@@ -97,6 +116,34 @@ export default function ResourcesPage() {
                 className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-shadow"
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Credibility Section */}
+      <section className="bg-gray-50 dark:bg-gray-900 py-8 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4">
+          <p className="text-center text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">
+            Developed in collaboration with recruiters and apprentices at
+          </p>
+          <div className="flex justify-center items-center gap-12 flex-wrap">
+            {partnerLogos.map((logo) => (
+              <div
+                key={logo.name}
+                className="flex items-center justify-center"
+              >
+                <img
+                  src={logo.url}
+                  alt={`${logo.name} logo`}
+                  style={{ width: logo.width }}
+                  className={`h-12 object-contain transition-all duration-300 ${
+                    logo.name === 'Digital Catapult' 
+                      ? 'brightness-0' 
+                      : 'grayscale'
+                  } hover:grayscale-0 dark:invert`}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
