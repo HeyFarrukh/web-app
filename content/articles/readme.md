@@ -4,7 +4,8 @@ description: "A guide to using our enhanced markdown features for expressive art
 category: "Documentation"
 date: "2025-03-07"
 image: "/images/markdown-guide.jpg"
-author: "Content Team"
+author: "Farrukh"
+authorImage: "/media/farrukh-av.png"
 keywords: ["markdown", "writing", "documentation"]
 lastModified: "2025-03-07"
 readingTime: "4 min"
@@ -121,6 +122,7 @@ category: "Category Name"                 # Required
 date: "YYYY-MM-DD"                       # Required
 image: "/images/your-image.jpg"          # Optional, article hero image
 author: "Author Name"                    # Optional
+authorImage: "/images/author.jpg"        # Optional, author's profile picture (recommended: 96x96)
 keywords: ["keyword1", "keyword2"]       # Optional, for SEO and related topics
 lastModified: "YYYY-MM-DD"              # Optional
 readingTime: "X min"                     # Optional

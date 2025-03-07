@@ -127,7 +127,20 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 <div className="flex items-center gap-6">
                   {article.author && (
                     <div className="flex items-center text-gray-300">
-                      <User className="w-5 h-5 mr-2" />
+                      {article.authorImage ? (
+                        <div className="relative w-6 h-6 mr-2">
+                          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 blur-[1px]" />
+                          <Image
+                            src={article.authorImage}
+                            alt={article.author}
+                            width={24}
+                            height={24}
+                            className="relative rounded-full object-cover border-2 border-white dark:border-gray-800"
+                          />
+                        </div>
+                      ) : (
+                        <User className="w-5 h-5 mr-2" />
+                      )}
                       <span>{article.author}</span>
                     </div>
                   )}
@@ -172,7 +185,20 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <div className="flex flex-wrap items-center gap-6 text-gray-600 dark:text-gray-400">
                 {article.author && (
                   <div className="flex items-center">
-                    <User className="w-5 h-5 mr-2" />
+                    {article.authorImage ? (
+                      <div className="relative w-6 h-6 mr-2">
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 blur-[1px]" />
+                        <Image
+                          src={article.authorImage}
+                          alt={article.author}
+                          width={24}
+                          height={24}
+                          className="relative rounded-full object-cover border-2 border-white dark:border-gray-800"
+                        />
+                      </div>
+                    ) : (
+                      <User className="w-5 h-5 mr-2" />
+                    )}
                     <span>{article.author}</span>
                   </div>
                 )}

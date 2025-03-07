@@ -28,6 +28,7 @@ export interface ArticleMetadata {
   slug: string;
   image?: string;
   author?: string;
+  authorImage?: string;
   keywords?: string[];
   lastModified?: string;
   readingTime?: string;
@@ -101,6 +102,7 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
       date: data.date,
       image: data.image || null,
       author: data.author || null,
+      authorImage: data.authorImage || null,
       keywords: data.keywords || null,
       lastModified: data.lastModified || null,
       readingTime: data.readingTime || null,
@@ -201,6 +203,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       date: data.date,
       image: data.image || null,
       author: data.author || null,
+      authorImage: data.authorImage || null,
       keywords: data.keywords || null,
       lastModified: data.lastModified || null,
       readingTime: data.readingTime || null,
