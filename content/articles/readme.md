@@ -3,7 +3,7 @@ title: "Getting Started with Enhanced Markdown"
 description: "A guide to using our enhanced markdown features for expressive articles"
 category: "Documentation"
 date: "2025-03-07"
-image: "/images/markdown-guide.jpg"
+image: "/resources/readme.png"
 author: "Farrukh"
 authorImage: "/media/farrukh-av.png"
 keywords: ["markdown", "writing", "documentation"]
