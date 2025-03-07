@@ -15,6 +15,7 @@ import rehypeStringify from 'rehype-stringify';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import { formatDateForSEO, formatDateForDisplay } from './utils/dateFormat';
 
 // Get the articles directory path
 const articlesDirectory = path.join(process.cwd(), 'content/articles');
@@ -25,12 +26,14 @@ export interface ArticleMetadata {
   description: string;
   category: string;
   date: string;
+  _rawDate: string;
   slug: string;
   image?: string;
   author?: string;
   authorImage?: string;
   keywords?: string[];
   lastModified?: string;
+  _rawLastModified?: string;
   readingTime?: string;
   featured?: boolean;
   partnerships?: Array<{
@@ -93,22 +96,24 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
     }
     
     // Create article metadata object
-    return {
-      id: slug,
-      slug: slug,
-      title: data.title,
-      description: data.description,
-      category: data.category,
-      date: data.date,
-      image: data.image || null,
-      author: data.author || null,
-      authorImage: data.authorImage || null,
-      keywords: data.keywords || null,
-      lastModified: data.lastModified || null,
-      readingTime: data.readingTime || null,
-      featured: data.featured || null,
-      partnerships: data.partnerships || null
-    };
+return {
+  id: slug,
+  slug: slug,
+  title: data.title,
+  description: data.description,
+  category: data.category,
+  date: formatDateForDisplay(data.date),
+  _rawDate: formatDateForSEO(data.date),
+  image: data.image ?? undefined,
+  author: data.author ?? undefined,
+  authorImage: data.authorImage ?? undefined,
+  keywords: data.keywords ?? undefined,
+  lastModified: data.lastModified ? formatDateForDisplay(data.lastModified) : undefined,
+  _rawLastModified: data.lastModified ? formatDateForSEO(data.lastModified) : undefined,
+  readingTime: data.readingTime ?? undefined,
+  featured: data.featured ?? undefined,
+  partnerships: data.partnerships ?? undefined
+};
   } catch (error) {
     console.error(`Error reading article metadata ${slug}:`, error);
     return null;
@@ -122,7 +127,7 @@ export function getAllArticlesMetadata(): ArticleMetadata[] {
     .map(slug => getArticleMetadata(slug))
     .filter((article): article is ArticleMetadata => article !== null)
     // Sort articles by date in descending order
-    .sort((a, b) => (new Date(b.date).getTime() - new Date(a.date).getTime()));
+    .sort((a, b) => (new Date(b._rawDate).getTime() - new Date(a._rawDate).getTime()));
   
   return articles;
 }
@@ -200,15 +205,17 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       title: data.title,
       description: data.description,
       category: data.category,
-      date: data.date,
-      image: data.image || null,
-      author: data.author || null,
-      authorImage: data.authorImage || null,
-      keywords: data.keywords || null,
-      lastModified: data.lastModified || null,
-      readingTime: data.readingTime || null,
-      featured: data.featured || null,
-      partnerships: data.partnerships || null,
+      date: formatDateForDisplay(data.date),
+      _rawDate: formatDateForSEO(data.date), // Store raw date for SEO
+      image: data.image || undefined,
+      author: data.author || undefined,
+      authorImage: data.authorImage || undefined,
+      keywords: data.keywords || undefined,
+      lastModified: data.lastModified ? formatDateForDisplay(data.lastModified) : undefined,
+      _rawLastModified: data.lastModified ? formatDateForSEO(data.lastModified) : undefined, // Store raw lastModified for SEO
+      readingTime: data.readingTime || undefined,
+      featured: data.featured || undefined,
+      partnerships: data.partnerships || undefined,
       content: content,
       contentHtml: contentHtml
     };
