@@ -17,6 +17,10 @@ export interface ArticleMetadata {
   date: string;
   slug: string;
   image?: string;
+  author?: string;
+  keywords?: string[];
+  lastModified?: string;
+  readingTime?: string;
 }
 
 export interface Article extends ArticleMetadata {
@@ -69,7 +73,11 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
       description: data.description,
       category: data.category,
       date: data.date,
-      image: data.image || null
+      image: data.image || null,
+      author: data.author || null,
+      keywords: data.keywords || null,
+      lastModified: data.lastModified || null,
+      readingTime: data.readingTime || null
     };
   } catch (error) {
     console.error(`Error reading article metadata ${slug}:`, error);
@@ -127,6 +135,10 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       category: data.category,
       date: data.date,
       image: data.image || null,
+      author: data.author || null,
+      keywords: data.keywords || null,
+      lastModified: data.lastModified || null,
+      readingTime: data.readingTime || null,
       content: content,
       contentHtml: contentHtml
     };

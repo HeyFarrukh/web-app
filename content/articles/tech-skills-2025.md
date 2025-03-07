@@ -4,6 +4,10 @@ description: "Stay ahead of the curve with these in-demand technical skills that
 category: "Skills"
 date: "February 28, 2025"
 image: "/images/tech-skills.jpg"
+author: "Alex Chen"
+keywords: ["tech skills", "career development", "apprenticeship", "technology", "employability"]
+lastModified: "March 7, 2025"
+readingTime: "10 minutes"
 ---
 
 # Essential Tech Skills for 2025

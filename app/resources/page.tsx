@@ -2,10 +2,23 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllArticlesMetadata } from '@/lib/articles';
+import { Metadata } from 'next';
 
 // This makes the page static at build time for optimal performance and SEO
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidate every hour
+
+// Generate metadata for the resources page
+export const metadata: Metadata = {
+  title: 'Resources',
+  description: 'Discover helpful guides, articles, and resources to support your apprenticeship journey.',
+  keywords: ['apprenticeship', 'resources', 'guides', 'career advice', 'skills development'],
+  openGraph: {
+    title: 'Resources | ApprenticeWatch',
+    description: 'Discover helpful guides, articles, and resources to support your apprenticeship journey.',
+    type: 'website',
+  },
+};
 
 export default function ResourcesPage() {
   const articles = getAllArticlesMetadata();
