@@ -129,7 +129,7 @@ export default function ResourcesPage() {
       <section className="bg-gray-50 dark:bg-gray-900 py-8 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4">
           <p className="text-center text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">
-             Developed in collaboration with {/*teachers,*/} recruiters and apprentices at 
+             Resources developed in collaboration with {/*teachers,*/} recruiters and apprentices at 
           </p>
           <div className="flex justify-center items-center gap-12 flex-wrap">
             {partnerLogos.map((logo) => (

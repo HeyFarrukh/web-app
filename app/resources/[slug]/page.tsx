@@ -6,6 +6,25 @@ import { getArticleBySlug, getAllArticlesMetadata } from '@/lib/articles';
 import { Metadata, ResolvingMetadata } from 'next';
 import '@/app/styles/markdown-enhanced.css';
 
+// Company logos mapping
+const partnerLogos = [
+  { 
+    name: 'Accenture', 
+    url: '/assets/logos/accenture.svg',
+    width: 120
+  },
+  { 
+    name: 'Digital Catapult', 
+    url: '/assets/logos/Digital_Catapult.svg',
+    width: 160
+  },
+  { 
+    name: 'HSBC', 
+    url: '/assets/logos/HSBC.svg',
+    width: 120
+  }
+];
+
 // This makes the page static at build time for optimal performance and SEO
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidate every hour
@@ -167,6 +186,49 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                     <span>{article.readingTime}</span>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Partnership Logos Section */}
+          {article.partnerships && article.partnerships.length > 0 && (
+            <div className="mb-8 py-6 border-y border-gray-100 dark:border-gray-700">
+              <p className="text-center text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">
+                Written in collaboration with{' '}
+                {(() => {
+                  const allCollaborators = article.partnerships.flatMap(p => p.collaborators);
+                  const hasApprentices = allCollaborators.includes('apprentice');
+                  const hasRecruiters = allCollaborators.includes('recruiter');
+                  
+                  if (hasApprentices && hasRecruiters) {
+                    return 'apprentices and recruiters at';
+                  } else if (hasApprentices) {
+                    return 'apprentices at';
+                  } else if (hasRecruiters) {
+                    return 'recruiters at';
+                  }
+                  return '';
+                })()}
+              </p>
+              <div className="flex justify-center items-center gap-12 flex-wrap">
+                {article.partnerships.map((partnership) => {
+                  const logo = partnerLogos.find(l => l.name === partnership.company);
+                  if (!logo) return null;
+                  return (
+                    <div key={logo.name} className="flex items-center justify-center">
+                      <img
+                        src={logo.url}
+                        alt={`${logo.name} logo`}
+                        style={{ width: logo.width }}
+                        className={`h-12 object-contain transition-all duration-300 ${
+                          logo.name === 'Digital Catapult' 
+                            ? 'brightness-0' 
+                            : 'grayscale'
+                        } hover:grayscale-0 dark:invert`}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

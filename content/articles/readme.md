@@ -9,6 +9,10 @@ keywords: ["markdown", "writing", "documentation"]
 lastModified: "2025-03-07"
 readingTime: "4 min"
 featured: true
+partnerships: [
+  { company: "Accenture", collaborators: ["recruiter"] },
+  { company: "Digital Catapult", collaborators: ["apprentice", "recruiter"] }
+]
 ---
 
 # Getting Started with Enhanced Markdown
@@ -105,5 +109,27 @@ Writing articles should be fun :smile: and rewarding :trophy:!
 ## Conclusion
 
 These enhanced markdown features allow you to create more engaging, expressive, and professional-looking articles. Experiment with them in your next piece!
+
+## Article Metadata
+
+The following metadata fields are available for articles:
+
+```yaml
+title: "Your Article Title"              # Required
+description: "Article description"        # Required
+category: "Category Name"                 # Required
+date: "YYYY-MM-DD"                       # Required
+image: "/images/your-image.jpg"          # Optional, article hero image
+author: "Author Name"                    # Optional
+keywords: ["keyword1", "keyword2"]       # Optional, for SEO and related topics
+lastModified: "YYYY-MM-DD"              # Optional
+readingTime: "X min"                     # Optional
+featured: true                           # Optional, shows article in featured section
+partnerships:                            # Optional, shows company logos and collaboration type
+  - company: "Company1"                  # Must match exact company name
+    collaborators: ["apprentice"]        # "apprentice" and/or "recruiter"
+  - company: "Company2"
+    collaborators: ["apprentice", "recruiter"]
+```
 
 For more details, check out the [full documentation](/resources/markdown-guide).
