@@ -128,6 +128,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <script src="https://unpkg.com/lucide@latest"></script>
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
         <Navbar />
@@ -137,6 +138,9 @@ export default function RootLayout({
         <Footer />
         <SpeedInsights />
         <GoogleAnalytics />
+        <script>
+          lucide.createIcons();
+        </script>
       </body>
     </html>
   );

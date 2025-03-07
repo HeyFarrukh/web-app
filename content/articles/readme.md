@@ -25,10 +25,20 @@ You can use all the standard markdown formatting like **bold**, *italic*, and **
 
 Icons can make your content more visually appealing. Here are some examples:
 
+**Font Awesome Icons**
+
 :icon[fa-solid fa-check] Use the check icon for completed items  
 :icon[fa-solid fa-lightbulb] The lightbulb is great for tips and ideas  
 :icon[fa-solid fa-warning] Use the warning icon for important notices  
-:icon[fa-brands fa-twitter] Add social media icons when needed  
+:icon[fa-brands fa-twitter] Add social media icons when needed 
+
+**Lucide Icons**
+
+:icon[lucide-check] Use Lucide Icons
+
+:icon[lucide-github] Lucide Icons are also available
+
+:icon[lucide-star] Lucide Icons are also available
 
 ## Text Highlighting
 

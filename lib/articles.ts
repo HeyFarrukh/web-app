@@ -129,9 +129,13 @@ function processCustomMarkdown(content: string): string {
   content = content.replace(/{{pdf:([^}]+)}}/g, 
     '<div class="pdf-embed"><iframe src="/api/pdf-viewer?file=$1" width="100%" height="500px" frameborder="0"></iframe></div>');
   
-  // Process icon embeds using custom syntax: :icon[icon-name]
-  content = content.replace(/:icon\[([^\]]+)\]/g, 
-    '<span class="icon"><i class="$1"></i></span>');
+  // Process Font Awesome icons using custom syntax: :icon[fa-solid fa-check]
+  content = content.replace(/:icon\[fa-([^\]]+)\]/g, 
+    '<span class="icon"><i class="fa-$1"></i></span>');
+
+  // Process Lucide icons using custom syntax: :icon[lucide-check]
+  content = content.replace(/:icon\[lucide-([^\]]+)\]/g, 
+    '<span class="icon"><i data-lucide="$1"></i></span>');
   
   return content;
 }
