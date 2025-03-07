@@ -1,59 +1,28 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, Tag } from 'lucide-react';
-import { getArticleBySlug, Article } from '@/utils/markdown';
+import { getArticleBySlug, getAllArticlesMetadata } from '@/lib/articles';
 
-interface ArticlePageProps {
-  params: {
-    slug: string;
-  };
+// This makes the page static at build time for optimal performance and SEO
+export const dynamic = 'force-static';
+export const revalidate = 3600; // Revalidate every hour
+
+// Generate static paths for all articles at build time
+export async function generateStaticParams() {
+  const articles = getAllArticlesMetadata();
+  return articles.map((article) => ({
+    slug: article.slug,
+  }));
 }
 
-export default function ArticlePage({ params }: ArticlePageProps) {
+export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const { slug } = params;
-  const [article, setArticle] = useState<Article | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const article = await getArticleBySlug(slug);
 
-  useEffect(() => {
-    const loadArticle = async () => {
-      try {
-        setIsLoading(true);
-        const articleData = await getArticleBySlug(slug);
-        
-        if (!articleData) {
-          setError('Article not found');
-          setIsLoading(false);
-          return;
-        }
-        
-        setArticle(articleData);
-      } catch (err) {
-        console.error('Error loading article:', err);
-        setError('Failed to load article');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadArticle();
-  }, [slug]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen pt-24 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-      </div>
-    );
-  }
-
-  if (error || !article) {
+  if (!article) {
     return (
       <div className="min-h-screen pt-24 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">{error || 'Article not found'}</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Article not found</h1>
         <Link href="/resources" className="text-orange-500 hover:text-orange-600 flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Resources
@@ -65,15 +34,12 @@ export default function ArticlePage({ params }: ArticlePageProps) {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section */}
-      <motion.section 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+      <section 
         className="px-4 py-24 text-center bg-gradient-to-r from-amber-400 to-orange-500"
       >
         <h1 className="text-4xl font-bold text-white mb-4">{article.title}</h1>
         <p className="text-xl text-white">{article.description}</p>
-      </motion.section>
+      </section>
 
       {/* Article Content */}
       <div className="max-w-4xl mx-auto px-4 py-12">
@@ -99,16 +65,11 @@ export default function ArticlePage({ params }: ArticlePageProps) {
           </div>
         </div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8"
-        >
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <article className="prose prose-orange max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-orange-500 hover:prose-a:text-orange-600">
-            <div dangerouslySetInnerHTML={{ __html: article.contentHtml || '' }} />
+            <div dangerouslySetInnerHTML={{ __html: article.contentHtml }} />
           </article>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
