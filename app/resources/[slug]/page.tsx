@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ArrowLeft, Calendar, Tag, Clock, User, Share2, Bookmark } from 'lucide-react';
 import { getArticleBySlug, getAllArticlesMetadata } from '@/lib/articles';
 import { Metadata, ResolvingMetadata } from 'next';
+import '@/app/styles/markdown-enhanced.css';
 
 // This makes the page static at build time for optimal performance and SEO
 export const dynamic = 'force-static';
@@ -171,7 +172,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           )}
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 md:p-12">
-            <article className="prose prose-lg max-w-none dark:prose-invert 
+            <article className="prose prose-lg max-w-none dark:prose-invert article-content
               prose-headings:text-gray-900 dark:prose-headings:text-white 
               prose-a:text-orange-500 hover:prose-a:text-orange-600
               prose-img:rounded-xl prose-img:shadow-md

@@ -5,6 +5,16 @@ import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
+import remarkGfm from 'remark-gfm';
+import remarkEmoji from 'remark-emoji';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeRaw from 'rehype-raw';
+import rehypeStringify from 'rehype-stringify';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
 // Get the articles directory path
 const articlesDirectory = path.join(process.cwd(), 'content/articles');
@@ -28,6 +38,17 @@ export interface Article extends ArticleMetadata {
   content: string;
   contentHtml: string;
 }
+
+// Custom processor options
+const processorOptions = {
+  highlight: {
+    ignoreMissing: true,
+    subset: ['javascript', 'typescript', 'jsx', 'tsx', 'html', 'css', 'json', 'python'],
+  },
+  emoji: {
+    emoticon: true,
+  },
+};
 
 // Function to get all article slugs
 export function getArticleSlugs() {
@@ -99,6 +120,43 @@ export function getAllArticlesMetadata(): ArticleMetadata[] {
   return articles;
 }
 
+// Function to process custom markdown syntax 
+function processCustomMarkdown(content: string): string {
+  // Process text highlights (==text== to <mark>text</mark>)
+  content = content.replace(/==([^=]+)==/g, '<mark class="highlight-orange">$1</mark>');
+  
+  // Process PDF embeds using custom syntax: {{pdf:path/to/file.pdf}}
+  content = content.replace(/{{pdf:([^}]+)}}/g, 
+    '<div class="pdf-embed"><iframe src="/api/pdf-viewer?file=$1" width="100%" height="500px" frameborder="0"></iframe></div>');
+  
+  // Process icon embeds using custom syntax: :icon[icon-name]
+  content = content.replace(/:icon\[([^\]]+)\]/g, 
+    '<span class="icon"><i class="$1"></i></span>');
+  
+  return content;
+}
+
+// Enhanced processor for article content
+async function processMarkdownContent(content: string): Promise<string> {
+  // First, process our custom markdown syntax
+  content = processCustomMarkdown(content);
+  
+  // Then use the unified/remark/rehype pipeline for standard and extended markdown
+  const processedContent = await unified()
+    .use(remarkParse)
+    .use(remarkGfm) // GitHub Flavored Markdown: tables, strikethrough, etc.
+    .use(remarkEmoji, processorOptions.emoji) // Convert emoji shortcodes to emojis
+    .use(remarkRehype, { allowDangerousHtml: true }) // Convert to HTML (allowing custom HTML)
+    .use(rehypeRaw) // Parse custom HTML in the markdown
+    .use(rehypeHighlight, processorOptions.highlight) // Syntax highlighting with highlight.js
+    .use(rehypeSlug) // Add IDs to headings
+    .use(rehypeAutolinkHeadings) // Add links to headings
+    .use(rehypeStringify) // Convert to HTML string
+    .process(content);
+
+  return processedContent.toString();
+}
+
 // Function to get article by slug with content
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
   try {
@@ -121,12 +179,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       return null;
     }
     
-    // Use remark to convert markdown into HTML string
-    const processedContent = await remark()
-      .use(html)
-      .process(content);
-    
-    const contentHtml = processedContent.toString();
+    // Use enhanced markdown processor
+    const contentHtml = await processMarkdownContent(content);
     
     // Create article object
     return {

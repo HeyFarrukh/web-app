@@ -1,0 +1,44 @@
+/* styles/markdown-enhanced.css */
+
+/* Highlight styles */
+.article-content .highlight-orange {
+  background-color: rgba(255, 165, 0, 0.2);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-weight: 500;
+  color: #d05700;
+}
+
+/* PDF embed container */
+.article-content .pdf-embed {
+  margin: 1.5rem 0;
+  border: 1px solid #e1e1e1;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+/* Icon styling */
+.article-content .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin: 0 0.2em;
+}
+
+/* Task lists - special styling not covered by Tailwind prose */
+.article-content ul.contains-task-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.article-content .task-list-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.article-content .task-list-item input[type="checkbox"] {
+  margin-right: 0.5rem;
+  margin-top: 0.25rem;
+}
