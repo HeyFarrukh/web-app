@@ -102,20 +102,8 @@ console.log(greet("Reader"));
 
 Writing articles should be fun :smile: and rewarding :trophy:!
 
-## Mathematical Expressions
-
-You can include mathematical expressions:
-
-$E = mc^2$
-
-Or more complex formulas:
-
-$$
-\frac{1}{n} \sum_{i=1}^{n} x_i = \bar{x}
-$$
-
 ## Conclusion
 
 These enhanced markdown features allow you to create more engaging, expressive, and professional-looking articles. Experiment with them in your next piece!
 
-For more details, check out our [full documentation](/resources/markdown-guide).
+For more details, check out the [full documentation](/resources/markdown-guide).
