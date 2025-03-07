@@ -3,11 +3,12 @@ title: "CV Writing Guide for Apprenticeships"
 description: "Learn how to create a standout CV that will help you secure your dream apprenticeship"
 category: "Career"
 date: "January 10, 2025"
-image: "/images/cv-guide.jpg"
+image: "/media/meta/cv-optimise-page.png"
 author: "Emma Johnson"
 keywords: ["CV", "resume", "apprenticeship", "job application", "career advice"]
 lastModified: "March 5, 2025"
 readingTime: "8 minutes"
+featured: true
 ---
 
 # CV Writing Guide
