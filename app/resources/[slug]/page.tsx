@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Tag, Clock, User } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowLeft, Calendar, Tag, Clock, User, Share2, Bookmark } from 'lucide-react';
 import { getArticleBySlug, getAllArticlesMetadata } from '@/lib/articles';
 import { Metadata, ResolvingMetadata } from 'next';
 
@@ -64,8 +65,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
   if (!article) {
     return (
-      <div className="min-h-screen pt-24 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Article not found</h1>
+      <div className="min-h-screen pt-24 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Article not found</h1>
         <Link href="/resources" className="text-orange-500 hover:text-orange-600 flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Resources
@@ -75,73 +76,150 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Hero Section */}
-      <section 
-        className="px-4 py-24 text-center bg-gradient-to-r from-amber-400 to-orange-500"
-      >
-        <h1 className="text-4xl font-bold text-white mb-4">{article.title}</h1>
-        <p className="text-xl text-white">{article.description}</p>
-      </section>
-
-      {/* Article Content */}
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="mb-8 flex flex-wrap items-center justify-between">
-          <Link 
-            href="/resources" 
-            className="text-orange-500 hover:text-orange-600 flex items-center mb-4 sm:mb-0"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Resources
-          </Link>
-          <div className="flex flex-wrap items-center gap-4">
-            {article.author && (
-              <div className="flex items-center text-gray-600 dark:text-gray-400">
-                <User className="w-4 h-4 mr-1" />
-                <span className="text-sm">{article.author}</span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <article className="relative">
+        {/* Hero Section */}
+        {article.image && (
+          <div className="relative h-[60vh] w-full">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900/90 z-10" />
+            <Image
+              src={article.image}
+              alt={article.title}
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute bottom-0 left-0 right-0 z-20 p-8">
+              <div className="max-w-4xl mx-auto">
+                <div className="flex flex-wrap items-center gap-4 mb-4">
+                  <span className="px-3 py-1 text-sm font-medium text-orange-400 bg-orange-500/10 backdrop-blur-sm rounded-full">
+                    {article.category}
+                  </span>
+                  {article.readingTime && (
+                    <span className="px-3 py-1 text-sm font-medium text-gray-300 bg-gray-700/30 backdrop-blur-sm rounded-full flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {article.readingTime}
+                    </span>
+                  )}
+                </div>
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{article.title}</h1>
+                <p className="text-xl text-gray-200 mb-6">{article.description}</p>
+                <div className="flex items-center gap-6">
+                  {article.author && (
+                    <div className="flex items-center text-gray-300">
+                      <User className="w-5 h-5 mr-2" />
+                      <span>{article.author}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center text-gray-300">
+                    <Calendar className="w-5 h-5 mr-2" />
+                    <span>{article.date}</span>
+                  </div>
+                </div>
               </div>
-            )}
-            <div className="flex items-center text-gray-600 dark:text-gray-400">
-              <Calendar className="w-4 h-4 mr-1" />
-              <span className="text-sm">{article.date}</span>
-            </div>
-            {article.readingTime && (
-              <div className="flex items-center text-gray-600 dark:text-gray-400">
-                <Clock className="w-4 h-4 mr-1" />
-                <span className="text-sm">{article.readingTime}</span>
-              </div>
-            )}
-            <div className="flex items-center">
-              <Tag className="w-4 h-4 mr-1 text-orange-500" />
-              <span className="text-sm font-medium text-orange-500 bg-orange-100 dark:bg-orange-900 dark:text-orange-300 px-2 py-1 rounded-full">
-                {article.category}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <article className="prose prose-orange max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-orange-500 hover:prose-a:text-orange-600">
-            <div dangerouslySetInnerHTML={{ __html: article.contentHtml }} />
-          </article>
-        </div>
-        
-        {article.keywords && article.keywords.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Related Topics</h3>
-            <div className="flex flex-wrap gap-2">
-              {article.keywords.map((keyword, index) => (
-                <span 
-                  key={index} 
-                  className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full"
-                >
-                  {keyword}
-                </span>
-              ))}
             </div>
           </div>
         )}
-      </div>
+
+        {/* Article Content */}
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          {/* Back to Resources Link and Share buttons - added at the top of the article content */}
+          <div className="flex items-center justify-between mb-8">
+            <Link 
+              href="/resources" 
+              className="text-gray-600 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 flex items-center group transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" />
+              Back to Resources
+            </Link>
+            <div className="flex items-center space-x-3">
+              <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <Share2 className="w-5 h-5" />
+              </button>
+              <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <Bookmark className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {!article.image && (
+            <div className="mb-8">
+              <span className="inline-block px-3 py-1 text-sm font-medium text-orange-500 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-300 rounded-full mb-4">
+                {article.category}
+              </span>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">{article.title}</h1>
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">{article.description}</p>
+              <div className="flex flex-wrap items-center gap-6 text-gray-600 dark:text-gray-400">
+                {article.author && (
+                  <div className="flex items-center">
+                    <User className="w-5 h-5 mr-2" />
+                    <span>{article.author}</span>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <Calendar className="w-5 h-5 mr-2" />
+                  <span>{article.date}</span>
+                </div>
+                {article.readingTime && (
+                  <div className="flex items-center">
+                    <Clock className="w-5 h-5 mr-2" />
+                    <span>{article.readingTime}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 md:p-12">
+            <article className="prose prose-lg max-w-none dark:prose-invert 
+              prose-headings:text-gray-900 dark:prose-headings:text-white 
+              prose-a:text-orange-500 hover:prose-a:text-orange-600
+              prose-img:rounded-xl prose-img:shadow-md
+              prose-blockquote:border-orange-500 prose-blockquote:bg-orange-50 dark:prose-blockquote:bg-orange-900/10 prose-blockquote:rounded-r-lg prose-blockquote:py-2 prose-blockquote:px-6
+              prose-code:text-orange-500 dark:prose-code:text-orange-400 prose-code:bg-orange-50 dark:prose-code:bg-orange-900/10 prose-code:rounded prose-code:px-1">
+              <div dangerouslySetInnerHTML={{ __html: article.contentHtml }} />
+            </article>
+          </div>
+          
+          {/* Keywords section */}
+          {article.keywords && article.keywords.length > 0 && (
+            <div className="mt-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Related Topics</h3>
+              <div className="flex flex-wrap gap-2">
+                {article.keywords.map((keyword, index) => (
+                  <span 
+                    key={index} 
+                    className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full transition-colors cursor-pointer"
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Back to Resources and Share buttons - added at the bottom of the article */}
+          <div className="mt-12 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-8">
+            <Link 
+              href="/resources" 
+              className="px-5 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-orange-100 dark:hover:bg-orange-900/20 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 rounded-full flex items-center group transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" />
+              Back to Resources
+            </Link>
+            <div className="flex items-center space-x-3">
+              <button className="flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-orange-100 dark:hover:bg-orange-900/20 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 rounded-full transition-colors">
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </button>
+              <button className="flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-orange-100 dark:hover:bg-orange-900/20 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 rounded-full transition-colors">
+                <Bookmark className="w-4 h-4 mr-2" />
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
     </div>
   );
 }

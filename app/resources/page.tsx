@@ -106,8 +106,8 @@ export default function ResourcesPage() {
           <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">Resources Hub</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">Discover expert guides and insights to excel in your apprenticeship journey</p>
           
-          {/* Search Bar */}
-          <div className="relative max-w-2xl mx-auto">
+          {/* Search Bar DO NOT REMOVE, WILL BE IMPLEMENTED LATER WHEN MORE ARTICLES ARE ADDED */}
+          {/* <div className="relative max-w-2xl mx-auto">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -116,7 +116,7 @@ export default function ResourcesPage() {
                 className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-shadow"
               />
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
 
