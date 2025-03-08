@@ -29,7 +29,15 @@ const partnerLogos = [
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidate every hour
 
-// Generate static paths for all articles at build time
+/**
+ * Generates paths for static article pages during build time.
+ *
+ * This function retrieves metadata for all articles and maps each entry to an object
+ * containing its slug. The resulting array of route parameter objects is used by Next.js
+ * for static generation of article pages.
+ *
+ * @returns An array of objects, each with a `slug` property representing the article identifier.
+ */
 export async function generateStaticParams() {
   const articles = getAllArticlesMetadata();
   return articles.map((article) => ({
@@ -37,7 +45,18 @@ export async function generateStaticParams() {
   }));
 }
 
-// Generate metadata for each article page
+/**
+ * Generates SEO metadata for an article page.
+ *
+ * This function retrieves an article by its slug and constructs metadata used for SEO and social sharing.
+ * If the article is found, its title, description, keywords, author details, publication dates, and image information
+ * are used to build comprehensive Open Graph and Twitter metadata. If the article is not found, default metadata indicating
+ * the missing article is returned. Parent-level Open Graph images are merged with the article image when available.
+ *
+ * @param params - Object containing route parameters, including the article slug.
+ * @param parent - Parent metadata used to merge site-wide Open Graph defaults.
+ * @returns A promise that resolves to the metadata for the article page.
+ */
 export async function generateMetadata(
   { params }: { params: { slug: string } },
   parent: ResolvingMetadata
@@ -79,6 +98,17 @@ export async function generateMetadata(
   };
 }
 
+/**
+ * Renders an article page based on the provided slug.
+ *
+ * This component fetches article data using the slug from the route parameters. If the article exists,
+ * it displays its hero section, content, partnership logos, related topics, and navigation buttons.
+ * Otherwise, it renders a user-friendly "Article not found" message with a link to the resources page.
+ *
+ * @param params - An object containing route parameters, including the article's slug.
+ *
+ * @returns A React element representing the article page or a not-found message if the article is unavailable.
+ */
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const article = await getArticleBySlug(slug);

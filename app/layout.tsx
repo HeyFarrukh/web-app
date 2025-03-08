@@ -114,6 +114,13 @@ export const metadata: Metadata = {
   ],
 };
 
+/**
+ * Renders the application's root layout.
+ *
+ * This component sets up the HTML structure including the head with favicons, external stylesheets, and scripts, and the body that houses the navigation bar, main content, footer, speed insights, and analytics. It ensures a consistent layout and resource integration across the application.
+ *
+ * @param children - The nested page or component content displayed within the main layout.
+ */
 export default function RootLayout({
   children,
 }: {

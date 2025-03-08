@@ -3,6 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+/**
+ * Serves a PDF file in response to a GET request.
+ *
+ * This function extracts the 'file' query parameter from the request URL, sanitizes it to prevent
+ * path traversal attacks, and constructs the full path to the corresponding PDF file in the public resources directory.
+ * It returns the file with headers set for inline PDF display if found.
+ * If the 'file' parameter is missing, or the file does not exist, it responds with a 400 or 404 error respectively.
+ * Any unexpected errors result in a logged error and a 500 error response.
+ *
+ * @returns A NextResponse containing the PDF file with appropriate headers or an error message.
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;

@@ -96,6 +96,16 @@ const partnerLogos = [
   // }
 ];
 
+/**
+ * Renders the static resources page for the apprenticeship platform.
+ *
+ * This component retrieves article metadata and separates the articles into featured and latest groups.
+ * It then conditionally renders a featured resources section (if any featured articles exist) and a
+ * latest resources section. The page also includes a hero section with a title and description, along
+ * with a credibility section displaying partner logos.
+ *
+ * @returns A React element representing the complete resources page.
+ */
 export default function ResourcesPage() {
   const allArticles = getAllArticlesMetadata();
   

@@ -21,6 +21,14 @@ interface FilterParams {
   level: string;
 }
 
+/**
+ * Renders the apprenticeship listings page with filtering, pagination, and view mode options.
+ *
+ * The component fetches and displays apprenticeship vacancies based on URL search parameters, managing filters,
+ * pagination, and toggling between list and map views. It updates query parameters and triggers analytics events
+ * when filters or view modes are changed. Additionally, if a specific listing ID is provided in the URL, it
+ * smoothly scrolls that listing into view after the data has loaded.
+ */
 export default function Listings() { 
   const searchParams = useSearchParams();
   const router = useRouter();

@@ -2,6 +2,17 @@ import type { MetadataRoute } from 'next'
 import { vacancyService } from '@/services/supabase/vacancyService'
 import { getAllArticlesMetadata } from '@/lib/articles'
 
+/**
+ * Generates a sitemap for the website.
+ *
+ * This asynchronous function constructs a sitemap by combining a set of predefined base URLs
+ * with dynamic entries derived from active vacancies and articles metadata. It fetches active
+ * vacancies (up to 1000) and retrieves metadata for all articles, excluding those with the slug "readme".
+ * Vacancy URLs incorporate the vacancy's ID and its posted date, while article URLs use the article's slug
+ * and raw date.
+ *
+ * @returns A promise that resolves to the complete sitemap, containing base, article, and vacancy URL entries.
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all active vacancies
   const { vacancies } = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} });
