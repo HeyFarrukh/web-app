@@ -44,8 +44,8 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const [showDropdown, setShowDropdown] = React.useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const referringPage = searchParams.get('fromPage') || '1';
-  const scrollToId = searchParams.get('scrollToId');
+  const referringPage = searchParams?.get('fromPage') || '1';
+  const scrollToId = searchParams?.get('scrollToId');
 
   useEffect(() => {
     // Track apprenticeship view

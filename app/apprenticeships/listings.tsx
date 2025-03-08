@@ -27,7 +27,7 @@ export default function Listings() {
   const pathname = usePathname();
 
   const [currentPage, setCurrentPage] = useState(() => {
-    const page = searchParams.get('page');
+    const page = searchParams?.get('page');
     return page ? parseInt(page, 10) : 1;
   });
 
@@ -37,9 +37,9 @@ export default function Listings() {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [filters, setFilters] = useState<FilterParams>({
-    search: searchParams.get('search') || '',
-    location: searchParams.get('location') || '',
-    level: searchParams.get('level') || ''
+    search: searchParams?.get('search') || '',
+    location: searchParams?.get('location') || '',
+    level: searchParams?.get('level') || ''
   });
   const [showMapAnimation, setShowMapAnimation] = useState(true);
 
@@ -130,7 +130,7 @@ export default function Listings() {
   // Handle scrolling to specific listing when returning from detail page
   useEffect(() => {
     if (!loading) {
-      const scrollToId = searchParams.get('scrollToId');
+      const scrollToId = searchParams?.get('scrollToId');
       if (scrollToId) {
         setTimeout(() => {
           const element = document.getElementById(`listing-${scrollToId}`);
@@ -143,7 +143,7 @@ export default function Listings() {
   }, [loading, searchParams]);
 
   const createQueryString = (params: Record<string, string>) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString());
+    const newSearchParams = new URLSearchParams(searchParams?.toString() || '');
     Object.entries(params).forEach(([key, value]) => {
       if (value) {
         newSearchParams.set(key, value);

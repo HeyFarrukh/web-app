@@ -1,9 +1,13 @@
 import type { MetadataRoute } from 'next'
 import { vacancyService } from '@/services/supabase/vacancyService'
+import { getAllArticlesMetadata } from '@/lib/articles'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all active vacancies
   const { vacancies } = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} });
+
+  // Get all articles metadata
+  const articles = getAllArticlesMetadata();
 
   // Base sitemap entries
   const baseUrls: MetadataRoute.Sitemap = [
@@ -20,13 +24,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: 'https://apprenticewatch.com/optimise-cv',
+      url: 'https://apprenticewatch.com/resources',
       lastModified: new Date(),
-      changeFrequency: 'monthly',
+      changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: 'https://apprenticewatch.com/cv-guide',
+      url: 'https://apprenticewatch.com/optimise-cv',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.9,
@@ -65,5 +69,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...baseUrls, ...vacancyUrls];
+  // Generate sitemap URLs for each article
+  const articleUrls: MetadataRoute.Sitemap = articles
+    .filter(article => article.slug !== 'readme')  
+    .map((article) => ({
+      url: `https://apprenticewatch.com/resources/${article.slug}`,
+      lastModified: new Date(article._rawDate), 
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    }));
+
+  // Return URLs in order: base URLs, article URLs, then vacancy URLs
+  return [...baseUrls, ...articleUrls, ...vacancyUrls];
 }
