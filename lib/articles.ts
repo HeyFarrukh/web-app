@@ -20,6 +20,25 @@ import { formatDateForSEO, formatDateForDisplay } from './utils/dateFormat';
 // Get the articles directory path
 const articlesDirectory = path.join(process.cwd(), 'content/articles');
 
+// Function to get file dates
+function getFileDates(filePath: string) {
+  const stats = fs.statSync(filePath);
+  const now = new Date();
+  
+  // For new files, use current time as both dates
+  if (!stats.birthtime || !stats.mtime) {
+    return {
+      createdAt: now.toISOString(),
+      modifiedAt: now.toISOString()
+    };
+  }
+
+  return {
+    createdAt: stats.birthtime.toISOString(),
+    modifiedAt: stats.mtime.toISOString()
+  };
+}
+
 export interface ArticleMetadata {
   id: string;
   title: string;
@@ -28,18 +47,18 @@ export interface ArticleMetadata {
   date: string;
   _rawDate: string;
   slug: string;
-  image?: string;
-  author?: string;
-  authorImage?: string;
-  keywords?: string[];
-  lastModified?: string;
-  _rawLastModified?: string;
-  readingTime?: string;
-  featured?: boolean;
+  image?: string | undefined;
+  author?: string | undefined;
+  authorImage?: string | undefined;
+  keywords?: string[] | undefined;
+  lastModified?: string | undefined;
+  _rawLastModified?: string | undefined;
+  readingTime?: string | undefined;
+  featured?: boolean | undefined;
   partnerships?: Array<{
     company: string;
     collaborators: Array<'apprentice' | 'recruiter'>;
-  }>;
+  }> | undefined;
 }
 
 export interface Article extends ArticleMetadata {
@@ -89,31 +108,34 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
     // Use gray-matter to parse the post metadata section
     const { data } = matter(fileContents);
     
+    // Get file dates
+    const { createdAt, modifiedAt } = getFileDates(filePath);
+    
     // Validate required fields
-    if (!data.title || !data.description || !data.category || !data.date) {
+    if (!data.title || !data.description || !data.category) {
       console.error(`Missing required metadata in article: ${slug}`);
       return null;
     }
     
     // Create article metadata object
-return {
-  id: slug,
-  slug: slug,
-  title: data.title,
-  description: data.description,
-  category: data.category,
-  date: formatDateForDisplay(data.date),
-  _rawDate: formatDateForSEO(data.date),
-  image: data.image ?? undefined,
-  author: data.author ?? undefined,
-  authorImage: data.authorImage ?? undefined,
-  keywords: data.keywords ?? undefined,
-  lastModified: data.lastModified ? formatDateForDisplay(data.lastModified) : undefined,
-  _rawLastModified: data.lastModified ? formatDateForSEO(data.lastModified) : undefined,
-  readingTime: data.readingTime ?? undefined,
-  featured: data.featured ?? undefined,
-  partnerships: data.partnerships ?? undefined
-};
+    return {
+      id: slug,
+      slug: slug,
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      date: formatDateForDisplay(data.date || createdAt),
+      _rawDate: formatDateForSEO(data.date || createdAt),
+      image: data.image ?? undefined,
+      author: data.author ?? undefined,
+      authorImage: data.authorImage ?? undefined,
+      keywords: data.keywords ?? undefined,
+      lastModified: formatDateForDisplay(modifiedAt),
+      _rawLastModified: formatDateForSEO(modifiedAt),
+      readingTime: data.readingTime ?? undefined,
+      featured: data.featured ?? undefined,
+      partnerships: data.partnerships ?? undefined
+    };
   } catch (error) {
     console.error(`Error reading article metadata ${slug}:`, error);
     return null;
@@ -189,8 +211,11 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
     // Use gray-matter to parse the post metadata section
     const { data, content } = matter(fileContents);
     
+    // Get file dates
+    const { createdAt, modifiedAt } = getFileDates(filePath);
+    
     // Validate required fields
-    if (!data.title || !data.description || !data.category || !data.date) {
+    if (!data.title || !data.description || !data.category) {
       console.error(`Missing required metadata in article: ${slug}`);
       return null;
     }
@@ -205,14 +230,14 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       title: data.title,
       description: data.description,
       category: data.category,
-      date: formatDateForDisplay(data.date),
-      _rawDate: formatDateForSEO(data.date), // Store raw date for SEO
+      date: formatDateForDisplay(data.date || createdAt),
+      _rawDate: formatDateForSEO(data.date || createdAt),
       image: data.image || undefined,
       author: data.author || undefined,
       authorImage: data.authorImage || undefined,
       keywords: data.keywords || undefined,
-      lastModified: data.lastModified ? formatDateForDisplay(data.lastModified) : undefined,
-      _rawLastModified: data.lastModified ? formatDateForSEO(data.lastModified) : undefined, // Store raw lastModified for SEO
+      lastModified: formatDateForDisplay(modifiedAt),
+      _rawLastModified: formatDateForSEO(modifiedAt),
       readingTime: data.readingTime || undefined,
       featured: data.featured || undefined,
       partnerships: data.partnerships || undefined,
