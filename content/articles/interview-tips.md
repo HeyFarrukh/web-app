@@ -2,12 +2,9 @@
 title: "Interview Tips for Apprenticeship Success"
 description: "Prepare for your apprenticeship interviews with these helpful tips and strategies"
 category: "Career"
-date: "January 15, 2025"
 image: "/media/privacy-policy.png"
 author: "James Wilson"
 keywords: ["interview", "apprenticeship", "job interview", "career advice", "preparation"]
-lastModified: "March 1, 2025"
-readingTime: "6 minutes"
 featured: false
 ---
 

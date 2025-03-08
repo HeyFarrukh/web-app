@@ -1,12 +1,11 @@
 ---
-title: "Getting Started with Enhanced Markdown"
+title: "Getting Started with Writing Articles in Markdown"
 description: "A guide to using our enhanced markdown features for expressive articles"
 category: "Documentation"
 image: "/resources/readme.png"
 author: "Farrukh"
 authorImage: "/media/farrukh-av.png"
-keywords: ["markdown", "writing", "documentation"]
-readingTime: "4 min"
+keywords: ["markdown", "documentation", "guide", "content creation"]
 featured: true
 partnerships: [
   { company: "Accenture", collaborators: ["recruiter"] },
@@ -123,7 +122,6 @@ author: "Author Name"                    # Optional
 authorImage: "/images/author.jpg"        # Optional, author's profile picture (recommended: 96x96)
 keywords: ["keyword1", "keyword2"]       # Optional, for SEO and related topics
 lastModified: "YYYY-MM-DD"              # Optional
-readingTime: "X min"                     # Optional
 featured: true                           # Optional, shows article in featured section
 partnerships:                            # Optional, shows company logos and collaboration type
   - company: "Company1"                  # Must match exact company name

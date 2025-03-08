@@ -2,12 +2,9 @@
 title: "Essential Tech Skills for 2025"
 description: "Stay ahead of the curve with these in-demand technical skills that employers are looking for."
 category: "Skills"
-date: "February 28, 2025"
 image: "/media/apprentice-watch.png"
 author: "Alex Chen"
 keywords: ["tech skills", "career development", "apprenticeship", "technology", "employability"]
-lastModified: "March 7, 2025"
-readingTime: "10 minutes"
 featured: true
 ---
 

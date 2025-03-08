@@ -16,6 +16,7 @@ import rehypeHighlight from 'rehype-highlight';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { formatDateForSEO, formatDateForDisplay } from './utils/dateFormat';
+import { calculateReadingTime } from './utils/readingTime';
 
 // Get the articles directory path
 const articlesDirectory = path.join(process.cwd(), 'content/articles');
@@ -132,7 +133,7 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
       keywords: data.keywords ?? undefined,
       lastModified: formatDateForDisplay(modifiedAt),
       _rawLastModified: formatDateForSEO(modifiedAt),
-      readingTime: data.readingTime ?? undefined,
+      readingTime: calculateReadingTime(fileContents),
       featured: data.featured ?? undefined,
       partnerships: data.partnerships ?? undefined
     };
@@ -238,7 +239,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       keywords: data.keywords || undefined,
       lastModified: formatDateForDisplay(modifiedAt),
       _rawLastModified: formatDateForSEO(modifiedAt),
-      readingTime: data.readingTime || undefined,
+      readingTime: calculateReadingTime(content),
       featured: data.featured || undefined,
       partnerships: data.partnerships || undefined,
       content: content,

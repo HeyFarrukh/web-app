@@ -5,7 +5,6 @@ category: "Career"
 image: "/media/meta/cv-optimise-page.png"
 author: "Emma Johnson"
 keywords: ["CV", "resume", "apprenticeship", "job application", "career advice"]
-readingTime: "8 minutes"
 featured: true
 ---
 
@@ -42,3 +41,5 @@ A personal statement is not a must-have for a CV, especially when you have many 
 - What you did & how (skills/job description) → Measurable impact (quantified).
 - Use keywords which emphasise the soft skills essential for the role, e.g. "Co-ordinated the team...", "Analysed survey responses to identify trends…".
 - When adapting the master CV to an application, consider the company culture and values.
+
+
