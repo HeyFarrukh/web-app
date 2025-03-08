@@ -29,19 +29,21 @@ const ArticleCard = ({ article }: { article: ReturnType<typeof getAllArticlesMet
     className="group"
   >
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg overflow-hidden transition-all duration-300 border border-gray-100 dark:border-gray-700">
-      <div className="relative h-48 w-full">
-        <Image
-          src={article.image || "/images/default-article.jpg"}
-          alt={article.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        {article.featured && (
-          <div className="absolute top-3 right-3 bg-orange-500 text-white rounded-full p-1.5 shadow-md">
-            <Star className="w-4 h-4" />
-          </div>
-        )}
-      </div>
+      {article.image && (
+        <div className="relative h-48 w-full">
+          <Image
+            src={article.image}
+            alt={article.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          {article.featured && (
+            <div className="absolute top-3 right-3 bg-orange-500 text-white rounded-full p-1.5 shadow-md">
+              <Star className="w-4 h-4" />
+            </div>
+          )}
+        </div>
+      )}
       <div className="p-6">
         <div className="flex flex-wrap gap-2 mb-3">
           <span className="inline-block px-3 py-1 text-sm font-medium text-orange-700 bg-orange-50 dark:bg-orange-900/30 dark:text-orange-300 rounded-full">
