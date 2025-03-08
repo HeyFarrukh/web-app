@@ -71,13 +71,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Generate sitemap URLs for each article
   const articleUrls: MetadataRoute.Sitemap = articles
-    .filter(article => article.slug !== 'readme')  
-    .map((article) => ({
-      url: `https://apprenticewatch.com/resources/${article.slug}`,
-      lastModified: new Date(article._rawDate), 
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    }));
+  .filter(article => article.slug !== 'readme' && article.slug !== 'cv-guide')   
+  .map((article) => ({
+    url: `https://apprenticewatch.com/resources/${article.slug}`,
+    lastModified: new Date(article._rawDate), 
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }));
+
 
   // Return URLs in order: base URLs, article URLs, then vacancy URLs
   return [...baseUrls, ...articleUrls, ...vacancyUrls];
