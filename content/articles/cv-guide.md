@@ -1,11 +1,11 @@
 ---
-title: "Craft the Perfect CV: Your Guide to Landing an Apprenticeship"
-description: "Transform your CV from ordinary to extraordinary. Learn how to impress recruiters and secure your dream apprenticeship with this comprehensive guide."
+title: "How to Write a CV That Gets You Hired (Reviewed by Accenture & HSBC)"
+description: "Struggling to get interviews? Learn how to write a CV that stands out to recruiters. Reviewed by Accenture, HSBC & more, this guide helps you land the apprenticeship you want."
 category: "Guides"
-image: "/resources/cv-guide-hero-v2.png" # Use a HIGH-QUALITY, visually appealing hero image
+image: "/resources/articles/cv-guide.png" 
 author: "Jamal"
 authorImage: "/media/jamal-av.png"
-keywords: ["CV", "resume", "apprenticeship", "guide", "job application", "career", "master CV", "tailoring", "ATS", "skills", "experience"]
+keywords: ["CV tips", "apprenticeship CV", "CV guide", "resume tips", "how to write a CV", "job application help", "career guide", "ATS-friendly CV", "best CV format"]
 featured: true
 partnerships:
   - company: "Accenture"
