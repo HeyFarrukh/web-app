@@ -26,17 +26,13 @@ function getFileDates(filePath: string) {
   const stats = fs.statSync(filePath);
   const now = new Date();
   
-  // For new files, use current time as both dates
-  if (!stats.birthtime || !stats.mtime) {
-    return {
-      createdAt: now.toISOString(),
-      modifiedAt: now.toISOString()
-    };
-  }
-
+  // Validate dates to ensure they're valid
+  const birthtime = stats.birthtime && stats.birthtime.getTime() > 0 ? stats.birthtime : now;
+  const mtime = stats.mtime && stats.mtime.getTime() > 0 ? stats.mtime : now;
+  
   return {
-    createdAt: stats.birthtime.toISOString(),
-    modifiedAt: stats.mtime.toISOString()
+    createdAt: birthtime.toISOString(),
+    modifiedAt: mtime.toISOString()
   };
 }
 
@@ -118,6 +114,11 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
       return null;
     }
     
+    // Use current date if no date is provided in frontmatter
+    const currentDate = new Date().toISOString();
+    const articleDate = data.date ? new Date(data.date).toISOString() : createdAt;
+    const lastModifiedDate = data.lastModified ? new Date(data.lastModified).toISOString() : modifiedAt;
+    
     // Create article metadata object
     return {
       id: slug,
@@ -125,14 +126,14 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
       title: data.title,
       description: data.description,
       category: data.category,
-      date: formatDateForDisplay(data.date || createdAt),
-      _rawDate: formatDateForSEO(data.date || createdAt),
+      date: formatDateForDisplay(articleDate),
+      _rawDate: formatDateForSEO(articleDate),
       image: data.image ?? undefined,
       author: data.author ?? undefined,
       authorImage: data.authorImage ?? undefined,
       keywords: data.keywords ?? undefined,
-      lastModified: formatDateForDisplay(modifiedAt),
-      _rawLastModified: formatDateForSEO(modifiedAt),
+      lastModified: formatDateForDisplay(lastModifiedDate),
+      _rawLastModified: formatDateForSEO(lastModifiedDate),
       readingTime: calculateReadingTime(fileContents),
       featured: data.featured ?? undefined,
       partnerships: data.partnerships ?? undefined
