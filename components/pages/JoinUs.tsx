@@ -36,6 +36,14 @@ export const JoinUs = () => {
 
   const handleApplyClick = () => {
     // Track ambassador application click
+    //window.open('https://trick.com', '_blank');
+    const link = document.createElement('a');
+    link.href = 'https://forms.gle/X9GUEcBCDNAUD6yH7'; // The URL you want to open
+    link.target = '_blank'; // Open in a new tab
+    link.rel = 'noopener noreferrer'; 
+    // Programmatically trigger a click on the anchor tag to open the link
+    link.click();
+
     Analytics.event('ambassador', 'apply_click');
   };
 
