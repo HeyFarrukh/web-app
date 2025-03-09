@@ -60,7 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     },
     {
-      url: 'https://apprenticewatch.com/cookies',
+      url: 'https://apprenticewatch.com/cookie-policy',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
