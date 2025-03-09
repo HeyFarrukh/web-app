@@ -8,7 +8,7 @@ interface GoogleSignInProps {
 export const GoogleSignIn = ({ redirect }: GoogleSignInProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = redirect || searchParams.get('redirect') || '/optimise-cv';
+  const redirectPath = redirect || searchParams?.get('redirect') || '/optimise-cv';
 
   const handleGoogleSignIn = async () => {
     try {

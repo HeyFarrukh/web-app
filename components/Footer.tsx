@@ -21,7 +21,7 @@ const footerSections = [
       { label: 'Apprenticeships', href: '/apprenticeships' },
       { label: 'Optimise CV', href: '/optimise-cv' },
       { label: 'Success Stories', href: '/success-stories' },
-      { label: 'CV Guide', href: '/cv-guide' }
+      { label: 'Resources', href: '/resources' }
     ]
   },
   {
@@ -115,7 +115,7 @@ export const Footer = () => {
             </div>
 
             <div className="text-center text-gray-400 text-sm">
-              <p>© {currentYear} ApprenticeWatch. All rights reserved.</p>
+              <p>&copy; {currentYear} ApprenticeWatch. All rights reserved.</p>
             </div>
           </div>
         </div>

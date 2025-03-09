@@ -51,7 +51,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   };
 
     const createQueryString = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || '');
     params.set('page', page.toString());
     return params.toString();
   };
