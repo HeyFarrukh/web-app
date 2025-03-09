@@ -10,10 +10,12 @@ export const metadata: Metadata = {
     title: 'Apprenticeship Listings | ApprenticeWatch',
     description: 'Browse the latest apprenticeship opportunities from top UK companies. Filter by location, industry, and more to find your perfect apprenticeship match.',
     url: 'https://apprenticewatch.com/apprenticeships',
+    images: ['/media/meta/listings.png'],
   },
   twitter: {
     title: 'Apprenticeship Listings | ApprenticeWatch',
     description: 'Browse the latest apprenticeship opportunities from top UK companies. Filter by location, industry, and more to find your perfect apprenticeship match.',
+    images: ['/media/meta/listings.png'],
   }
 };
 
