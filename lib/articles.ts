@@ -170,8 +170,9 @@ function processCustomMarkdown(content: string): string {
     '<span class="icon"><i class="fa-$1"></i></span>');
 
   // Process Lucide icons using custom syntax: :icon[lucide-check]
+  // Using a span with a class that we can target with CSS or JavaScript
   content = content.replace(/:icon\[lucide-([^\]]+)\]/g, 
-    '<span class="icon"><i data-lucide="$1"></i></span>');
+    '<span class="lucide-icon lucide-$1"></span>');
   
   return content;
 }

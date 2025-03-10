@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Tag, Clock, User, Share2, Bookmark } from 'lucide-
 import { getArticleBySlug, getAllArticlesMetadata } from '@/lib/articles';
 import { Metadata, ResolvingMetadata } from 'next';
 import '@/app/styles/markdown-enhanced.css';
+import { LucideIconRenderer } from '@/components/LucideIconRenderer';
 
 // Company logos mapping
 const partnerLogos = [
@@ -269,6 +270,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               prose-pre:bg-gray-50 dark:prose-pre:bg-gray-700/50 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-600 
               prose-pre:rounded-xl prose-pre:shadow-sm">
               <div dangerouslySetInnerHTML={{ __html: article.contentHtml }} />
+              <LucideIconRenderer />
             </article>
           </div>
           
