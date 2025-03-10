@@ -37,17 +37,35 @@ Let's explore each one with examples.
 
 Bar charts are excellent for comparing quantities across different categories.
 
-<div class="chart-wrapper" data-chart-type="bar" data-chart-title="Monthly Sales 2024" data-chart-height="400" data-chart-width="600" data-chart-data='{"labels":["Jan","Feb","Mar","Apr","May","Jun"],"datasets":[{"label":"Sales (£)","data":[4500,5200,4800,6000,5700,6500]}]}'></div>
+<div class="chart-wrapper" data-chart-type="bar" data-chart-title="Apprenticeship Enrollment by Industry (2024)" data-chart-height="400" data-chart-width="600" data-chart-data='{"labels":["Technology","Healthcare","Engineering","Business","Creative","Hospitality"],"datasets":[{"label":"Apprentices","data":[4500,3200,3800,2900,1700,2100]}]}'></div>
 
 To create this bar chart, use the following syntax:
 
 ```html
 <div class="chart-wrapper" 
   data-chart-type="bar" 
-  data-chart-title="Monthly Sales 2024" 
+  data-chart-title="Apprenticeship Enrollment by Industry (2024)" 
   data-chart-height="400" 
   data-chart-width="600" 
-  data-chart-data='{"labels":["Jan","Feb","Mar","Apr","May","Jun"],"datasets":[{"label":"Sales (£)","data":[4500,5200,4800,6000,5700,6500]}]}'>
+  data-chart-data='{"labels":["Technology","Healthcare","Engineering","Business","Creative","Hospitality"],"datasets":[{"label":"Apprentices","data":[4500,3200,3800,2900,1700,2100]}]}'>
+</div>
+```
+
+## Multi-Series Bar Chart Example
+
+You can also create multi-series bar charts to compare multiple datasets:
+
+<div class="chart-wrapper" data-chart-type="bar" data-chart-title="Apprenticeship Completion Rates by Region" data-chart-height="400" data-chart-width="600" data-chart-data='{"labels":["London","Midlands","North West","South East","Scotland","Wales"],"datasets":[{"label":"2023 (%)","data":[78,72,75,81,79,74]},{"label":"2024 (%)","data":[85,79,82,87,84,80]}]}'></div>
+
+To create this multi-series bar chart, use:
+
+```html
+<div class="chart-wrapper" 
+  data-chart-type="bar" 
+  data-chart-title="Apprenticeship Completion Rates by Region" 
+  data-chart-height="400" 
+  data-chart-width="600" 
+  data-chart-data='{"labels":["London","Midlands","North West","South East","Scotland","Wales"],"datasets":[{"label":"2023 (%)","data":[78,72,75,81,79,74]},{"label":"2024 (%)","data":[85,79,82,87,84,80]}]}'>
 </div>
 ```
 
@@ -55,17 +73,17 @@ To create this bar chart, use the following syntax:
 
 Line charts are perfect for showing trends over time.
 
-<div class="chart-wrapper" data-chart-type="line" data-chart-title="Apprenticeship Completion Rates" data-chart-height="400" data-chart-width="600" data-chart-data='{"labels":["2019","2020","2021","2022","2023","2024"],"datasets":[{"label":"Technology (%)","data":[65,68,72,78,82,85]},{"label":"Engineering (%)","data":[70,72,75,79,81,84]}]}'></div>
+<div class="chart-wrapper" data-chart-type="line" data-chart-title="Apprenticeship Growth (2019-2024)" data-chart-height="400" data-chart-width="600" data-chart-data='{"labels":["2019","2020","2021","2022","2023","2024"],"datasets":[{"label":"Technology","data":[2100,2400,3200,3800,4200,4500]},{"label":"Healthcare","data":[1800,1900,2200,2600,2900,3200]},{"label":"Engineering","data":[2300,2500,2800,3100,3500,3800]}]}'></div>
 
 To create this line chart, use:
 
 ```html
 <div class="chart-wrapper" 
   data-chart-type="line" 
-  data-chart-title="Apprenticeship Completion Rates" 
+  data-chart-title="Apprenticeship Growth (2019-2024)" 
   data-chart-height="400" 
   data-chart-width="600" 
-  data-chart-data='{"labels":["2019","2020","2021","2022","2023","2024"],"datasets":[{"label":"Technology (%)","data":[65,68,72,78,82,85]},{"label":"Engineering (%)","data":[70,72,75,79,81,84]}]}'>
+  data-chart-data='{"labels":["2019","2020","2021","2022","2023","2024"],"datasets":[{"label":"Technology","data":[2100,2400,3200,3800,4200,4500]},{"label":"Healthcare","data":[1800,1900,2200,2600,2900,3200]},{"label":"Engineering","data":[2300,2500,2800,3100,3500,3800]}]}'>
 </div>
 ```
 
@@ -73,17 +91,17 @@ To create this line chart, use:
 
 Pie charts show proportions of a whole and are great for showing percentage or proportional data.
 
-<div class="chart-wrapper" data-chart-type="pie" data-chart-title="Apprenticeship Fields Distribution" data-chart-height="300" data-chart-width="600" data-chart-data='{"labels":["Technology","Engineering","Healthcare","Business","Creative"],"datasets":[{"data":[35,25,15,20,5]}]}'></div>
+<div class="chart-wrapper" data-chart-type="pie" data-chart-title="Apprenticeship Age Distribution" data-chart-height="400" data-chart-width="600" data-chart-data='{"labels":["16-18","19-24","25-34","35-44","45+"],"datasets":[{"data":[25,35,20,15,5]}]}'></div>
 
 To create this pie chart, use:
 
 ```html
 <div class="chart-wrapper" 
   data-chart-type="pie" 
-  data-chart-title="Apprenticeship Fields Distribution" 
-  data-chart-height="300" 
+  data-chart-title="Apprenticeship Age Distribution" 
+  data-chart-height="400" 
   data-chart-width="600" 
-  data-chart-data='{"labels":["Technology","Engineering","Healthcare","Business","Creative"],"datasets":[{"data":[35,25,15,20,5]}]}'>
+  data-chart-data='{"labels":["16-18","19-24","25-34","35-44","45+"],"datasets":[{"data":[25,35,20,15,5]}]}'>
 </div>
 ```
 
@@ -91,7 +109,7 @@ To create this pie chart, use:
 
 Doughnut charts are similar to pie charts but with a hole in the center, which can make them easier to read in some cases.
 
-<div class="chart-wrapper" data-chart-type="doughnut" data-chart-title="Apprenticeship Funding Allocation" data-chart-height="300" data-chart-width="600" data-chart-data='{"labels":["Training","Mentorship","Assessment","Resources","Administration","Support"],"datasets":[{"data":[40,25,10,15,5,5]}]}'></div>
+<div class="chart-wrapper" data-chart-type="doughnut" data-chart-title="Apprenticeship Funding Allocation" data-chart-height="400" data-chart-width="600" data-chart-data='{"labels":["Training","Mentorship","Assessment","Equipment","Administration","Support Services"],"datasets":[{"data":[40,20,15,10,8,7]}]}'></div>
 
 To create this doughnut chart, use:
 
@@ -99,9 +117,9 @@ To create this doughnut chart, use:
 <div class="chart-wrapper" 
   data-chart-type="doughnut" 
   data-chart-title="Apprenticeship Funding Allocation" 
-  data-chart-height="300" 
+  data-chart-height="400" 
   data-chart-width="600" 
-  data-chart-data='{"labels":["Training","Mentorship","Assessment","Resources","Administration","Support"],"datasets":[{"data":[40,25,10,15,5,5]}]}'>
+  data-chart-data='{"labels":["Training","Mentorship","Assessment","Equipment","Administration","Support Services"],"datasets":[{"data":[40,20,15,10,8,7]}]}'>
 </div>
 ```
 

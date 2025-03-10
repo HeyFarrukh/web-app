@@ -29,6 +29,7 @@
     "react-dom": "^18.2.0",
     "react-ga4": "^2.1.0",
     "react-icons": "^5.4.0",
+    "recharts": "^2.15.1",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-highlight": "^7.0.2",
     "rehype-prism-plus": "^2.0.0",

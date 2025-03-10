@@ -2,32 +2,22 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
   Legend,
-  ChartOptions,
-} from 'chart.js';
-import { Bar, Doughnut, Line, Pie } from 'react-chartjs-2';
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-);
+  Sector,
+  Label
+} from 'recharts';
 
 // Define chart types
 type ChartType = 'bar' | 'line' | 'pie' | 'doughnut';
@@ -54,92 +44,115 @@ interface ChartRendererProps {
 
 // ApprenticeWatch theme colors
 const themeColors = {
-  primary: 'rgba(249, 115, 22, 1)', // Orange primary
-  primaryLight: 'rgba(249, 115, 22, 0.2)',
-  secondary: 'rgba(59, 130, 246, 1)', // Blue secondary
-  secondaryLight: 'rgba(59, 130, 246, 0.2)',
-  tertiary: 'rgba(16, 185, 129, 1)', // Green tertiary
-  tertiaryLight: 'rgba(16, 185, 129, 0.2)',
-  quaternary: 'rgba(139, 92, 246, 1)', // Purple quaternary
-  quaternaryLight: 'rgba(139, 92, 246, 0.2)',
-  quinary: 'rgba(236, 72, 153, 1)', // Pink quinary
-  quinaryLight: 'rgba(236, 72, 153, 0.2)',
-  senary: 'rgba(234, 179, 8, 1)', // Yellow senary
-  senaryLight: 'rgba(234, 179, 8, 0.2)',
-  text: 'rgba(17, 24, 39, 1)', // Dark text
-  textLight: 'rgba(107, 114, 128, 1)', // Light text
-  background: 'rgba(255, 255, 255, 1)', // White background
-  backgroundDark: 'rgba(249, 250, 251, 1)', // Light gray background
-  border: 'rgba(229, 231, 235, 1)', // Border color
+  primary: '#f97316', // Orange primary (from tailwind config)
+  primaryLight: '#fdba74',
+  primaryLighter: '#ffedd5',
+  secondary: '#3b82f6', // Blue
+  secondaryLight: '#93c5fd',
+  tertiary: '#10b981', // Green
+  tertiaryLight: '#6ee7b7',
+  quaternary: '#8b5cf6', // Purple
+  quaternaryLight: '#c4b5fd',
+  quinary: '#ec4899', // Pink
+  quinaryLight: '#f9a8d4',
+  senary: '#eab308', // Yellow
+  senaryLight: '#fde68a',
+  text: '#111827', // Dark text
+  textLight: '#6b7280', // Light text
+  background: '#ffffff', // White background
+  backgroundDark: '#f9fafb', // Light gray background
+  border: '#e5e7eb', // Border color
 };
 
-// Default color palettes for different chart types
-const defaultColors = {
-  bar: {
-    backgroundColor: [
-      themeColors.primaryLight,
-      themeColors.secondaryLight,
-      themeColors.tertiaryLight,
-      themeColors.quaternaryLight,
-      themeColors.quinaryLight,
-      themeColors.senaryLight,
-    ],
-    borderColor: [
-      themeColors.primary,
-      themeColors.secondary,
-      themeColors.tertiary,
-      themeColors.quaternary,
-      themeColors.quinary,
-      themeColors.senary,
-    ],
-  },
-  line: {
-    backgroundColor: 'transparent',
-    borderColor: [
-      themeColors.primary,
-      themeColors.secondary,
-      themeColors.tertiary,
-      themeColors.quaternary,
-      themeColors.quinary,
-      themeColors.senary,
-    ],
-  },
-  pie: {
-    backgroundColor: [
-      themeColors.primaryLight,
-      themeColors.secondaryLight,
-      themeColors.tertiaryLight,
-      themeColors.quaternaryLight,
-      themeColors.quinaryLight,
-      themeColors.senaryLight,
-    ],
-    borderColor: [
-      themeColors.primary,
-      themeColors.secondary,
-      themeColors.tertiary,
-      themeColors.quaternary,
-      themeColors.quinary,
-      themeColors.senary,
-    ],
-  },
-  doughnut: {
-    backgroundColor: [
-      themeColors.primaryLight,
-      themeColors.secondaryLight,
-      themeColors.tertiaryLight,
-      themeColors.quaternaryLight,
-      themeColors.quinaryLight,
-      themeColors.senaryLight,
-    ],
-    borderColor: [
-      themeColors.primary,
-      themeColors.secondary,
-      themeColors.tertiary,
-      themeColors.quaternary,
-      themeColors.quinary,
-      themeColors.senary,
-    ],
-  },
+// Color palettes for different chart types
+const chartColors = {
+  bar: [
+    themeColors.primary,
+    themeColors.secondary,
+    themeColors.tertiary,
+    themeColors.quaternary,
+    themeColors.quinary,
+    themeColors.senary,
+  ],
+  line: [
+    themeColors.primary,
+    themeColors.secondary,
+    themeColors.tertiary,
+    themeColors.quaternary,
+    themeColors.quinary,
+    themeColors.senary,
+  ],
+  pie: [
+    themeColors.primary,
+    themeColors.secondary,
+    themeColors.tertiary,
+    themeColors.quaternary,
+    themeColors.quinary,
+    themeColors.senary,
+  ],
+  doughnut: [
+    themeColors.primary,
+    themeColors.secondary,
+    themeColors.tertiary,
+    themeColors.quaternary,
+    themeColors.quinary,
+    themeColors.senary,
+  ],
+};
+
+// Custom tooltip component for Recharts
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
+        <p className="text-sm font-medium text-gray-900">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={`item-${index}`} className="text-sm" style={{ color: entry.color }}>
+            {entry.name}: {new Intl.NumberFormat('en-GB').format(entry.value)}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// Custom active shape for pie/doughnut charts
+const renderActiveShape = (props: any) => {
+  const { 
+    cx, cy, innerRadius, outerRadius, startAngle, endAngle,
+    fill, payload, percent, value 
+  } = props;
+
+  return (
+    <g>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius + 10}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={innerRadius - 5}
+        outerRadius={innerRadius - 1}
+        fill={fill}
+      />
+      <text x={cx} y={cy - 15} dy={8} textAnchor="middle" fill={themeColors.text} className="text-sm font-medium">
+        {payload.name}
+      </text>
+      <text x={cx} y={cy + 15} textAnchor="middle" fill={themeColors.textLight} className="text-sm">
+        {`${(percent * 100).toFixed(1)}%`}
+      </text>
+    </g>
+  );
 };
 
 export const ChartRenderer: React.FC<ChartRendererProps> = ({
@@ -149,7 +162,8 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
   height = 300,
   width = 600,
 }) => {
-  const [chartData, setChartData] = useState<ChartData | null>(null);
+  const [chartData, setChartData] = useState<any[] | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -173,75 +187,19 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         throw new Error('Chart data must include datasets array');
       }
 
-      // Get the appropriate color palette for the chart type
-      const colorPalette = defaultColors[type];
-
-      // Add theme colors if not provided
-      const processedDatasets = parsedData.datasets.map((dataset: any, index: number) => {
-        const colorIndex = index % colorPalette.borderColor.length;
+      // Transform the data from Chart.js format to Recharts format
+      const transformedData = parsedData.labels.map((label: string, index: number) => {
+        const dataPoint: any = { name: label };
         
-        // For pie and doughnut charts, we need an array of colors for each data point
-        if (type === 'pie' || type === 'doughnut') {
-          // For pie/doughnut, each slice gets its own color
-          const dataLength = dataset.data.length;
-          const backgroundColors = [];
-          const borderColors = [];
-          
-          // Generate colors for each data point
-          for (let i = 0; i < dataLength; i++) {
-            const colorIdx = i % colorPalette.backgroundColor.length;
-            backgroundColors.push(colorPalette.backgroundColor[colorIdx]);
-            borderColors.push(colorPalette.borderColor[colorIdx]);
-          }
-          
-          return {
-            ...dataset,
-            backgroundColor: dataset.backgroundColor || backgroundColors,
-            borderColor: dataset.borderColor || borderColors,
-            borderWidth: dataset.borderWidth || 1,
-          };
-        }
+        parsedData.datasets.forEach((dataset: any, datasetIndex: number) => {
+          const datasetLabel = dataset.label || `Dataset ${datasetIndex + 1}`;
+          dataPoint[datasetLabel] = dataset.data[index];
+        });
         
-        // For bar charts
-        if (type === 'bar') {
-          return {
-            ...dataset,
-            backgroundColor: dataset.backgroundColor || colorPalette.backgroundColor[colorIndex],
-            borderColor: dataset.borderColor || colorPalette.borderColor[colorIndex],
-            borderWidth: dataset.borderWidth || 1,
-          };
-        }
-        
-        // For line charts
-        if (type === 'line') {
-          return {
-            ...dataset,
-            backgroundColor: dataset.backgroundColor || 'transparent',
-            borderColor: dataset.borderColor || colorPalette.borderColor[colorIndex],
-            borderWidth: dataset.borderWidth || 2,
-            tension: dataset.tension || 0.4, // Add some curve to lines
-            pointBackgroundColor: colorPalette.borderColor[colorIndex],
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: colorPalette.borderColor[colorIndex],
-            pointRadius: 4,
-            pointHoverRadius: 6,
-          };
-        }
-        
-        // Default case
-        return {
-          ...dataset,
-          backgroundColor: dataset.backgroundColor || colorPalette.backgroundColor[colorIndex],
-          borderColor: dataset.borderColor || colorPalette.borderColor[colorIndex],
-          borderWidth: dataset.borderWidth || 1,
-        };
+        return dataPoint;
       });
 
-      setChartData({
-        labels: parsedData.labels,
-        datasets: processedDatasets,
-      });
+      setChartData(transformedData);
       
     } catch (err) {
       console.error('Error parsing chart data:', err, 'Raw data:', data);
@@ -249,117 +207,9 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
     }
   }, [data, type]);
 
-  // ApprenticeWatch themed chart options
-  const options: ChartOptions<any> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top' as const,
-        labels: {
-          font: {
-            family: "'Inter', sans-serif",
-            size: 12,
-          },
-          color: themeColors.text,
-          usePointStyle: true,
-          padding: 20,
-        },
-      },
-      title: {
-        display: !!title,
-        text: title,
-        font: {
-          family: "'Inter', sans-serif",
-          size: 16,
-          weight: 'bold',
-        },
-        color: themeColors.text,
-        padding: {
-          top: 10,
-          bottom: 20,
-        },
-      },
-      tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        titleColor: themeColors.text,
-        bodyColor: themeColors.textLight,
-        borderColor: themeColors.border,
-        borderWidth: 1,
-        cornerRadius: 8,
-        boxPadding: 6,
-        usePointStyle: true,
-        titleFont: {
-          family: "'Inter', sans-serif",
-          size: 14,
-          weight: 'bold',
-        },
-        bodyFont: {
-          family: "'Inter', sans-serif",
-          size: 13,
-        },
-        callbacks: {
-          // Format numbers with commas for thousands
-          label: function(context: any) {
-            let label = context.dataset.label || '';
-            if (label) {
-              label += ': ';
-            }
-            if (context.parsed.y !== null) {
-              label += new Intl.NumberFormat('en-GB').format(context.parsed.y);
-            } else if (context.parsed !== null && typeof context.parsed === 'number') {
-              label += new Intl.NumberFormat('en-GB').format(context.parsed);
-            }
-            return label;
-          }
-        }
-      },
-    },
-    scales: type === 'bar' || type === 'line' ? {
-      x: {
-        grid: {
-          color: 'rgba(229, 231, 235, 0.5)',
-        },
-        ticks: {
-          font: {
-            family: "'Inter', sans-serif",
-            size: 12,
-          },
-          color: themeColors.textLight,
-          callback: function(value: any) {
-            return new Intl.NumberFormat('en-GB').format(value as number);
-          }
-        },
-      },
-      y: {
-        grid: {
-          color: 'rgba(229, 231, 235, 0.5)',
-        },
-        ticks: {
-          font: {
-            family: "'Inter', sans-serif",
-            size: 12,
-          },
-          color: themeColors.textLight,
-          callback: function(value: any) {
-            return new Intl.NumberFormat('en-GB').format(value as number);
-          }
-        },
-        beginAtZero: true,
-      },
-    } : undefined,
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
   };
-
-  // Additional options for doughnut and pie charts
-  if (type === 'doughnut' || type === 'pie') {
-    options.plugins = {
-      ...options.plugins,
-      legend: {
-        ...options.plugins?.legend,
-        position: 'right',
-      },
-    };
-  }
 
   if (error) {
     return (
@@ -379,24 +229,178 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
     );
   }
 
+  // Get dataset labels
+  const datasetLabels = JSON.parse(typeof data === 'string' ? data : JSON.stringify(data)).datasets.map(
+    (dataset: any) => dataset.label || 'Dataset'
+  );
+
+  // Render the appropriate chart based on type
   const renderChart = () => {
     switch (type) {
       case 'bar':
-        return <Bar data={chartData} options={options} />;
+        return (
+          <ResponsiveContainer width="100%" height={height}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border} />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fill: themeColors.textLight, fontSize: 12 }}
+                tickLine={{ stroke: themeColors.border }}
+                axisLine={{ stroke: themeColors.border }}
+              />
+              <YAxis 
+                tick={{ fill: themeColors.textLight, fontSize: 12 }}
+                tickLine={{ stroke: themeColors.border }}
+                axisLine={{ stroke: themeColors.border }}
+                tickFormatter={(value) => new Intl.NumberFormat('en-GB').format(value)}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend 
+                wrapperStyle={{ 
+                  paddingTop: '10px',
+                  fontSize: '12px',
+                  fontFamily: "'Inter', sans-serif"
+                }} 
+              />
+              {datasetLabels.map((label: string, index: number) => (
+                <Bar 
+                  key={`bar-${index}`}
+                  dataKey={label} 
+                  fill={chartColors.bar[index % chartColors.bar.length]}
+                  radius={[4, 4, 0, 0]}
+                  animationDuration={1500}
+                  animationEasing="ease-in-out"
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      
       case 'line':
-        return <Line data={chartData} options={options} />;
+        return (
+          <ResponsiveContainer width="100%" height={height}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={themeColors.border} />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fill: themeColors.textLight, fontSize: 12 }}
+                tickLine={{ stroke: themeColors.border }}
+                axisLine={{ stroke: themeColors.border }}
+              />
+              <YAxis 
+                tick={{ fill: themeColors.textLight, fontSize: 12 }}
+                tickLine={{ stroke: themeColors.border }}
+                axisLine={{ stroke: themeColors.border }}
+                tickFormatter={(value) => new Intl.NumberFormat('en-GB').format(value)}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend 
+                wrapperStyle={{ 
+                  paddingTop: '10px',
+                  fontSize: '12px',
+                  fontFamily: "'Inter', sans-serif"
+                }} 
+              />
+              {datasetLabels.map((label: string, index: number) => (
+                <Line 
+                  key={`line-${index}`}
+                  type="monotone" 
+                  dataKey={label} 
+                  stroke={chartColors.line[index % chartColors.line.length]}
+                  strokeWidth={3}
+                  dot={{ 
+                    fill: chartColors.line[index % chartColors.line.length],
+                    stroke: '#fff',
+                    strokeWidth: 2,
+                    r: 6 
+                  }}
+                  activeDot={{ 
+                    fill: chartColors.line[index % chartColors.line.length],
+                    stroke: '#fff',
+                    strokeWidth: 2,
+                    r: 8 
+                  }}
+                  animationDuration={1500}
+                  animationEasing="ease-in-out"
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        );
+      
       case 'pie':
-        return <Pie data={chartData} options={options} />;
       case 'doughnut':
-        return <Doughnut data={chartData} options={options} />;
+        // For pie/doughnut, we need to transform the data differently
+        const pieData = JSON.parse(typeof data === 'string' ? data : JSON.stringify(data));
+        const pieChartData = pieData.labels.map((label: string, index: number) => ({
+          name: label,
+          value: pieData.datasets[0].data[index]
+        }));
+        
+        return (
+          <ResponsiveContainer width="100%" height={height}>
+            <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <Pie
+                activeIndex={activeIndex}
+                activeShape={renderActiveShape}
+                data={pieChartData}
+                cx="50%"
+                cy="50%"
+                innerRadius={type === 'doughnut' ? 60 : 0}
+                outerRadius={100}
+                fill={themeColors.primary}
+                dataKey="value"
+                onMouseEnter={onPieEnter}
+                animationDuration={1500}
+                animationEasing="ease-in-out"
+                paddingAngle={2}
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
+              >
+                {pieChartData.map((_: any, index: number) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={chartColors.pie[index % chartColors.pie.length]} 
+                  />
+                ))}
+              </Pie>
+              <Tooltip 
+                formatter={(value) => new Intl.NumberFormat('en-GB').format(value as number)}
+                content={<CustomTooltip />}
+              />
+              <Legend 
+                layout="vertical" 
+                align="right" 
+                verticalAlign="middle"
+                wrapperStyle={{ 
+                  fontSize: '12px',
+                  fontFamily: "'Inter', sans-serif",
+                  paddingLeft: '20px'
+                }} 
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+      
       default:
-        return <Bar data={chartData} options={options} />;
+        return <div>Unsupported chart type</div>;
     }
   };
 
   return (
     <div className="chart-container bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-6 my-6">
-      <div style={{ height, width: '100%', maxWidth: width, margin: '0 auto' }}>
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 text-center">
+          {title}
+        </h3>
+      )}
+      <div style={{ width: '100%', maxWidth: width, margin: '0 auto' }}>
         {renderChart()}
       </div>
     </div>
