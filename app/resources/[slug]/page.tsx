@@ -6,6 +6,7 @@ import { getArticleBySlug, getAllArticlesMetadata } from '@/lib/articles';
 import { Metadata, ResolvingMetadata } from 'next';
 import '@/app/styles/markdown-enhanced.css';
 import { LucideIconRenderer } from '@/components/LucideIconRenderer';
+import { ShareButton } from '../../../components/ShareButton';
 
 // Company logos mapping
 const partnerLogos = [
@@ -167,9 +168,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               Back to Resources
             </Link>
             <div className="flex items-center space-x-3">
-              <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <Share2 className="w-5 h-5" />
-              </button>
+              <ShareButton title={article.title} />
               <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <Bookmark className="w-5 h-5" />
               </button>
