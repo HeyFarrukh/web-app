@@ -173,28 +173,47 @@ function processCustomMarkdown(content: string): string {
   content = content.replace(/:icon\[lucide-([^\]]+)\]/g, 
     '<span class="icon"><i data-lucide="$1"></i></span>');
   
+  // Process chart embeds using custom syntax: 
+  // {{chart:type:title:height:width:data}}
+  // Example: {{chart:bar:Monthly Sales:400:600:{"labels":["Jan","Feb","Mar"],"datasets":[{"label":"Sales","data":[30,50,20]}]}}}
+  content = content.replace(/{{chart:([^:]+):([^:]*):([^:]*):([^:]*):([^}]+)}}/g, (match, type, title, height, width, data) => {
+    // Sanitize and validate inputs
+    const chartType = ['bar', 'line', 'pie', 'doughnut'].includes(type) ? type : 'bar';
+    const chartTitle = title || '';
+    const chartHeight = parseInt(height) || 300;
+    const chartWidth = parseInt(width) || 600;
+    
+    // Escape the data JSON to prevent issues with quotes
+    const escapedData = data.replace(/"/g, '&quot;');
+    
+    // Create a special HTML comment that won't be processed by the markdown parser
+    return `<!-- CHART_START -->
+<div class="chart-wrapper" data-chart-type="${chartType}" data-chart-title="${chartTitle}" data-chart-height="${chartHeight}" data-chart-width="${chartWidth}" data-chart-data="${escapedData}"></div>
+<!-- CHART_END -->`;
+  });
+  
   return content;
 }
 
 // Enhanced processor for article content
 async function processMarkdownContent(content: string): Promise<string> {
-  // First, process our custom markdown syntax
-  content = processCustomMarkdown(content);
+  // First, process our custom markdown syntax (except charts)
+  let processedContent = processCustomMarkdown(content);
   
   // Then use the unified/remark/rehype pipeline for standard and extended markdown
-  const processedContent = await unified()
+  const htmlContent = await unified()
     .use(remarkParse)
     .use(remarkGfm) // GitHub Flavored Markdown: tables, strikethrough, etc.
     .use(remarkEmoji, processorOptions.emoji) // Convert emoji shortcodes to emojis
     .use(remarkRehype, { allowDangerousHtml: true }) // Convert to HTML (allowing custom HTML)
-    .use(rehypeRaw) // Parse custom HTML in the markdown
+    .use(rehypeRaw, { passThrough: ['div', 'span'] }) // Parse custom HTML in the markdown with specific elements passed through
     .use(rehypeHighlight, processorOptions.highlight) // Syntax highlighting with highlight.js
     .use(rehypeSlug) // Add IDs to headings
     .use(rehypeAutolinkHeadings) // Add links to headings
-    .use(rehypeStringify) // Convert to HTML string
-    .process(content);
+    .use(rehypeStringify, { allowDangerousHtml: true }) // Convert to HTML string with dangerous HTML allowed
+    .process(processedContent);
 
-  return processedContent.toString();
+  return htmlContent.toString();
 }
 
 // Function to get article by slug with content
