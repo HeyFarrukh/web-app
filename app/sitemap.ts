@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Base sitemap entries
   const baseUrls: MetadataRoute.Sitemap = [
     {
-      url: 'https://apprenticewatch.com/',
+      url: 'https://apprenticewatch.com',
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1.0,
