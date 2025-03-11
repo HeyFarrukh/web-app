@@ -7,6 +7,8 @@ import { Metadata, ResolvingMetadata } from 'next';
 import '@/app/styles/markdown-enhanced.css';
 import { LucideIconRenderer } from '@/components/LucideIconRenderer';
 import { ShareButton } from '../../../components/ShareButton';
+import TableWrapper from '@/components/ui/TableWrapper';
+import ArticleContentEnhancer from '@/components/ui/ArticleContentEnhancer';
 
 // Company logos mapping
 const partnerLogos = [
@@ -267,9 +269,19 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               prose-blockquote:border-orange-500 prose-blockquote:bg-orange-50 dark:prose-blockquote:bg-orange-900/10 prose-blockquote:rounded-r-lg prose-blockquote:py-2 prose-blockquote:px-6
               prose-code:text-orange-500 dark:prose-code:text-orange-400 prose-code:bg-orange-50 dark:prose-code:bg-orange-900/10 prose-code:rounded prose-code:px-1
               prose-pre:bg-gray-50 dark:prose-pre:bg-gray-700/50 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-600 
-              prose-pre:rounded-xl prose-pre:shadow-sm">
-              <div dangerouslySetInnerHTML={{ __html: article.contentHtml }} />
+              prose-pre:rounded-xl prose-pre:shadow-sm
+              prose-table:border-collapse prose-table:overflow-hidden prose-table:w-full
+              prose-th:bg-gray-50 dark:prose-th:bg-gray-800 prose-th:p-3 prose-th:text-left
+              prose-td:p-3 prose-td:border-b prose-td:border-gray-200 dark:prose-td:border-gray-700
+              prose-tr:hover:bg-gray-50 dark:prose-tr:hover:bg-gray-800/50
+              prose-hr:my-8">
+              <div 
+                dangerouslySetInnerHTML={{ __html: article.contentHtml }} 
+                className="article-content-wrapper"
+              />
               <LucideIconRenderer />
+              <TableWrapper />
+              <ArticleContentEnhancer />
             </article>
           </div>
           

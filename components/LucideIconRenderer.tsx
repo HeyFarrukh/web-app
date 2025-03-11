@@ -4,54 +4,6 @@ import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Icons from 'lucide-react';
 
-// Create a mapping of kebab-case icon names to their components
-const iconMap = {
-  'check': Icons.Check,
-  'x': Icons.X,
-  'arrow-right': Icons.ArrowRight,
-  'arrow-left': Icons.ArrowLeft,
-  'calendar': Icons.Calendar,
-  'tag': Icons.Tag,
-  'clock': Icons.Clock,
-  'user': Icons.User,
-  'share-2': Icons.Share2,
-  'bookmark': Icons.Bookmark,
-  'search': Icons.Search,
-  'chevron-right': Icons.ChevronRight,
-  'chevron-left': Icons.ChevronLeft,
-  'map-pin': Icons.MapPin,
-  'building-2': Icons.Building2,
-  'graduation-cap': Icons.GraduationCap,
-  'pound-sterling': Icons.PoundSterling,
-  'github': Icons.Github,
-  'linkedin': Icons.Linkedin,
-  'twitter': Icons.Twitter,
-  'mail': Icons.Mail,
-  'list': Icons.List,
-  'map': Icons.Map,
-  'sun': Icons.Sun,
-  'moon': Icons.Moon,
-  'sparkles': Icons.Sparkles,
-  'lock': Icons.Lock,
-  'alert-circle': Icons.AlertCircle,
-  'zap': Icons.Zap,
-  'bot': Icons.Bot,
-  'cpu': Icons.Cpu,
-  'target': Icons.Target,
-  'trending-up': Icons.TrendingUp,
-  'file-text': Icons.FileText,
-  'key': Icons.Key,
-  'copy': Icons.Copy,
-  'home': Icons.Home,
-  'refresh-cw': Icons.RefreshCw,
-  'award': Icons.Award,
-  'users': Icons.Users,
-  'briefcase': Icons.Briefcase,
-  'log-out': Icons.LogOut,
-  'star': Icons.Star,
-};
-
-// This component will be used to render Lucide icons in markdown content
 export function LucideIconRenderer() {
   useEffect(() => {
     // Find all elements with the lucide-icon class
@@ -60,15 +12,24 @@ export function LucideIconRenderer() {
     // Store references to roots for cleanup
     const roots: Array<ReturnType<typeof createRoot>> = [];
     
+    // Helper function to convert kebab-case to PascalCase
+    const kebabToPascalCase = (str: string): string => {
+      return str
+        .split('-')
+        .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
+        .join('');
+    };
+    
     // For each icon element, render the appropriate Lucide icon
     iconElements.forEach((element) => {
       // Get the icon name from the class (e.g., lucide-check -> check)
-      const iconClasses = Array.from(element.classList)
+      const iconClass = Array.from(element.classList)
         .find(className => className.startsWith('lucide-') && className !== 'lucide-icon');
       
-      if (iconClasses) {
-        const iconName = iconClasses.replace('lucide-', '');
-        const IconComponent = iconMap[iconName as keyof typeof iconMap];
+      if (iconClass) {
+        const iconKebabName = iconClass.replace('lucide-', '');
+        const iconPascalName = kebabToPascalCase(iconKebabName);
+        const IconComponent = (Icons as any)[iconPascalName];
         
         if (IconComponent) {
           // Clear the original element's content
@@ -99,6 +60,8 @@ export function LucideIconRenderer() {
               }}
             />
           );
+        } else {
+          console.warn(`Icon not found: ${iconPascalName}`);
         }
       }
     });

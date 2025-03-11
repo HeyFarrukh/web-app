@@ -2,7 +2,7 @@
 title: "How to Write a CV That Gets You Hired (Reviewed by Accenture & HSBC)"
 description: "Struggling to get interviews? Learn how to write a CV that stands out to recruiters. Reviewed by Accenture, HSBC & more, this guide helps you land the apprenticeship you want."
 category: "Guides"
-image: "/resources/articles/cv-guide.png" 
+image: "/resources/articles/cv-guide.png"
 author: "Jamal"
 authorImage: "/media/jamal-av.png"
 keywords: ["CV tips", "apprenticeship CV", "CV guide", "resume tips", "how to write a CV", "job application help", "career guide", "ATS-friendly CV", "best CV format"]
@@ -16,22 +16,18 @@ partnerships:
     collaborators: ["apprentice", "recruiter"]
 ---
 
-# :icon[lucide-file-text] CV Writing Guide: Make a Lasting First Impression
+#  CV Writing Guide: Make a Lasting First Impression
 
-> "The most important thing about a CV is making a strong first impression"
-
-:icon[lucide-quote] Reviewed by apprentices and hiring managers at Accenture, HSBC, and Digital Catapult.
-
+> Your CV is an important part of your application and is your first opportunity to demonstrate your qualities and achievements. It also enables us to consider you if another suitable role comes up in the future. - [HSBC](https://www.hsbc.com/careers/application-hints-and-tips)
 ---
 
 <br/>
 
-## :icon[lucide-user-check] Your Personal Information
+## :icon[lucide-square-user] Your Personal Information
 
-**First Last**
+**First & Last Name**
 
-> :icon[lucide-linkedin] [LinkedIn](https://www.linkedin.com/company/apprenticewatch)    :icon[lucide-github] [Github](https://github.com/apprenticewatch) (if applicable)  
-> :icon[lucide-phone] +44 1234567890    :icon[lucide-mail] [Email](mailto:jamal@apprenticewatch.com)
+ :icon[lucide-linkedin] [LinkedIn](https://www.linkedin.com/company/apprenticewatch)  <br/>  :icon[lucide-github] [Github](https://github.com/apprenticewatch) (if applicable) <br/> :icon[lucide-phone] +44 1234567890 <br/>  :icon[lucide-mail] [Email](mailto:jamal@apprenticewatch.com)
 
 ---
 
@@ -39,39 +35,85 @@ partnerships:
 
 ## :icon[lucide-file-question] Why Your CV Might Be Holding You Back
 
-> In the world of apprenticeship applications, first impressions are everything. Your Curriculum Vitae (CV) is your first opportunity, your first chance to leave an imprint of yourself, and traverse through the application process. A well-crafted CV is not just a list of your experiences—it's a powerful story of who you are, what you've achieved, and where you're going. 
+> In the world of apprenticeship applications, first impressions are everything. Your Curriculum Vitae (CV) is your first opportunity, your first chance to leave an imprint of yourself, and traverse through the application process. A well-crafted CV is not just a list of your experiences—it's a powerful story of who you are, what you've achieved, and where you're going.
 
 > Your CV is more than just a document; it's your personal brand, and in the competitive world of job hunting, it’s the first thing potential employers will see. So, how do you make yours stand out in a sea of applicants?
 
 > Think of it as the chance to strategically <a href="https://online.hbs.edu/blog/post/personal-branding-at-work">brand</a> yourself: Highlight the skills, experiences, and achievements that speak directly to the role and its requirements. Whether it’s adjusting the emphasis on your education or tweaking the wording in your personal statement, building and customising a quality CV shows recruiters that you’ve put in the effort to align your experience with their needs.
 
 Here's a template from an award-winning recruitment agency, from which many template examples throughout this guide are sourced from: <a href="/cv-guide-resources/dartmouth.pdf" target="_blank" rel="noopener noreferrer">Dartmouth CV</a>
-              
+
 <br/>
 
-## :icon[lucide-file-stack] The Master CV: Your Foundation
+## :icon[lucide-file-stack] Creating Your "Master CV"
 
-> If anything, your details are the one part of your CV that should stay the same, regardless of the company you’re applying to. In other words, it should go unchanged from the <a href="https://www.jobteaser.com/en/advices/153-why-you-should-always-keep-a-master-cv">Master CV</a> - a resume that has absolutely everything that you would ever want to include in an application. To simplify things, your master CV should emphasise your strongest skills, and be centered around your ideal company.
+**What is a Master CV?**
 
-> However, each CV should be tailored to the job description and culture of the company in order to emphasise your points, and showcase why you could be a perfect fit for the vacancy. This includes everything from the subjects highlighted in education, down to the headlined skills & achievements, and the personal statement.
+A "Master CV" is a comprehensive document that contains *all* of your work experience, skills, education, and achievements.  Think of it as your CV "toolbox."  You'll then select and tailor specific pieces from this toolbox to create targeted CVs for each job application.
 
-> A personal statement is not a must-have for a CV, especially when you have many experiences to draw from. Nonetheless, a personal statement or career objective could be expected by recruiters, or useful when differentiating from other applicants. In certain industries, such as hospitality, a personal statement can act as a prerequisite to an interview, giving insight to your character and goals. If anything, use it to showcase your motivation behind working "here" rather than anywhere else. Research!
+**Why Create a Master CV?**
 
+*   Saves Time: You don't have to start from scratch each time you apply for a job.
+*   Ensures Completeness: You won't forget any important details.
+*   Provides a Foundation: It's easier to tailor a CV than to create one from nothing.
+
+**Action Step:** Create a new document titled "Master CV" and start listing *everything* you've ever done, both professionally and academically. We'll show you how to organize it in the following sections.
+
+**:icon[lucide-link-2] Free CV Templates:**
+
+*   [Microsoft Resume Templates](https://create.microsoft.com/en-us/templates/resumes)
+*   [CV Template UK](https://www.cvtemplate.co.uk/)
+*   [Adobe Express CV Templates](https://www.adobe.com/uk/express/templates/resume/cv)
+*   [CV-Library CV Templates](https://www.cv-library.co.uk/career-advice/cv/cv-templates/)
+
+---
+
+## :icon[lucide-square-user] Introduction
+
+Consider adding a concise introduction below your contact information. This is your opportunity to quickly grab the recruiter's attention and highlight why you're a great fit for the role.
+
+**Tips for Writing a Compelling Introduction:**
+
+*   **Keep it brief:** Aim for a couple of sentences max.
+*   **Incorporate keywords from the job description:** Carefully review the job description and identify key skills, qualifications, and requirements.  Incorporate these keywords naturally into your introduction to show that you understand what the employer is looking for. For example: "Highly motivated data science graduate with experience in Python and machine learning."
+*   **Show your passion and enthusiasm:** Let your personality shine through and convey your genuine interest in the role and the company.
+*   **Tailor it to each job:** Don't use the same introduction for every application. Customise it to match the specific requirements of each job, having a Master CV will save you time.
+
+**Example Introduction (Data Scientist Role):**
+
+> Highly motivated data science graduate with proven skills in Python and machine learning. Eager to apply my analytical abilities and contribute to innovative projects at Acme Corp. Passionate about leveraging data to solve complex business problems.
 ---
 
 <br/>
 
-## :icon[lucide-building-2] Work Experience/Professional
+## :icon[lucide-building-2] Work Experience
 
-### Most Recent Relevant Work Experience Firm
-**Location, Country**
+| Element | Description | Example |
+|---|---|---|
+| **Company Name** |  Name of the company where you worked. |  Acme Corp |
+| **Location, Country** | City and country where the company is located. | London, UK |
+| **Role/Event** |  Your job title or the name of the event. | Data Scientist Intern |
+| **Start - End Date** |  The period you worked there.  Use "Present" if you still work there. | Feb 2023 - Present |
+| **Responsibilities & Achievements** |  Use bullet points to describe your key responsibilities and achievements.  Focus on impact. |  <ul><li>Led the development of X</li><li>Reduced costs by £££</li></ul> |
 
-#### Role/Event  
-Start (Month, Year) - End/“Present”
+<br/>
 
-- Talk about the impact of your work with measurable impacts if possible. If it was a workshop or other type of professional event, display the attributes, professional behaviours, and skills you learnt or refined.
-- Second piece of information perhaps detailing a project that you helped with – or another relevant achievement.
-- Final highlight – don’t waffle- you can go into extra detail once you’re in the interview.
+### Example Work Experience Entry
+
+**Acme Corp**  
+London, UK
+
+*Data Scientist Intern*  
+Feb 2023 - Present
+
+- Collaborated with a team of data engineers to develop a Python script using Pandas and NumPy for cleaning and preprocessing a large dataset of legislative documents, reducing data inconsistencies by 30% and improving data quality for downstream analysis.
+- Participated in code reviews and provided feedback to other team members, ensuring code quality and adherence to coding standards
+
+>  :icon[lucide-info] Remember if you are applying for ‘Project Management’ for instance, you could focus more on how you handled constraints, or coordinated resources, and write “Project Manager Intern” or the relevant role instead.
+
+>  :icon[lucide-info] If possible, each experience should cover a different part of the job description, or your skillset, instead of repeating similar points. Even if you completed similar tasks, you can break down subsections of an experience, to emphasise versatility and willingness to learn - key attributes for an apprentice.
+
+
 
 
 ### Quick Tips for Your CV:
@@ -84,37 +126,7 @@ Start (Month, Year) - End/“Present”
 | :icon[lucide-clipboard-check]                | When adapting the master CV to an application, consider the culture of the company and the job description.                                                          |
 | :icon[lucide-clipboard-check]                   | **Never lie!** Authenticity is crucial.                                                |
 
-<br/>
 
-### :icon[lucide-briefcase] Consulting/Tech Example:
-
-**PA Consulting** | London, UK
-*Data Scientist Intern* | *Feb 2025*
-
-- Led the development of an AI application dedicated to monitoring legislative regulatory changes, substantially reducing administrative overhead and repetitive tasks by 90%.
-- Supervised a small team using the Scrum framework, ensuring collaborative environments and high-quality work.
-
-> :icon[lucide-info] Whilst this example could be derived from the master CV, if you were applying for ‘Project Management’ for instance, you could focus more on how you handled constraints, or coordinated resources, and write “Project Manager Intern” instead.
-
-> :icon[lucide-info] If possible, each experience should cover a different part of the job description, or your skillset, instead of repeating similar points. Even if you completed similar tasks, you can break down subsections of an experience, to emphasise versatility and willingness to learn - key attributes for an apprentice.
-
-<br/>
-
-### :icon[lucide-braces] Student Example (Hackathon):
-
-**Sans AI Hackathon** | London, UK
-*Participant* | *November 2024*
-
-- Built a smart home energy monitor (Python, Raspberry Pi), presenting findings of **up to 40% increased efficiency** to judges.
-- Integrated various sensors to collect data on electricity usage, then processed the data to create actionable insights; creating a working prototype that tracked energy usage with **95% accuracy.**
-
-> Even if you haven’t had any desirable internships or the most relevant work experience, you still have experience! Think about::
-> :icon[lucide-search]
-> - **Volunteering:** Did you help at a charity or school event?
-> - **School Projects:** Have you worked on coding projects, presentations, or group work?
-> - **Part-time Jobs/Hobbies:**  Do you create websites, edit videos, or manage social media?
-
----
 <br/>
 
 ## :icon[lucide-clipboard-check] Considerations:
@@ -122,7 +134,7 @@ Start (Month, Year) - End/“Present”
 -   **Consistency is KEY!**
 -   Always start from most to least recent
 -   Ensure no spelling or grammar errors.
--   Some companies will have AI filtering. To prepare for this, try and use as many important keywords from the job description which naturally fit. Use our CV optimisation to help you
+-   Some companies will have AI filtering. To prepare for this, try and use as many important keywords from the job description which naturally fit. Use our [FREE CV Optimiser](/optimise-cv) to help you
 -   When read by a recruiter, they will spend less than a minute reading, so focus on what you did, and why it mattered (impact) in the first line of each experience -**Measurable impacts!**
 -   If it’s hard to quantify your work, use “Action” & “Result” from the <a href = "https://uk.indeed.com/career-advice/interviewing/starr-method">STARR framework</a>, and estimate the impact of what you did
 ---
@@ -131,29 +143,32 @@ Start (Month, Year) - End/“Present”
 
 ## :icon[lucide-graduation-cap] Education: Structure and Clarity
 
-**Sixth Form/College** | Location, Country | *Start (Year) - End*
+**Sixth Form/College/Seconday School** 
 
-- *Qualification:* Subject, Grade
-- *Notable Achievements:* (if applicable)
+Location, Country 
 
-**Secondary School (if different)** | Location, Country | *Start (Year) - End*
+*Start - End Date*
 
-- *Qualification:* Subject, Grade
-- *Notable Achievements:* (if applicable)
+- **Qualification:** Subject, Grade
+- **Notable Achievements:** (if applicable)
+
 
 <br/>
 
 ### :icon[lucide-school] Sixth Form Example:
 
-**Ada, the National College of Digital Skills** | London, UK | *2023-2025*
+**Ada, the National College of Digital Skills** 
 
-- *BTEC National Diploma:* Computer Science, D*D*
-- *A-Level:* Business, A*
-- *Mathematical Studies (Core Maths):* A
-- *Certificates in Formal Writing & Presenting:* Achieved
+London, UK
 
-> :icon[lucide-plus-circle] 
-> Include relevant projects, coursework, or certifications here.
+*2023-2025*
+
+- **BTEC National Diploma in Computer Science:** D\*D\*
+- **Business A-Level:** A*
+- **Mathematical Studies (Core Maths):** A
+- **Certificates in Formal Writing & Presenting:** Achieved
+
+> You can include relevant projects, coursework, or certifications under the Education section. However, it is recommended to have a separate section for them.
 
 ---
 
@@ -161,13 +176,14 @@ Start (Month, Year) - End/“Present”
 
 ## :icon[lucide-trophy] Leadership & Extracurriculars: Beyond the Classroom
 
-_Showcase your personality and well-roundedness._ (Use the same format as Work Experience, or list as below).
+_Showcase your personality and well-roundedness._ (Use the same format as Work Experience).
 
-| Activities                                 |                                  |                               |
-| :----------------------------------------- | :------------------------------- | :---------------------------- |
-|  Basketball Coaching    |  3D Modelling Club     |  Chess           |
-|  Music Performance        |  Programming Club         |  Choir           |
-|  Music Production     |  Boxing Marketing        |  Gaming          |
+| Activities               | Description  (Optional, But Recommended)          |
+| :---------------------- | :------------------- |
+| Basketball Coaching     |  Designed training drills and managed game strategies for a youth basketball team.   |
+| Personal Project      |  Built a responsive e-commerce site using React, complete with user authentication.     |
+| Music Production       |  Composed, recorded, and mixed original tracks using Logic Pro X.   |
+     
 
 ---
 
@@ -185,7 +201,7 @@ _Showcase your personality and well-roundedness._ (Use the same format as Work E
 
 **Technical Skills**
 
-:badge[Python] :badge[JavaScript] :badge[HTML] :badge[Java] :badge[SQL]
+<span class="badge-python">Python</span> <span class="badge-javascript">JavaScript</span> <span class="badge-html">HTML</span> <span class="badge-css">CSS</span> <span class="badge-sql">SQL</span> <span class="badge-java">Java</span>
 
 **Interests**
 
@@ -217,24 +233,20 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 
 ## :icon[lucide-files] Compare & Improve: CV Examples
 
-- <a href="/cv-guide-resources/original-cv.pdf" target="_blank" rel="noopener noreferrer">Original CV</a>(Before)
-- <a href="/cv-guide-resources/guide-example.pdf" target="_blank" rel="noopener noreferrer">Improved CV</a> (After applying this guide)
-
----
-
-<br/>
+- <a href="/cv-guide-resources/original-cv.pdf" target="_blank" rel="noopener noreferrer">Generic CV</a>
+- <a href="/cv-guide-resources/guide-example.pdf" target="_blank" rel="noopener noreferrer">Improved CV</a>
 
 ## :icon[lucide-book-open] Overview: CV Tips & Best Practices
 
 ### 1. How to Tailor Your CV for Each Application
 - Customise CVs to match job descriptions.
 - Example: Highlighting specific skills based on company culture and role requirements.
-- AI-powered CV optimisation.
+- ==[AI-powered CV optimisation.](/optimise-cv)==
 
 ### 2. Common CV Mistakes to Avoid
 - Overloading with unnecessary details.
 - Using clichés like "hardworking" without proving it.
-- Spelling and grammar mistakes (Tools: Grammarly, LanguageTool, Hemingway Editor).
+- Spelling and grammar mistakes (Our ==[CV Optimiser](/optimise-cv)== can proofread your CV)
 
 ### 3. CV Formatting & Readability
 - Recommended fonts: Arial, Calibri, Times New Roman (size 10-12).
@@ -242,7 +254,7 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 - Keep margins at 0.5” to 1” for professional formatting.
 - Make sure your CV is between 1-2 pages.
 
-### 4. How to Write Impactful Bullet Points (What you did + Impact)
+### 4. How to Write Impactful Bullet Points (STAAR)
 - **Situation**: Describe the context.
 - **Task**: What was your responsibility?
 - **Action**: What did you do?
@@ -250,18 +262,23 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 - **Reflection**: What did you learn from this experience?
 
 #### Example:
-- ✅ **"Developed a Python script to automate data collection, reducing manual work by 60%."**
-- ❌ **"Worked with Python for data collection."**
+- ❌ **Researched companies and helped analysts with investments.**
+- ✅ **"Conducted market research on FTSE 100 companies, supporting senior analysts in investment recommendations that contributed to a 15% increase in portfolio performance."**
 
 ### 5. Online Presence & Portfolio
-- Make LinkedIn stand out by adding bio, experience, and projects.
-- GitHub & Personal website for tech roles (Showcase projects & clean code).
-- Link your online portfolio, especially if you are a designer, developer, or marketer.
+- Make LinkedIn stand out by adding bio, experience, and projects. <br/>
+==[Example LinkedIn](http://link.apprenticewatch.com/5PtUPT)==
+- GitHub & personal website for tech roles – Showcase projects and open-source contributions. <br/>
+==[Example GitHub](https://link.apprenticewatch.com/EyGz8w)==
+- Link your online portfolio, especially if you are a designer, developer, or marketer. <br/>
+==[Example Portfolio](https://link.apprenticewatch.com/1rWiKm)==
 
 ### 6. The Power of Keywords (Beating ATS Systems)
 - Applicant Tracking Systems (ATS) scan [CVs](https://create.microsoft.com/en-us/templates/ats-resumes) for relevant keywords.
 - Find keywords in the job description and incorporate them naturally.
 - Example: "Software Engineering Intern" should have terms like "Python", "Agile", "Data Structures", etc.
+
+> Paste the job description along with your master CV in our [FREE CV optimiser](/optimise-cv) so you don't have to manually identify keywords! 
 
 ### :icon[lucide-link-2] Additional Resources
 - [Write an Incredible Resume: 5 Golden Rules!](https://www.youtube.com/watch?v=Tt08KmFfIYQ)
@@ -270,13 +287,17 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 
 Always remember: your CV is a form of your personal brand — a first chance to show recruiters why you're the one to fill the vacancy. You should always tweak it, even if only a little, based on the job description and values of where you're applying.
 
-Good luck with your applications!
-
+Good luck with your applications & let us know if we helped you land an Apprenticeship!
+[contact@apprenticewatch.com](mailto:contact@apprenticewatch.com)
 
 <br/>
 
-## :icon[lucide-rocket] Ready to Elevate Your CV?
+## :icon[lucide-rocket] Ready to Optimise your CV for FREE?
 
-Need help? Use our AI-powered tool to tailor your CV and get instant feedback.
+<div class="article-cta">
+  <h3 class="article-cta-title">Our AI-powered CV optimiser tailors your CV and gives instant feedback.</h3>
+  <p class="article-cta-description">Did we mention the whole process takes under 20 seconds?  </p>
+  <a href="/optimise-cv" class="article-cta-button">Try CV Optimiser Now!</a>
+</div>
 
-[**Try CV Optimiser Now!**](/optimise-cv)
+<br/>

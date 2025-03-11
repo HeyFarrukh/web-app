@@ -14,7 +14,6 @@ import rehypeRaw from 'rehype-raw';
 import rehypeStringify from 'rehype-stringify';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeSlug from 'rehype-slug';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { formatDateForSEO, formatDateForDisplay } from './utils/dateFormat';
 import { calculateReadingTime } from './utils/readingTime';
 
@@ -191,7 +190,7 @@ async function processMarkdownContent(content: string): Promise<string> {
     .use(rehypeRaw) // Parse custom HTML in the markdown
     .use(rehypeHighlight, processorOptions.highlight) // Syntax highlighting with highlight.js
     .use(rehypeSlug) // Add IDs to headings
-    .use(rehypeAutolinkHeadings) // Add links to headings
+    // Removing rehypeAutolinkHeadings to get rid of the heading anchor links
     .use(rehypeStringify) // Convert to HTML string
     .process(content);
 
