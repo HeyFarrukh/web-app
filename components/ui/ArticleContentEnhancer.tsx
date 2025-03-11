@@ -133,7 +133,10 @@ const ArticleContentEnhancer: React.FC = () => {
             const link = p.querySelector('a');
             if (link) {
               link.className = 'article-cta-button';
-              link.innerHTML = link.innerHTML + ' →';
+              // Only add arrow if it doesn't already have one
+              if (!link.innerHTML.includes('→')) {
+                link.innerHTML = link.innerHTML + ' →';
+              }
             }
           } else {
             // Regular paragraph - add description class
