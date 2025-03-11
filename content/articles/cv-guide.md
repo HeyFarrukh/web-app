@@ -43,7 +43,7 @@ partnerships:
 
 > Your CV is more than just a document; it's your personal brand, and in the competitive world of job hunting, it’s the first thing potential employers will see. So, how do you make yours stand out in a sea of applicants?
 
-> Think of it as the chance to strategically <a href="https://online.hbs.edu/blog/post/personal-branding-at-work">brand</a> yourself: Highlight the skills, experiences, and achievements that speak directly to the role and its requirements. Whether it’s adjusting the emphasis on your education or tweaking the wording in your personal statement, building and customising a quality CV shows recruiters that you’ve put in the effort to align your experience with their needs.
+> Think of it as the chance to strategically <a href="https://online.hbs.edu/blog/post/personal-branding-at-work" target="_blank" rel="noopener noreferrer">brand</a> yourself: Highlight the skills, experiences, and achievements that speak directly to the role and its requirements. Whether it’s adjusting the emphasis on your education or tweaking the wording in your personal statement, building and customising a quality CV shows recruiters that you’ve put in the effort to align your experience with their needs.
 
 Here's a template from an award-winning recruitment agency, from which many template examples throughout this guide are sourced from: <a href="/cv-guide-resources/dartmouth.pdf" target="_blank" rel="noopener noreferrer">Dartmouth CV</a>
               
@@ -51,7 +51,7 @@ Here's a template from an award-winning recruitment agency, from which many temp
 
 ## :icon[lucide-file-stack] The Master CV: Your Foundation
 
-> If anything, your details are the one part of your CV that should stay the same, regardless of the company you’re applying to. In other words, it should go unchanged from the <a href="https://www.jobteaser.com/en/advices/153-why-you-should-always-keep-a-master-cv">Master CV</a> - a resume that has absolutely everything that you would ever want to include in an application. To simplify things, your master CV should emphasise your strongest skills, and be centered around your ideal company.
+> If anything, your details are the one part of your CV that should stay the same, regardless of the company you’re applying to. In other words, it should go unchanged from the <a href="https://www.jobteaser.com/en/advices/153-why-you-should-always-keep-a-master-cv" target="_blank" rel="noopener noreferrer">Master CV</a> - a resume that has absolutely everything that you would ever want to include in an application. To simplify things, your master CV should emphasise your strongest skills, and be centered around your ideal company.
 
 > However, each CV should be tailored to the job description and culture of the company in order to emphasise your points, and showcase why you could be a perfect fit for the vacancy. This includes everything from the subjects highlighted in education, down to the headlined skills & achievements, and the personal statement.
 
@@ -108,8 +108,7 @@ Start (Month, Year) - End/“Present”
 - Built a smart home energy monitor (Python, Raspberry Pi), presenting findings of **up to 40% increased efficiency** to judges.
 - Integrated various sensors to collect data on electricity usage, then processed the data to create actionable insights; creating a working prototype that tracked energy usage with **95% accuracy.**
 
-> Even if you haven’t had any desirable internships or the most relevant work experience, you still have experience! Think about::
-> :icon[lucide-search]
+> Even if you haven’t had any desirable internships or the most relevant work experience, you still have experience! Think about:
 > - **Volunteering:** Did you help at a charity or school event?
 > - **School Projects:** Have you worked on coding projects, presentations, or group work?
 > - **Part-time Jobs/Hobbies:**  Do you create websites, edit videos, or manage social media?
@@ -124,7 +123,7 @@ Start (Month, Year) - End/“Present”
 -   Ensure no spelling or grammar errors.
 -   Some companies will have AI filtering. To prepare for this, try and use as many important keywords from the job description which naturally fit. Use our CV optimisation to help you
 -   When read by a recruiter, they will spend less than a minute reading, so focus on what you did, and why it mattered (impact) in the first line of each experience -**Measurable impacts!**
--   If it’s hard to quantify your work, use “Action” & “Result” from the <a href = "https://uk.indeed.com/career-advice/interviewing/starr-method">STARR framework</a>, and estimate the impact of what you did
+-   If it’s hard to quantify your work, use “Action” & “Result” from the <a href = "https://uk.indeed.com/career-advice/interviewing/starr-method" target="_blank" rel="noopener noreferrer">STARR framework</a>, and estimate the impact of what you did
 ---
 
 <br/>
@@ -177,7 +176,7 @@ _Showcase your personality and well-roundedness._ (Use the same format as Work E
 
 **Certifications & Skills:** Include programming skills/languages/excel/word/ppt/anything relevant to the job. Try to focus more on hard skills which you have enough confidence in.
 
-**Activities & Interests:** Mixed Martial Arts, Piano, Cooking, Breathing, <a href="https://www.totaljobs.com/advice/how-to-write-your-hobbies-and-interests-on-your-cv">anything interesting about yourself!</a> Be prepared to talk about these too, as they make you stand out in the memory of a hiring manager after meeting multiple people for a role.
+**Activities & Interests:** Mixed Martial Arts, Piano, Cooking, Breathing, <a href="https://www.totaljobs.com/advice/how-to-write-your-hobbies-and-interests-on-your-cv" target="_blank" rel="noopener noreferrer">anything interesting about yourself!</a> Be prepared to talk about these too, as they make you stand out in the memory of a hiring manager after meeting multiple people for a role.
 
 <br/>
 
@@ -203,12 +202,12 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 ## :icon[lucide-clipboard-list] Final Tips
 
 -   **The most important thing about a CV is making a strong first impression.**
--   **Consistency is key!** This includes formatting, <a href="https://www.themuse.com/advice/finally-the-answer-to-how-much-does-my-resume-font-matter" >fonts</a>, and no mistakes.
+-   **Consistency is key!** This includes formatting, <a href="https://www.themuse.com/advice/finally-the-answer-to-how-much-does-my-resume-font-matter" target="_blank" rel="noopener noreferrer">fonts</a>, and no mistakes.
 -   Keep it under 2 pages at **most.** In investment banking, a one-page CV is standard.
 -   Do not add LinkedIn & Github if your profile is ‘bare bones’ - empty.
 -   Always <a href="/optimise-cv" target="_blank" rel="noopener noreferrer">tailor a CV</a> to the job description and company culture, whilst avoiding sounding verbose and inauthentic. Be as clear and concise as possible.
--  Avoid broad skills or <a href = "https://www.indeed.com/career-advice/resumes-cover-letters/buzzwords-to-avoid-in-resume" >clichés</a>, but replace it with how it may have related to the task or action. e.g. “Teamworker” → “Collaborated on a project..”
--   Include <a href = "http://cheekyscientist.com/how-to-ensure-your-resume-makes-a-winning-first-impression/" >appropriate sections</a>
+-  Avoid broad skills or <a href = "https://www.indeed.com/career-advice/resumes-cover-letters/buzzwords-to-avoid-in-resume" target="_blank" rel="noopener noreferrer">clichés</a>, but replace it with how it may have related to the task or action. e.g. “Teamworker” → “Collaborated on a project..”
+-   Include <a href = "http://cheekyscientist.com/how-to-ensure-your-resume-makes-a-winning-first-impression/" target="_blank" rel="noopener noreferrer">appropriate sections</a>
 -   **Save as a PDF:** "First Last [Company] CV.pdf"
 
 ---
