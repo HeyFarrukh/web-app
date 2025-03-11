@@ -2,15 +2,16 @@
   "name": "apprenticewatch",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "export": "next export",
-    "deploy": "next build && firebase deploy",
-    "build:all": "npm run build"
-  },
+"scripts": {
+  "prebuild": "node ignore-files.js",
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "next lint",
+  "export": "next export",
+  "deploy": "next build && firebase deploy",
+  "build:all": "npm run build"
+},
   "dependencies": {
     "@google/generative-ai": "^0.2.0",
     "@next/third-parties": "^14.1.0",
