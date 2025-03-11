@@ -255,6 +255,240 @@
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
+/* Language badges - styled like keywords but with language-specific colors */
+.article-content .badge-python,
+.article-content .badge-js,
+.article-content .badge-javascript,
+.article-content .badge-html,
+.article-content .badge-css,
+.article-content .badge-sql,
+.article-content .badge-java,
+.article-content .badge-csharp,
+.article-content .badge-cpp,
+.article-content .badge-ruby,
+.article-content .badge-php,
+.article-content .badge-go,
+.article-content .badge-rust,
+.article-content .badge-swift,
+.article-content .badge-kotlin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  margin: 0 0.25rem 0.5rem 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+/* Python - Blue */
+.article-content .badge-python {
+  background-color: rgba(53, 114, 165, 0.1);
+  color: #3572A5;
+  border: 1px solid rgba(53, 114, 165, 0.3);
+}
+
+.dark .article-content .badge-python {
+  background-color: rgba(53, 114, 165, 0.15);
+  color: #6ea8d7;
+  border: 1px solid rgba(53, 114, 165, 0.3);
+}
+
+/* JavaScript - Yellow */
+.article-content .badge-js,
+.article-content .badge-javascript {
+  background-color: rgba(240, 219, 79, 0.1);
+  color: #c9b018;
+  border: 1px solid rgba(240, 219, 79, 0.3);
+}
+
+.dark .article-content .badge-js,
+.dark .article-content .badge-javascript {
+  background-color: rgba(240, 219, 79, 0.15);
+  color: #F0DB4F;
+  border: 1px solid rgba(240, 219, 79, 0.3);
+}
+
+/* HTML - Orange/Red */
+.article-content .badge-html {
+  background-color: rgba(227, 76, 38, 0.1);
+  color: #E34C26;
+  border: 1px solid rgba(227, 76, 38, 0.3);
+}
+
+.dark .article-content .badge-html {
+  background-color: rgba(227, 76, 38, 0.15);
+  color: #f17b5c;
+  border: 1px solid rgba(227, 76, 38, 0.3);
+}
+
+/* CSS - Blue */
+.article-content .badge-css {
+  background-color: rgba(38, 77, 228, 0.1);
+  color: #264DE4;
+  border: 1px solid rgba(38, 77, 228, 0.3);
+}
+
+.dark .article-content .badge-css {
+  background-color: rgba(38, 77, 228, 0.15);
+  color: #6a87f0;
+  border: 1px solid rgba(38, 77, 228, 0.3);
+}
+
+/* SQL - Blue */
+.article-content .badge-sql {
+  background-color: rgba(0, 117, 143, 0.1);
+  color: #00758F;
+  border: 1px solid rgba(0, 117, 143, 0.3);
+}
+
+.dark .article-content .badge-sql {
+  background-color: rgba(0, 117, 143, 0.15);
+  color: #4db6d2;
+  border: 1px solid rgba(0, 117, 143, 0.3);
+}
+
+/* Java - Red */
+.article-content .badge-java {
+  background-color: rgba(176, 114, 25, 0.1);
+  color: #B07219;
+  border: 1px solid rgba(176, 114, 25, 0.3);
+}
+
+.dark .article-content .badge-java {
+  background-color: rgba(176, 114, 25, 0.15);
+  color: #e09e4b;
+  border: 1px solid rgba(176, 114, 25, 0.3);
+}
+
+/* C# - Purple */
+.article-content .badge-csharp {
+  background-color: rgba(23, 134, 0, 0.1);
+  color: #178600;
+  border: 1px solid rgba(23, 134, 0, 0.3);
+}
+
+.dark .article-content .badge-csharp {
+  background-color: rgba(23, 134, 0, 0.15);
+  color: #5fd13d;
+  border: 1px solid rgba(23, 134, 0, 0.3);
+}
+
+/* C++ - Pink */
+.article-content .badge-cpp {
+  background-color: rgba(243, 75, 125, 0.1);
+  color: #f34b7d;
+  border: 1px solid rgba(243, 75, 125, 0.3);
+}
+
+.dark .article-content .badge-cpp {
+  background-color: rgba(243, 75, 125, 0.15);
+  color: #f67ea0;
+  border: 1px solid rgba(243, 75, 125, 0.3);
+}
+
+/* Ruby - Red */
+.article-content .badge-ruby {
+  background-color: rgba(112, 21, 22, 0.1);
+  color: #701516;
+  border: 1px solid rgba(112, 21, 22, 0.3);
+}
+
+.dark .article-content .badge-ruby {
+  background-color: rgba(112, 21, 22, 0.15);
+  color: #d04142;
+  border: 1px solid rgba(112, 21, 22, 0.3);
+}
+
+/* PHP - Purple */
+.article-content .badge-php {
+  background-color: rgba(79, 93, 149, 0.1);
+  color: #4F5D95;
+  border: 1px solid rgba(79, 93, 149, 0.3);
+}
+
+.dark .article-content .badge-php {
+  background-color: rgba(79, 93, 149, 0.15);
+  color: #8a97c8;
+  border: 1px solid rgba(79, 93, 149, 0.3);
+}
+
+/* Go - Blue */
+.article-content .badge-go {
+  background-color: rgba(0, 173, 216, 0.1);
+  color: #00ADD8;
+  border: 1px solid rgba(0, 173, 216, 0.3);
+}
+
+.dark .article-content .badge-go {
+  background-color: rgba(0, 173, 216, 0.15);
+  color: #4dcbea;
+  border: 1px solid rgba(0, 173, 216, 0.3);
+}
+
+/* Rust - Brown */
+.article-content .badge-rust {
+  background-color: rgba(222, 165, 132, 0.1);
+  color: #DEA584;
+  border: 1px solid rgba(222, 165, 132, 0.3);
+}
+
+.dark .article-content .badge-rust {
+  background-color: rgba(222, 165, 132, 0.15);
+  color: #e8c1a7;
+  border: 1px solid rgba(222, 165, 132, 0.3);
+}
+
+/* Swift - Orange */
+.article-content .badge-swift {
+  background-color: rgba(255, 172, 69, 0.1);
+  color: #FFAC45;
+  border: 1px solid rgba(255, 172, 69, 0.3);
+}
+
+.dark .article-content .badge-swift {
+  background-color: rgba(255, 172, 69, 0.15);
+  color: #ffc278;
+  border: 1px solid rgba(255, 172, 69, 0.3);
+}
+
+/* Kotlin - Purple */
+.article-content .badge-kotlin {
+  background-color: rgba(167, 38, 208, 0.1);
+  color: #A726D0;
+  border: 1px solid rgba(167, 38, 208, 0.3);
+}
+
+.dark .article-content .badge-kotlin {
+  background-color: rgba(167, 38, 208, 0.15);
+  color: #c76de3;
+  border: 1px solid rgba(167, 38, 208, 0.3);
+}
+
+/* Hover effect for all language badges */
+.article-content .badge-python:hover,
+.article-content .badge-js:hover,
+.article-content .badge-javascript:hover,
+.article-content .badge-html:hover,
+.article-content .badge-css:hover,
+.article-content .badge-sql:hover,
+.article-content .badge-java:hover,
+.article-content .badge-csharp:hover,
+.article-content .badge-cpp:hover,
+.article-content .badge-ruby:hover,
+.article-content .badge-php:hover,
+.article-content .badge-go:hover,
+.article-content .badge-rust:hover,
+.article-content .badge-swift:hover,
+.article-content .badge-kotlin:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
 /* Article CTA with navbar-style animation */
 .article-cta {
   margin: 3rem 0;

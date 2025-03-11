@@ -68,7 +68,24 @@ A "Master CV" is a comprehensive document that contains *all* of your work exper
 
 ---
 
+## :icon[lucide-square-user] Introduction
 
+Consider adding a concise introduction below your contact information. This is your opportunity to quickly grab the recruiter's attention and highlight why you're a great fit for the role.
+
+**Tips for Writing a Compelling Introduction:**
+
+*   **Keep it brief:** Aim for a couple of sentences max.
+*   **Highlight your key skills and experiences:** Focus on the skills that are most relevant to the job you're applying for.
+*   **Incorporate keywords from the job description:** Carefully review the job description and identify key skills, qualifications, and requirements.  Incorporate these keywords naturally into your introduction to show that you understand what the employer is looking for. For example: "Highly motivated data science graduate with experience in Python and machine learning."
+*   **Show your passion and enthusiasm:** Let your personality shine through and convey your genuine interest in the role and the company.
+*   **Tailor it to each job:** Don't use the same introduction for every application. Customize it to match the specific requirements of each job.
+
+**Example Introduction (Data Scientist Role):**
+
+> Highly motivated data science graduate with proven skills in Python and machine learning. Eager to apply my analytical abilities and contribute to innovative projects at Acme Corp. Passionate about leveraging data to solve complex business problems.
+---
+
+<br/>
 
 ## :icon[lucide-building-2] Work Experience
 
@@ -185,7 +202,7 @@ _Showcase your personality and well-roundedness._ (Use the same format as Work E
 
 **Technical Skills**
 
-<span class="badge-python">Python</span> <span class="badge-js">JavaScript</span> <span class="badge-html">HTML</span> <span class="badge-sql">SQL</span> 
+<span class="badge-python">Python</span> <span class="badge-javascript">JavaScript</span> <span class="badge-html">HTML</span> <span class="badge-css">CSS</span> <span class="badge-sql">SQL</span> <span class="badge-java">Java</span>
 
 **Interests**
 
@@ -270,7 +287,8 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 
 Always remember: your CV is a form of your personal brand — a first chance to show recruiters why you're the one to fill the vacancy. You should always tweak it, even if only a little, based on the job description and values of where you're applying.
 
-Good luck with your applications!
+Good luck with your applications & let us know if we helped you land an Apprenticeship!
+[contact@apprenticewatch.com](mailto:contact@apprenticewatch.com)
 
 <br/>
 
@@ -283,4 +301,3 @@ Good luck with your applications!
 </div>
 
 <br/>
-
