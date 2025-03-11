@@ -17,7 +17,7 @@
   overflow: hidden;
 }
 
-/* Icon styling */
+/* Icon styling - improved for inline display */
 .article-content .icon {
   display: inline-flex;
   align-items: center;
@@ -26,6 +26,7 @@
   margin: 0 0.2em;
   font-size: 1.1em;
   color: #4a5568;
+  line-height: 1;
 }
 
 .dark .article-content .icon {
@@ -212,27 +213,27 @@
   border: 1px solid #a7f3d0;
 }
 
-.dark .article-content .badge-success {
+.dark .article-content .badge-python {
   background-color: rgba(16, 185, 129, 0.15);
-  color: #34d399;
+  color:  #032a4a;
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.article-content .badge-danger {
+.article-content .badge-javascript {
   background-color: #fef2f2;
-  color: #ef4444;
+  color: #F0DB4F;
   border: 1px solid #fecaca;
 }
 
-.dark .article-content .badge-danger {
+.dark .article-content .badge-html {
   background-color: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  color: #E34C26;
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.article-content .badge-warning {
+.article-content .badge-sql {
   background-color: #fffbeb;
-  color: #f59e0b;
+  color: #00758F;
   border: 1px solid #fde68a;
 }
 
@@ -394,6 +395,10 @@
   font-weight: 700;
   line-height: 1.3;
   color: #1e293b;
+  /* Fix to ensure headings don't wrap strangely with icons */
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .dark .article-content h1, 
@@ -440,22 +445,38 @@
 .article-content h4 .lucide-icon,
 .article-content h5 .lucide-icon,
 .article-content h6 .lucide-icon {
-  display: inline-block !important;
+  display: inline-flex !important;
   vertical-align: middle !important;
   margin-right: 0.5rem !important;
-  margin-top: -0.125rem !important; /* Slight adjustment to align with text */
+  margin-top: 0 !important; /* Removed negative margin for better alignment */
+  flex-shrink: 0;
 }
 
 /* Fix for :icon[lucide-*] syntax in markdown */
-.article-content :is(h1, h2, h3, h4, h5, h6) span.icon {
-  display: inline-block !important;
+.article-content :is(h1, h2, h3, h4, h5, h6) .icon {
+  display: inline-flex !important;
   vertical-align: middle !important;
   margin-right: 0.5rem !important;
+  margin-bottom: 0 !important; /* Ensure no bottom margin creates space */
+  flex-shrink: 0;
 }
 
 /* Ensure no line breaks between icon and text in headings */
 .article-content :is(h1, h2, h3, h4, h5, h6) br:first-child {
   display: none !important;
+}
+
+/* Remove any hidden spaces or entities that might cause icon separation */
+.article-content :is(h1, h2, h3, h4, h5, h6) .icon + span,
+.article-content :is(h1, h2, h3, h4, h5, h6) .lucide-icon + span {
+  margin-left: 0;
+  white-space: nowrap;
+  display: inline !important;
+}
+
+/* Fix for any text following icons to stay on the same line */
+.article-content :is(h1, h2, h3, h4, h5, h6) > span:first-child {
+  display: inline !important;
 }
 
 /* Link styling */
@@ -480,6 +501,14 @@
 
 .article-content li {
   margin-bottom: 0.5rem;
+}
+
+/* Fix for list items with icons */
+.article-content li .icon,
+.article-content li .lucide-icon {
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  margin-right: 0.25rem !important;
 }
 
 /* Code block styling */
@@ -584,4 +613,27 @@
   .article-cta {
     padding: 2rem 1.5rem;
   }
+
+  /* Improve responsive behavior for headings with icons */
+  .article-content :is(h1, h2, h3, h4, h5, h6) {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+/* Specific fix for blockquote icon inline display */
+.article-content blockquote .icon,
+.article-content blockquote .lucide-icon {
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  margin-right: 0.25rem !important;
+}
+
+/* Fix for paragraph icons to stay on same line */
+.article-content p .icon,
+.article-content p .lucide-icon {
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  margin-right: 0.25rem !important;
 }
