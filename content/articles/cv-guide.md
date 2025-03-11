@@ -75,10 +75,9 @@ Consider adding a concise introduction below your contact information. This is y
 **Tips for Writing a Compelling Introduction:**
 
 *   **Keep it brief:** Aim for a couple of sentences max.
-*   **Highlight your key skills and experiences:** Focus on the skills that are most relevant to the job you're applying for.
 *   **Incorporate keywords from the job description:** Carefully review the job description and identify key skills, qualifications, and requirements.  Incorporate these keywords naturally into your introduction to show that you understand what the employer is looking for. For example: "Highly motivated data science graduate with experience in Python and machine learning."
 *   **Show your passion and enthusiasm:** Let your personality shine through and convey your genuine interest in the role and the company.
-*   **Tailor it to each job:** Don't use the same introduction for every application. Customize it to match the specific requirements of each job.
+*   **Tailor it to each job:** Don't use the same introduction for every application. Customise it to match the specific requirements of each job, having a Master CV will save you time.
 
 **Example Introduction (Data Scientist Role):**
 
@@ -234,24 +233,20 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 
 ## :icon[lucide-files] Compare & Improve: CV Examples
 
-- <a href="/cv-guide-resources/original-cv.pdf" target="_blank" rel="noopener noreferrer">Original CV</a>(Before)
-- <a href="/cv-guide-resources/guide-example.pdf" target="_blank" rel="noopener noreferrer">Improved CV</a> (After applying this guide)
-
----
-
-<br/>
+- <a href="/cv-guide-resources/original-cv.pdf" target="_blank" rel="noopener noreferrer">Generic CV</a>
+- <a href="/cv-guide-resources/guide-example.pdf" target="_blank" rel="noopener noreferrer">Improved CV</a>
 
 ## :icon[lucide-book-open] Overview: CV Tips & Best Practices
 
 ### 1. How to Tailor Your CV for Each Application
 - Customise CVs to match job descriptions.
 - Example: Highlighting specific skills based on company culture and role requirements.
-- AI-powered CV optimisation.
+- ==[AI-powered CV optimisation.](/optimise-cv)==
 
 ### 2. Common CV Mistakes to Avoid
 - Overloading with unnecessary details.
 - Using clichés like "hardworking" without proving it.
-- Spelling and grammar mistakes (Tools: Grammarly, LanguageTool, Hemingway Editor).
+- Spelling and grammar mistakes (Our ==[CV Optimiser](/optimise-cv)== can proofread your CV)
 
 ### 3. CV Formatting & Readability
 - Recommended fonts: Arial, Calibri, Times New Roman (size 10-12).
@@ -259,7 +254,7 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 - Keep margins at 0.5” to 1” for professional formatting.
 - Make sure your CV is between 1-2 pages.
 
-### 4. How to Write Impactful Bullet Points (What you did + Impact)
+### 4. How to Write Impactful Bullet Points (STAAR)
 - **Situation**: Describe the context.
 - **Task**: What was your responsibility?
 - **Action**: What did you do?
@@ -267,18 +262,23 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 - **Reflection**: What did you learn from this experience?
 
 #### Example:
-- ✅ **"Developed a Python script to automate data collection, reducing manual work by 60%."**
-- ❌ **"Worked with Python for data collection."**
+- ❌ **Researched companies and helped analysts with investments.**
+- ✅ **"Conducted market research on FTSE 100 companies, supporting senior analysts in investment recommendations that contributed to a 15% increase in portfolio performance."**
 
 ### 5. Online Presence & Portfolio
-- Make LinkedIn stand out by adding bio, experience, and projects.
-- GitHub & Personal website for tech roles (Showcase projects & clean code).
-- Link your online portfolio, especially if you are a designer, developer, or marketer.
+- Make LinkedIn stand out by adding bio, experience, and projects. <br/>
+==[Example LinkedIn](http://link.apprenticewatch.com/5PtUPT)==
+- GitHub & personal website for tech roles – Showcase projects and open-source contributions. <br/>
+==[Example GitHub](https://link.apprenticewatch.com/EyGz8w)==
+- Link your online portfolio, especially if you are a designer, developer, or marketer. <br/>
+==[Example Portfolio](https://link.apprenticewatch.com/1rWiKm)==
 
 ### 6. The Power of Keywords (Beating ATS Systems)
 - Applicant Tracking Systems (ATS) scan [CVs](https://create.microsoft.com/en-us/templates/ats-resumes) for relevant keywords.
 - Find keywords in the job description and incorporate them naturally.
 - Example: "Software Engineering Intern" should have terms like "Python", "Agile", "Data Structures", etc.
+
+> Paste the job description along with your master CV in our [FREE CV optimiser](/optimise-cv) so you don't have to manually identify keywords! 
 
 ### :icon[lucide-link-2] Additional Resources
 - [Write an Incredible Resume: 5 Golden Rules!](https://www.youtube.com/watch?v=Tt08KmFfIYQ)
@@ -292,11 +292,11 @@ Good luck with your applications & let us know if we helped you land an Apprenti
 
 <br/>
 
-## :icon[lucide-rocket] Ready to Elevate Your CV?
+## :icon[lucide-rocket] Ready to Optimise your CV for FREE?
 
 <div class="article-cta">
-  <h3 class="article-cta-title">Need help? Use our AI-powered tool to tailor your CV and get instant feedback.</h3>
-  <p class="article-cta-description">Follow this guide, tailor your CV, and get noticed by top companies like Accenture & HSBC.</p>
+  <h3 class="article-cta-title">Our AI-powered CV optimiser tailors your CV and gives instant feedback.</h3>
+  <p class="article-cta-description">Did we mention the whole process takes under 20 seconds?  </p>
   <a href="/optimise-cv" class="article-cta-button">Try CV Optimiser Now!</a>
 </div>
 
