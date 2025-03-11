@@ -13,12 +13,22 @@ export const ShareButton: React.FC<ShareButtonProps> = ({ title }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const handleCopyLink = () => {
+   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     setShowDropdown(false);
-  };
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+       setShowDropdown(false);
+      })
+      .catch((err) => {
+        console.error('Failed to copy:', err);
+       alert('Failed to copy link to clipboard. Please try again or copy manually.');
+      });
+   };
 
   const shareText = title 
     ? `Check out this article: ${title}`
