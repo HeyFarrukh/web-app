@@ -233,20 +233,20 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 
 ## :icon[lucide-files] Compare & Improve: CV Examples
 
-- <a href="/cv-guide-resources/original-cv.pdf" target="_blank" rel="noopener noreferrer">Generic CV</a>
-- <a href="/cv-guide-resources/guide-example.pdf" target="_blank" rel="noopener noreferrer">Improved CV</a>
+- <a href="/cv-guide-resources/original-cv.pdf" target="_blank" rel="noopener noreferrer">Original CV</a>
+- <a href="/cv-guide-resources/guide-example.pdf" target="_blank" rel="noopener noreferrer">Improved CV (After following this guide)</a>
 
 ## :icon[lucide-book-open] Overview: CV Tips & Best Practices
 
 ### 1. How to Tailor Your CV for Each Application
 - Customise CVs to match job descriptions.
 - Example: Highlighting specific skills based on company culture and role requirements.
-- ==[AI-powered CV optimisation.](/optimise-cv)==
+- <a href="/optimise-cv" target="_blank" rel="noopener noreferrer">AI-powered CV optimisation.</a>
 
 ### 2. Common CV Mistakes to Avoid
 - Overloading with unnecessary details.
 - Using clichés like "hardworking" without proving it.
-- Spelling and grammar mistakes (Our ==[CV Optimiser](/optimise-cv)== can proofread your CV)
+- Spelling and grammar mistakes (Our <a href="/optimise-cv" target="_blank" rel="noopener noreferrer">CV Optimiser</a> can proofread your CV. However, [LanguageTool](https://languagetool.org/), [Grammarly](https://www.grammarly.com/), and [Quillbot](https://quillbot.com/grammar-check) are great tools as well)
 
 ### 3. CV Formatting & Readability
 - Recommended fonts: Arial, Calibri, Times New Roman (size 10-12).
@@ -267,11 +267,11 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 
 ### 5. Online Presence & Portfolio
 - Make LinkedIn stand out by adding bio, experience, and projects. <br/>
-==[Example LinkedIn](http://link.apprenticewatch.com/5PtUPT)==
+[Example LinkedIn](http://link.apprenticewatch.com/5PtUPT)
 - GitHub & personal website for tech roles – Showcase projects and open-source contributions. <br/>
-==[Example GitHub](https://link.apprenticewatch.com/EyGz8w)==
+[Example GitHub](https://link.apprenticewatch.com/EyGz8w)
 - Link your online portfolio, especially if you are a designer, developer, or marketer. <br/>
-==[Example Portfolio](https://link.apprenticewatch.com/1rWiKm)==
+[Example Portfolio](https://link.apprenticewatch.com/1rWiKm)
 
 ### 6. The Power of Keywords (Beating ATS Systems)
 - Applicant Tracking Systems (ATS) scan [CVs](https://create.microsoft.com/en-us/templates/ats-resumes) for relevant keywords.
