@@ -117,6 +117,27 @@ class SavedApprenticeshipService {
       return [];
     }
   }
+
+  async removeAllSavedApprenticeships(userId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from(this.TABLE_NAME)
+        .delete()
+        .eq('user_id', userId);
+  
+      if (error) {
+        console.error('[SavedApprenticeshipService] Error removing all saved apprenticeships:', error);
+        Analytics.event('error', 'remove_all_apprenticeships_error', error.message);
+        throw error;
+      }
+  
+      Analytics.event('user_action', 'all_apprenticeships_removed', userId);
+      return true;
+    } catch (error) {
+      console.error('[SavedApprenticeshipService] Error removing all saved apprenticeships:', error);
+      return false;
+    }
+  }
 }
 
 export const savedApprenticeshipService = new SavedApprenticeshipService();

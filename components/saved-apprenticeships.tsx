@@ -26,7 +26,6 @@ export default function SavedApprenticeships() {
 
     if (!isLoading) {
       if (!isAuthenticated) {
-        // Redirect to sign in page if not authenticated
         router.push('/signin?redirect=/saved-apprenticeships');
       } else {
         fetchSavedApprenticeships();
@@ -40,11 +39,23 @@ export default function SavedApprenticeships() {
     try {
       const success = await savedApprenticeshipService.unsaveApprenticeship(userData.id, vacancyId);
       if (success) {
-        // Remove the listing from the state
         setSavedListings(prevListings => prevListings.filter(listing => listing.id !== vacancyId));
       }
     } catch (error) {
       console.error('Error deleting saved apprenticeship:', error);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!userData) return;
+    
+    try {
+      const success = await savedApprenticeshipService.removeAllSavedApprenticeships(userData.id);
+      if (success) {
+        setSavedListings([]);
+      }
+    } catch (error) {
+      console.error('Error removing all saved apprenticeships:', error);
     }
   };
 
@@ -87,23 +98,34 @@ export default function SavedApprenticeships() {
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
-            {savedListings.map((listing) => (
-              <div key={listing.id} className="relative">
-                <button 
-                  onClick={() => handleDelete(listing.id)}
-                  className="absolute top-4 right-4 z-10 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
-                  aria-label="Delete saved apprenticeship"
-                >
-                  <Trash2 className="w-5 h-5 text-red-500" />
-                </button>
-                <ListingCard 
-                  listing={listing} 
-                  hideSaveButton={true} 
-                  customLinkUrl={`/apprenticeships/${listing.id}?fromPage=saved&scrollToId=${listing.id}&fromSaved=true`}
-                />
-              </div>
-            ))}
+          <div>
+            <div className="flex justify-end mb-6">
+              <button
+                onClick={handleDeleteAll}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-5 h-5" />
+                Remove All
+              </button>
+            </div>
+            <div className="space-y-6">
+              {savedListings.map((listing) => (
+                <div key={listing.id} className="relative">
+                  <button 
+                    onClick={() => handleDelete(listing.id)}
+                    className="absolute top-4 right-4 z-10 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
+                    aria-label="Delete saved apprenticeship"
+                  >
+                    <Trash2 className="w-5 h-5 text-red-500" />
+                  </button>
+                  <ListingCard 
+                    listing={listing} 
+                    hideSaveButton={true} 
+                    customLinkUrl={`/apprenticeships/${listing.id}?fromPage=saved&scrollToId=${listing.id}&fromSaved=true`}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
