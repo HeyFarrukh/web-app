@@ -8,6 +8,7 @@ import {
   ArrowLeft, Building2, MapPin, GraduationCap,
   Clock, Calendar, Timer, Mail, Phone, Globe, Users,
   Check, X, Briefcase, Share2 as Share, Clipboard, Linkedin,
+  Bookmark,
 } from 'lucide-react';
 import { SiWhatsapp as WhatsApp } from 'react-icons/si';
 import { ListingType } from '@/types/listing';
@@ -15,6 +16,8 @@ import { formatDate } from '@/utils/dateUtils';
 import { companies } from './companyData';
 import { Analytics } from '@/services/analytics/analytics';
 import { ListingMap } from './ListingMap';
+import { useAuth } from '@/hooks/useAuth';
+import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
 
 interface InfoCardProps {
   icon: React.ElementType;
@@ -42,6 +45,8 @@ interface ListingDetailsProps {
 
 export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const [showDropdown, setShowDropdown] = React.useState(false);
+  const [isSaved, setIsSaved] = React.useState(false);
+  const { isAuthenticated, userData } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const referringPage = searchParams?.get('fromPage') || '1';
@@ -55,10 +60,40 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     }
   }, [listing]);
 
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      if (userData && listing.id) {
+        const savedListings = await savedApprenticeshipService.getSavedApprenticeships(userData.id);
+        setIsSaved(savedListings.some(saved => saved.id === listing.id));
+      }
+    };
+    checkIfSaved();
+  }, [userData, listing.id]);
+
   const handleApplyClick = () => {
     // Track apply button click
     if (typeof window !== 'undefined') {
       Analytics.event('apprenticeship', 'apply_click', `${listing.title} - ${listing.employerName}`);
+    }
+  };
+
+  const handleSaveToggle = async () => {
+    if (!isAuthenticated) {
+      router.push(`/signin?redirect=/apprenticeships/${listing.id}`);
+      return;
+    }
+
+    if (!userData) return;
+
+    try {
+      if (isSaved) {
+        await savedApprenticeshipService.unsaveApprenticeship(userData.id, listing.id);
+      } else {
+        await savedApprenticeshipService.saveApprenticeship(userData.id, listing.id);
+      }
+      setIsSaved(!isSaved);
+    } catch (error) {
+      console.error('Error toggling save status:', error);
     }
   };
 
@@ -112,7 +147,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
             <span>{fromSavedPage ? "Back to Saved Apprenticeships" : "Back to Apprenticeships"}</span>
           </button>
-          <div className="relative flex justify-center items-center">
+          <div className="relative flex justify-center items-center space-x-4">
             <button
               className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
               aria-label="Share"
@@ -120,6 +155,14 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             >
               <span>Share</span>
               <Share className="w-6 h-6" aria-hidden="true" />
+            </button>
+            <button
+              className={`text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base ${isSaved ? 'text-orange-500 dark:text-orange-400' : ''}`}
+              aria-label={isSaved ? "Unsave Apprenticeship" : "Save Apprenticeship"}
+              onClick={handleSaveToggle}
+            >
+              <span>{isSaved ? "Saved" : "Save"}</span>
+              <Bookmark className="w-6 h-6" aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
             </button>
             {showDropdown && (
               <motion.div
