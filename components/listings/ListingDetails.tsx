@@ -46,6 +46,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const router = useRouter();
   const referringPage = searchParams?.get('fromPage') || '1';
   const scrollToId = searchParams?.get('scrollToId');
+  const fromSavedPage = searchParams?.get('fromSaved') === 'true';
 
   useEffect(() => {
     // Track apprenticeship view
@@ -98,14 +99,18 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <button
             onClick={() => {
-              const url = `/apprenticeships?page=${referringPage}${scrollToId ? `&scrollToId=${scrollToId}` : ''}`;
-              router.push(url);
+              if (fromSavedPage) {
+                router.push('/saved-apprenticeships');
+              } else {
+                const url = `/apprenticeships?page=${referringPage}${scrollToId ? `&scrollToId=${scrollToId}` : ''}`;
+                router.push(url);
+              }
             }}
             className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
-            aria-label="Back to Apprenticeships"
+            aria-label={fromSavedPage ? "Back to Saved Apprenticeships" : "Back to Apprenticeships"}
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
-            <span>Back to Apprenticeships</span>
+            <span>{fromSavedPage ? "Back to Saved Apprenticeships" : "Back to Apprenticeships"}</span>
           </button>
           <div className="relative flex justify-center items-center">
             <button
