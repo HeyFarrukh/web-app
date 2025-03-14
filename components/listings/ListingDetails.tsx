@@ -46,6 +46,11 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const router = useRouter();
   const referringPage = searchParams?.get('fromPage') || '1';
   const scrollToId = searchParams?.get('scrollToId');
+  const filterParams = {
+    search: searchParams?.get('search'),
+    location: searchParams?.get('location'),
+    level: searchParams?.get('level')
+  };
 
   useEffect(() => {
     // Track apprenticeship view
@@ -98,8 +103,18 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <button
             onClick={() => {
-              const url = `/apprenticeships?page=${referringPage}${scrollToId ? `&scrollToId=${scrollToId}` : ''}`;
-              router.push(url);
+              const url = new URL('/apprenticeships', window.location.origin);
+              url.searchParams.set('page', referringPage);
+              if (scrollToId) {
+                url.searchParams.set('scrollToId', scrollToId);
+              }
+              Object.keys(filterParams).forEach(key => {
+                const value = filterParams[key as keyof typeof filterParams];
+                if (value) {
+                  url.searchParams.set(key, value);
+                }
+              });
+              router.push(url.toString());
             }}
             className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
             aria-label="Back to Apprenticeships"
