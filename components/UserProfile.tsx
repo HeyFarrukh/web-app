@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, User, Mail } from 'lucide-react';
+import { LogOut, User, Mail, Bookmark } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import supabase from '@/config/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { Analytics } from '@/services/analytics/analytics';
+import Link from 'next/link';
 
 export const UserProfile = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -109,6 +110,14 @@ export const UserProfile = () => {
             </div>
             
             <div className="p-3">
+              <Link
+                href="/saved-apprenticeships"
+                className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl flex items-center space-x-3 transition-colors mb-2"
+                onClick={() => setIsOpen(false)}
+              >
+                <Bookmark className="w-5 h-5" />
+                <span className="font-medium">Saved Apprenticeships</span>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl flex items-center space-x-3 transition-colors"

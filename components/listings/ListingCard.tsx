@@ -7,12 +7,15 @@ import { Building2, MapPin, GraduationCap, Clock, PoundSterling } from 'lucide-r
 import { ListingType } from '@/types/listing';
 import { formatDate } from '@/utils/dateUtils';
 import { companies } from './companyData';
+import { SaveButton } from './SaveButton';
 
 interface ListingCardProps {
   listing: ListingType;
+  hideSaveButton?: boolean;
+  customLinkUrl?: string;
 }
 
-export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
+export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButton = false, customLinkUrl }) => {
   const truncateDescription = (text: string, maxLength: number = 150) => {
     if (!text) return '';
     if (text.length <= maxLength) return text;
@@ -59,9 +62,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           }}
         />
         <div className="flex-1">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            {listing.title}
-          </h3>
+          <div className="flex justify-between items-start">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              {listing.title}
+            </h3>
+            {!hideSaveButton && <SaveButton vacancyId={listing.id} />}
+          </div>
 
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-300">
             <div className="flex items-center space-x-1">
@@ -94,7 +100,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
 
           <div className="mt-4 flex items-center justify-between">
             <Link
-              href={`/apprenticeships/${listing.id}?fromPage=${currentPage}&scrollToId=${listing.id}`}
+              href={customLinkUrl || `/apprenticeships/${listing.id}?fromPage=${currentPage}&scrollToId=${listing.id}`}
               className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
             >
               View Details
