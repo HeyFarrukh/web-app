@@ -2,12 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, AlertCircle, X, Sparkles, Zap, Bot, Cpu, Target, TrendingUp, FileText, Key, Copy, Check } from 'lucide-react';
+import { Lock, AlertCircle, X, Sparkles, Zap, Bot, Cpu, Target, TrendingUp, FileText, Key, Copy, Check, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { geminiService } from '@/services/ai/geminiService';
 import { cvTrackingService } from '@/services/cv/cvTrackingService';
 import { useAuth } from '@/hooks/useAuth';
 import { Analytics } from '@/services/analytics/analytics';
+import { FileUpload } from '@/components/ui/FileUpload';
+import { pdfService } from '@/services/pdf/pdfService';
+import { pdfStorageService } from '@/services/storage/pdfStorageService';
+import { createLogger } from '@/services/logger/logger';
+
+const logger = createLogger({ module: 'OptimiseCV' });
 
 interface ScoreCategory {
   name: string;
@@ -32,6 +38,7 @@ interface CopyState {
 const MIN_CV_LENGTH = 200;
 const MIN_JOB_DESC_LENGTH = 50;
 const ANALYSIS_COOLDOWN = 20000; // 20 seconds cooldown
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
 const LoadingMessages = [
   "Let the AI cook... 👨‍🍳🔥",
@@ -45,6 +52,24 @@ interface WarningState {
   show: boolean;
   message: string;
 }
+
+// Utility functions
+export const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return bytes + ' bytes';
+  else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  else return (bytes / 1048576).toFixed(1) + ' MB';
+};
+
+// Define error messages in one place
+export const errorMessages = {
+  fileTooLarge: `File size exceeds ${formatFileSize(MAX_FILE_SIZE)} limit. Please upload a smaller PDF file. 📄`,
+  tooManyFiles: 'Please upload only one PDF file at a time. 📄',
+  fileInvalidType: 'Please upload a PDF file. Other file types are not supported. 📄',
+  processingError: 'Failed to process PDF. Please try again or paste your CV text manually. 📄',
+  uploadError: 'Failed to upload PDF. Please try again. 📄',
+  insufficientText: 'The extracted text seems too short. Please ensure your PDF contains readable text or try pasting your CV manually. 📄',
+  authError: 'Please sign in to upload and process your CV. 📄'
+};
 
 export const OptimiseCV = () => {
   const router = useRouter();
@@ -66,6 +91,9 @@ export const OptimiseCV = () => {
     jobDesc: string;
     timestamp: number;
   } | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [isPdfProcessing, setIsPdfProcessing] = useState(false);
+  const [pdfError, setPdfError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     // Track CV Optimisation page view
@@ -93,9 +121,10 @@ export const OptimiseCV = () => {
       show: true,
       message
     });
+    // Increased timeout to give users more time to read the message
     setTimeout(() => {
       setWarning({ show: false, message: '' });
-    }, 5000);
+    }, 7000); // 7 seconds instead of 5
   };
 
   const validateInput = () => {
@@ -199,7 +228,7 @@ export const OptimiseCV = () => {
       });
       
     } catch (error) {
-      console.error('Analysis failed:', error);
+      logger.error('Analysis failed:', error);
       showWarning('Sorry, something went wrong while analysing your CV. Please try again.');
     } finally {
       setIsAnalyzing(false);
@@ -214,7 +243,7 @@ export const OptimiseCV = () => {
         setCopyStates(prev => ({ ...prev, [sectionId]: false }));
       }, 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      logger.error('Failed to copy:', err);
     }
   };
 
@@ -244,6 +273,68 @@ export const OptimiseCV = () => {
       default:
         return "text-gray-500 dark:text-gray-400";
     }
+  };
+
+  const handlePdfSelect = async (file: File) => {
+    try {
+      setPdfFile(file);
+      setPdfError(undefined);
+      setIsPdfProcessing(true);
+      
+      // Ensure user is authenticated
+      if (!userData?.id) {
+        setPdfError(errorMessages.authError);
+        Analytics.event('cv_optimization', 'pdf_upload_error', 'auth_required');
+        return;
+      }
+
+      try {
+        // Track PDF upload start
+        Analytics.event('cv_optimization', 'pdf_upload_start');
+        
+        // Upload to Supabase storage
+        const { path, error: uploadError } = await pdfStorageService.uploadPdf(file, userData.id);
+        
+        if (uploadError) {
+          logger.error('PDF upload error:', uploadError);
+          setPdfError(errorMessages.uploadError);
+          Analytics.event('cv_optimization', 'pdf_upload_error', 'storage_failed');
+          return;
+        }
+        
+        try {
+          // Extract text from PDF
+          const extractedText = await pdfService.smartExtractTextFromPDF(file);
+          
+          if (extractedText.length < MIN_CV_LENGTH) {
+            setPdfError(errorMessages.insufficientText);
+            Analytics.event('cv_optimization', 'pdf_extraction_error', 'insufficient_text');
+          } else {
+            setCvText(extractedText);
+            Analytics.event('cv_optimization', 'pdf_extraction_success');
+          }
+        } catch (extractError) {
+          logger.error('PDF extraction error:', extractError);
+          setPdfError(errorMessages.processingError);
+          Analytics.event('cv_optimization', 'pdf_extraction_error', 'extraction_failed');
+        }
+      } catch (uploadError) {
+        logger.error('PDF upload error:', uploadError);
+        setPdfError(errorMessages.uploadError);
+        Analytics.event('cv_optimization', 'pdf_upload_error', 'upload_failed');
+      }
+    } catch (error) {
+      logger.error('PDF processing error:', error);
+      setPdfError(errorMessages.processingError);
+      Analytics.event('cv_optimization', 'pdf_processing_error', 'unknown_error');
+    } finally {
+      setIsPdfProcessing(false);
+    }
+  };
+
+  const handlePdfRemove = () => {
+    setPdfFile(null);
+    setPdfError(undefined);
   };
 
   if (isLoading) {
@@ -283,29 +374,28 @@ export const OptimiseCV = () => {
             className="space-y-4"
           >
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
-              <div className="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-lg" />
-                <div className="relative">
-                  <Lock className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    PDF Upload Coming Soon
-                  </p>
-                </div>
-              </div>
+              <FileUpload
+                onFileSelect={handlePdfSelect}
+                onFileRemove={handlePdfRemove}
+                selectedFile={pdfFile}
+                isProcessing={isPdfProcessing}
+                error={pdfError}
+                onError={showWarning}
+              />
             </div>
 
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
               <div className="flex items-center space-x-2 mb-2">
                 <Cpu className="w-4 h-4 text-orange-500" />
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Paste Your CV Text
+                  {pdfFile ? 'Extracted CV Text' : 'Paste Your CV Text'}
                 </label>
               </div>
               <textarea
                 value={cvText}
                 onChange={(e) => setCvText(e.target.value)}
                 className="w-full h-48 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm"
-                placeholder="Copy and paste your CV content here..."
+                placeholder={pdfFile ? "Text extracted from your PDF..." : "Copy and paste your CV content here..."}
               />
             </div>
 

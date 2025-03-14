@@ -6,12 +6,14 @@
 - [Project Structure](#project-structure)
 - [Authentication](#authentication)
 - [Database](#database)
+- [Logging System](#logging-system)
 - [Design System](#design-system)
 - [Component Guidelines](#component-guidelines)
 - [State Management](#state-management)
 - [Analytics Integration](#analytics-integration)
 - [Mapbox Integration](#mapbox-integration)
 - [AI Integration](#ai-integration)
+- [PDF Handling and Storage](#pdf-handling-and-storage)
 - [Environment Variables](#environment-variables)
 - [Deployment](#deployment)
 - [Troubleshooting](#troubleshooting)
@@ -31,6 +33,7 @@ ApprenticeWatch is a platform designed to help users discover apprenticeship opp
 - **Analytics**: Google Analytics 4
 - **Maps**: Mapbox
 - **AI**: Google's Gemini AI API
+- **Logging**: Custom structured logging system
 
 ## Project Structure
 
@@ -52,13 +55,14 @@ web-app/
 ├── config/               # Configuration files
 ├── hooks/                # Custom React hooks
 ├── public/               # Static assets
-├── services/             # Service modules
-│   ├── ai/               # AI service integration
-│   ├── analytics/        # Analytics service
-│   ├── auth/             # Authentication service
-│   └── supabase/         # Supabase client and utilities
-├── types/                # TypeScript type definitions
-└── utils/                # Utility functions
+├── services/            # Service modules
+│   ├── ai/              # AI service integration
+│   ├── analytics/       # Analytics service
+│   ├── auth/            # Authentication service
+│   ├── logger/          # Structured logging service
+│   └── supabase/        # Supabase client and utilities
+├── types/               # TypeScript type definitions
+└── utils/               # Utility functions
 ```
 
 ## Authentication
@@ -77,92 +81,101 @@ Authentication is handled through Supabase Auth with Google OAuth integration.
 4. User profile is saved to Supabase and local storage
 5. User is redirected to the main application (typically to the CV optimization page)
 
-### User Profile Structure
+## Logging System
+
+The application uses a structured logging system to ensure consistent error handling, debugging, and monitoring across all services.
+
+### Key Features
+- Environment-aware logging (development vs. production)
+- Multiple log levels (info, warn, error, debug)
+- Structured log format with metadata
+- Sensitive data protection
+- Performance tracking
+
+### Usage
+
+1. Import and initialize the logger:
 ```typescript
-interface GoogleUser {
-  id: string;
-  email: string;
-  name: string | null;
-  picture: string | null;
-}
+import { createLogger } from '@/services/logger/logger';
+
+const logger = createLogger({ module: 'YourServiceName' });
 ```
 
-### Adding New Authentication Providers
-To add a new authentication provider:
-1. Configure the provider in the Supabase dashboard
-2. Create a new authentication service file in `services/auth/`
-3. Create a new sign-in component in `components/auth/`
-4. Update the sign-in page to include the new provider
-
-## Database
-
-We use Supabase as our database with PostgreSQL as the underlying engine.
-
-### Configuration
-The Supabase client is configured in `config/supabase.ts`:
-
+2. Log with different levels:
 ```typescript
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce',
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined
-  }
+// Info level for general information
+logger.info('Operation completed', { 
+  userId,
+  operationType: 'upload',
+  duration: 1200 
+});
+
+// Error level for error handling
+logger.error('Operation failed', { 
+  error: error.message,
+  context: 'file_upload',
+  userId 
+});
+
+// Debug level for detailed information (not shown in production)
+logger.debug('Processing step completed', { 
+  step: 'validation',
+  result: 'success' 
+});
+
+// Warn level for potential issues
+logger.warn('Resource limit approaching', { 
+  usage: 85,
+  limit: 100 
 });
 ```
 
-### Key Tables
+3. Handling Sensitive Data:
+```typescript
+// DO: Log metadata without sensitive content
+logger.info('CV analysis started', { 
+  cvLength: cv.length,
+  jobDescLength: jobDescription.length 
+});
 
-#### Users Table
-Stores user profile information:
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY REFERENCES auth.users,
-  email TEXT UNIQUE NOT NULL,
-  name TEXT,
-  picture TEXT,
-  last_login TIMESTAMP WITH TIME ZONE
-);
+// DON'T: Log sensitive content directly
+logger.info('CV analysis started', { cv, jobDescription }); // Wrong!
 ```
 
-#### Apprenticeships Table
-Stores apprenticeship listings:
-```sql
-CREATE TABLE apprenticeships (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title TEXT NOT NULL,
-  description TEXT NOT NULL,
-  employer_name TEXT NOT NULL,
-  location JSONB NOT NULL,
-  address JSONB NOT NULL,
-  posted_date TIMESTAMP WITH TIME ZONE NOT NULL,
-  closing_date TIMESTAMP WITH TIME ZONE NOT NULL,
-  is_active BOOLEAN DEFAULT true
-);
-```
+### Log Levels
+- **Error**: Use for failures that need immediate attention
+- **Warn**: Use for potentially problematic situations
+- **Info**: Use for general operational information
+- **Debug**: Use for detailed debugging information (development only)
 
-### Database Operations
-Database operations are handled directly through the Supabase client. For example:
+### Best Practices
+1. Always include relevant context in log messages
+2. Use structured logging with metadata objects
+3. Never log sensitive information (passwords, personal data, full documents)
+4. Use appropriate log levels based on severity
+5. Include error messages and stack traces for errors
+6. Add performance metrics where relevant
+
+## Analytics Integration
+
+Analytics are handled through Google Analytics 4 with custom event tracking.
+
+### Key Files
+- `services/analytics/analytics.ts`: Main analytics service
+- Integration with the logger for error tracking
+
+### Event Tracking
+Events are now tracked with structured data and proper error handling:
 
 ```typescript
-// Fetch apprenticeships
-const { data, error } = await supabase
-  .from('apprenticeships')
-  .select('*')
-  .eq('is_active', true);
+// Track a user action
+Analytics.event('cv_optimization', 'start_analysis', value);
 
-// Insert a new user
-const { data, error } = await supabase
-  .from('users')
-  .upsert({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    picture: user.picture,
-    last_login: new Date().toISOString(),
-  });
+// Track page views
+Analytics.pageView('/optimise-cv');
+
+// Track timing events
+Analytics.timing('cv_analysis', 'processing_time', duration);
 ```
 
 ## Design System
@@ -276,35 +289,6 @@ const useAuth = () => {
 
   return { user, isLoading };
 };
-```
-
-## Analytics Integration
-
-Google Analytics 4 is implemented throughout the application to track user behavior.
-
-### Key Files
-- `components/GoogleAnalytics.tsx`: Main GA4 component
-- `services/analytics/analytics.ts`: Analytics service
-
-### Event Tracking
-The application tracks the following events:
-
-1. **Page Views**: Automatically tracked via the GoogleAnalytics component
-2. **User Actions**:
-   - Sign in/sign out
-   - Apprenticeship listing views
-   - Apply button clicks
-   - Filter usage
-   - Map interactions
-   - CV optimization requests
-
-### Implementation Details
-- GA4 is implemented as a client-side component with `ssr: false`
-- All analytics tracking code includes `typeof window !== 'undefined'` checks
-- Events are tracked using the `Analytics.event()` method:
-
-```typescript
-Analytics.event('category', 'action', 'label', value);
 ```
 
 ## Mapbox Integration
@@ -451,23 +435,132 @@ The system uses a carefully crafted prompt structure to ensure consistent and hi
 3. Monitor response times
 4. Optimize prompt length
 
+## PDF Handling and Storage
+
+### PDF Processing Architecture
+
+The application uses PDF.js for text extraction with a hybrid approach:
+
+1. Core Components:
+   - `pdfjs-dist` npm package for core functionality and TypeScript types
+   - CDN-hosted resources for supplementary files (cmaps and fonts)
+
+2. Implementation:
+```typescript
+// PDF.js configuration in pdfService.ts
+const loadingTask = pdfjsLib.getDocument({
+  data: arrayBuffer,
+  cMapUrl: 'https://unpkg.com/browse/pdfjs-dist@4.10.38/cmaps/',
+  cMapPacked: true,
+  standardFontDataUrl: 'https://unpkg.com/browse/pdfjs-dist@4.10.38/standard_fonts/'
+});
+```
+
+3. Benefits:
+   - Core functionality bundled with the app for reliability
+   - Supplementary resources loaded on-demand from CDN
+   - Full TypeScript support through npm package
+   - Reduced bundle size by using CDN for large resources
+
+### PDF Processing Flow
+1. User uploads PDF (5MB size limit enforced)
+2. File size and type validation
+3. PDF.js worker initialization
+4. Text extraction using PDF.js
+5. Text sent to Gemini AI for analysis
+
+### File Size Limits
+- Maximum PDF file size: 5MB
+- File size validation occurs before processing
+- User-friendly warnings are shown via the alert system
+- File size errors are tracked in analytics
+
+### Implementation Details
+```typescript
+// File size validation in FileUpload component
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
+if (file.size > MAX_FILE_SIZE) {
+  logger.warn('File size exceeded:', { 
+    size: file.size, 
+    maxSize: MAX_FILE_SIZE 
+  });
+  return showAlert('error', 'File too large. Maximum size is 5MB.');
+}
+```
+
+### PDF Storage in Supabase
+PDFs are stored securely in Supabase with the following configuration:
+
+1. Storage Configuration
+   - Bucket: 'cv-pdfs' (private bucket)
+   - Access: Row Level Security (RLS) enabled
+   - User association: Each PDF is linked to the uploading user
+
+2. Database Schema
+```sql
+CREATE TABLE user_pdfs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users NOT NULL,
+  email TEXT NOT NULL,
+  file_name TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Email sync trigger
+CREATE TRIGGER sync_user_email
+  AFTER INSERT OR UPDATE ON user_pdfs
+  FOR EACH ROW
+  EXECUTE FUNCTION sync_user_email();
+```
+
+3. Security Features
+   - RLS policies ensure users can only access their own PDFs
+   - Email column is automatically synced with auth.users
+   - Efficient lookups via email index
+   - Automatic timestamp management
+
+### Logging and Monitoring
+PDF operations are tracked using structured logging:
+
+```typescript
+// PDF upload logging
+logger.info('Starting PDF upload', {
+  fileName: file.name,
+  fileSize: file.size,
+  userId: user.id
+});
+
+// PDF processing logging
+logger.info('PDF text extraction complete', {
+  fileName: file.name,
+  textLength: extractedText.length,
+  processingTime: endTime - startTime
+});
+```
+
 ## Environment Variables
 
 The application requires the following environment variables:
 
-```
-# Supabase
+```env
+# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # Google Analytics
-NEXT_PUBLIC_GA_TRACKING_ID=your_ga4_measurement_id
+NEXT_PUBLIC_GA_ID=your_ga4_measurement_id
 
 # Mapbox
 NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
 
-# Gemini AI
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
+# Google AI (Gemini)
+GOOGLE_AI_API_KEY=your_gemini_api_key
+
+# File Upload Limits
+MAX_FILE_SIZE=5242880 # 5MB in bytes
 ```
 
 ## Deployment
