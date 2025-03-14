@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Analytics } from '@/services/analytics/analytics';
 import { FileUpload } from '@/components/ui/FileUpload';
 import { pdfService } from '@/services/pdf/pdfService';
+import { pdfStorageService } from '@/services/storage/pdfStorageService';
 
 interface ScoreCategory {
   name: string;
@@ -259,6 +260,20 @@ export const OptimiseCV = () => {
       
       // Track PDF upload event
       Analytics.event('cv_optimization', 'pdf_upload_start');
+
+      // Ensure user is authenticated
+      if (!userData?.id) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Upload to Supabase storage
+      const { path, error: uploadError } = await pdfStorageService.uploadPdf(file, userData.id);
+      
+      if (uploadError) {
+        setPdfError('Failed to upload PDF. Please try again.');
+        Analytics.event('cv_optimization', 'pdf_upload_error', uploadError.message);
+        throw uploadError;
+      }
       
       // Extract text from PDF
       const extractedText = await pdfService.smartExtractTextFromPDF(file);
