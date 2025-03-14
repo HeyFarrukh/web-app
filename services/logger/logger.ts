@@ -25,30 +25,33 @@ class Logger {
     return `[${timestamp}] [${this.module}] [${level.toUpperCase()}] ${message}`;
   }
 
-  private shouldLog(): boolean {
+  private shouldLog(level: LogLevel): boolean {
+    // Always log errors in any environment
+    if (level === 'error') return true;
+    // Other logs only in development
     return this.isDevelopment;
   }
 
   info(message: string, ...args: any[]): void {
-    if (this.shouldLog()) {
+    if (this.shouldLog('info')) {
       console.info(this.formatMessage('info', message), ...args);
     }
   }
 
   warn(message: string, ...args: any[]): void {
-    if (this.shouldLog()) {
+    if (this.shouldLog('warn')) {
       console.warn(this.formatMessage('warn', message), ...args);
     }
   }
 
   error(message: string, ...args: any[]): void {
-    if (this.shouldLog()) {
+    if (this.shouldLog('error')) {
       console.error(this.formatMessage('error', message), ...args);
     }
   }
 
   debug(message: string, ...args: any[]): void {
-    if (this.shouldLog()) {
+    if (this.shouldLog('debug')) {
       console.debug(this.formatMessage('debug', message), ...args);
     }
   }
