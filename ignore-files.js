@@ -3,7 +3,7 @@ const fs = require("fs");
 const isProduction = process.env.VERCEL_ENV === "production";
 const vercelIgnorePath = ".vercelignore";
 
-// Define files to ignore in production but allow in preview
+// Define files to ignore in production but allow in preview 
 const filesToIgnore = [
   "content/articles/readme.md",
   "content/articles/cv-guide.md"
