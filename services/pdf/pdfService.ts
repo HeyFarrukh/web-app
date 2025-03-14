@@ -38,9 +38,9 @@ class PDFService {
       const loadingTask = pdfjsLib.getDocument({
         data: arrayBuffer,
         // Use the same version as the worker
-        cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+        cMapUrl: 'https://unpkg.com/browse/pdfjs-dist@4.10.38/cmaps/',
         cMapPacked: true,
-        standardFontDataUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/standard_fonts/'
+        standardFontDataUrl: 'https://unpkg.com/browse/pdfjs-dist@4.10.38/standard_fonts/'
       });
       
       console.log("PDF loading task created, waiting for promise...");
