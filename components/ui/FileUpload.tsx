@@ -5,6 +5,10 @@ import { useDropzone } from 'react-dropzone';
 import { FileText, Upload, X, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from '@/services/analytics/analytics';
+import { errorMessages, formatFileSize } from '@/components/optimise-cv/OptimiseCV';
+import { createLogger } from '@/services/logger/logger';
+
+const logger = createLogger({ module: 'FileUpload' });
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -34,8 +38,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
         if (file.size > maxFileSize) {
-          onError?.(`File size exceeds ${formatFileSize(maxFileSize)} limit. Please upload a smaller PDF file. 📄`);
+          onError?.(errorMessages.fileTooLarge);
           Analytics.event('cv_optimization', 'pdf_upload_error', 'file_size_exceeded');
+          logger.warn('File size exceeded:', { size: file.size, maxSize: maxFileSize });
           return;
         }
         onFileSelect(file);
@@ -51,14 +56,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         const error = rejection.errors[0];
         
         if (error?.code === 'file-too-large') {
-          onError?.(`File size exceeds ${formatFileSize(maxFileSize)} limit. Please upload a smaller PDF file. 📄`);
+          onError?.(errorMessages.fileTooLarge);
           Analytics.event('cv_optimization', 'pdf_upload_error', 'file_size_exceeded');
+          logger.warn('File size exceeded:', { size: rejection.file?.size, maxSize: maxFileSize });
         } else if (error?.code === 'too-many-files') {
-          onError?.('Please upload only one PDF file at a time. 📄');
+          onError?.(errorMessages.tooManyFiles);
           Analytics.event('cv_optimization', 'pdf_upload_error', 'too_many_files');
+          logger.warn('Too many files uploaded');
         } else if (error?.code === 'file-invalid-type') {
-          onError?.('Please upload a PDF file. Other file types are not supported. 📄');
+          onError?.(errorMessages.fileInvalidType);
           Analytics.event('cv_optimization', 'pdf_upload_error', 'invalid_file_type');
+          logger.warn('Invalid file type:', { type: rejection.file?.type });
         }
       }
     },
@@ -80,12 +88,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   useEffect(() => {
     setDragActive(isDragActive);
   }, [isDragActive]);
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + ' bytes';
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    else return (bytes / 1048576).toFixed(1) + ' MB';
-  };
 
   return (
     <div className="w-full">

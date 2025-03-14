@@ -1,4 +1,7 @@
 import supabase from '../../config/supabase';
+import { createLogger } from '@/services/logger/logger';
+
+const logger = createLogger({ module: 'PDFStorageService' });
 
 export const pdfStorageService = {
   async uploadPdf(file: File, userId: string): Promise<{ path: string; error: Error | null }> {
@@ -6,6 +9,12 @@ export const pdfStorageService = {
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}/${Date.now()}.${fileExt}`;
       
+      logger.info('Starting PDF upload to Supabase storage', { 
+        fileName: file.name,
+        size: file.size,
+        bucket: 'cv-pdfs'
+      });
+
       // Upload to storage with explicit owner metadata
       const { data, error } = await supabase.storage
         .from('cv-pdfs')
@@ -13,7 +22,12 @@ export const pdfStorageService = {
           upsert: false
         });
 
-      if (error) throw error;
+      if (error) {
+        logger.error('Failed to upload PDF to storage:', error);
+        throw error;
+      }
+
+      logger.info('PDF uploaded to storage successfully', { path: data.path });
 
       // Insert record into user_pdfs table
       const { error: dbError } = await supabase
@@ -24,34 +38,57 @@ export const pdfStorageService = {
           file_url: data.path
         });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        logger.error('Failed to create PDF record in database:', dbError);
+        throw dbError;
+      }
 
+      logger.info('PDF record created in database successfully');
       return { path: data.path, error: null };
     } catch (error) {
-      console.error('Error uploading PDF:', error);
+      logger.error('Error in PDF upload process:', error);
       return { path: '', error: error as Error };
     }
   },
 
   async getUserPdfs(userId: string) {
-    const { data, error } = await supabase
-      .from('user_pdfs')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+    try {
+      logger.info('Fetching user PDFs', { userId });
+      
+      const { data, error } = await supabase
+        .from('user_pdfs')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data;
+      if (error) {
+        logger.error('Failed to fetch user PDFs:', error);
+        throw error;
+      }
+
+      logger.info('Successfully fetched user PDFs', { count: data.length });
+      return data;
+    } catch (error) {
+      logger.error('Error fetching user PDFs:', error);
+      throw error;
+    }
   },
 
   async deletePdf(path: string, userId: string) {
     try {
+      logger.info('Starting PDF deletion process', { path, userId });
+
       // Delete from storage
       const { error: storageError } = await supabase.storage
         .from('cv-pdfs')
         .remove([path]);
 
-      if (storageError) throw storageError;
+      if (storageError) {
+        logger.error('Failed to delete PDF from storage:', storageError);
+        throw storageError;
+      }
+
+      logger.info('PDF deleted from storage successfully');
 
       // Delete from database
       const { error: dbError } = await supabase
@@ -60,11 +97,15 @@ export const pdfStorageService = {
         .eq('file_url', path)
         .eq('user_id', userId);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        logger.error('Failed to delete PDF record from database:', dbError);
+        throw dbError;
+      }
 
+      logger.info('PDF record deleted from database successfully');
       return { error: null };
     } catch (error) {
-      console.error('Error deleting PDF:', error);
+      logger.error('Error in PDF deletion process:', error);
       return { error };
     }
   }

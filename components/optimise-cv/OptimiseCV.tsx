@@ -11,6 +11,9 @@ import { Analytics } from '@/services/analytics/analytics';
 import { FileUpload } from '@/components/ui/FileUpload';
 import { pdfService } from '@/services/pdf/pdfService';
 import { pdfStorageService } from '@/services/storage/pdfStorageService';
+import { createLogger } from '@/services/logger/logger';
+
+const logger = createLogger({ module: 'OptimiseCV' });
 
 interface ScoreCategory {
   name: string;
@@ -49,6 +52,24 @@ interface WarningState {
   show: boolean;
   message: string;
 }
+
+// Utility functions
+export const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return bytes + ' bytes';
+  else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  else return (bytes / 1048576).toFixed(1) + ' MB';
+};
+
+// Define error messages in one place
+export const errorMessages = {
+  fileTooLarge: `File size exceeds ${formatFileSize(MAX_FILE_SIZE)} limit. Please upload a smaller PDF file. 📄`,
+  tooManyFiles: 'Please upload only one PDF file at a time. 📄',
+  fileInvalidType: 'Please upload a PDF file. Other file types are not supported. 📄',
+  processingError: 'Failed to process PDF. Please try again or paste your CV text manually. 📄',
+  uploadError: 'Failed to upload PDF. Please try again. 📄',
+  insufficientText: 'The extracted text seems too short. Please ensure your PDF contains readable text or try pasting your CV manually. 📄',
+  authError: 'Please sign in to upload and process your CV. 📄'
+};
 
 export const OptimiseCV = () => {
   const router = useRouter();
@@ -207,7 +228,7 @@ export const OptimiseCV = () => {
       });
       
     } catch (error) {
-      console.error('Analysis failed:', error);
+      logger.error('Analysis failed:', error);
       showWarning('Sorry, something went wrong while analysing your CV. Please try again.');
     } finally {
       setIsAnalyzing(false);
@@ -222,7 +243,7 @@ export const OptimiseCV = () => {
         setCopyStates(prev => ({ ...prev, [sectionId]: false }));
       }, 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      logger.error('Failed to copy:', err);
     }
   };
 
@@ -260,37 +281,52 @@ export const OptimiseCV = () => {
       setPdfError(undefined);
       setIsPdfProcessing(true);
       
-      // Track PDF upload event
-      Analytics.event('cv_optimization', 'pdf_upload_start');
-
       // Ensure user is authenticated
       if (!userData?.id) {
-        throw new Error('User not authenticated');
+        setPdfError(errorMessages.authError);
+        Analytics.event('cv_optimization', 'pdf_upload_error', 'auth_required');
+        return;
       }
-      
-      // Upload to Supabase storage
-      const { path, error: uploadError } = await pdfStorageService.uploadPdf(file, userData.id);
-      
-      if (uploadError) {
-        setPdfError('Failed to upload PDF. Please try again.');
-        Analytics.event('cv_optimization', 'pdf_upload_error', uploadError.message);
-        throw uploadError;
-      }
-      
-      // Extract text from PDF
-      const extractedText = await pdfService.smartExtractTextFromPDF(file);
-      
-      if (extractedText.length < MIN_CV_LENGTH) {
-        setPdfError('The extracted text seems too short. Please ensure your PDF contains readable text or try pasting your CV manually.');
-        Analytics.event('cv_optimization', 'pdf_extraction_error', 'insufficient_text');
-      } else {
-        setCvText(extractedText);
-        Analytics.event('cv_optimization', 'pdf_extraction_success');
+
+      try {
+        // Track PDF upload start
+        Analytics.event('cv_optimization', 'pdf_upload_start');
+        
+        // Upload to Supabase storage
+        const { path, error: uploadError } = await pdfStorageService.uploadPdf(file, userData.id);
+        
+        if (uploadError) {
+          logger.error('PDF upload error:', uploadError);
+          setPdfError(errorMessages.uploadError);
+          Analytics.event('cv_optimization', 'pdf_upload_error', 'storage_failed');
+          return;
+        }
+        
+        try {
+          // Extract text from PDF
+          const extractedText = await pdfService.smartExtractTextFromPDF(file);
+          
+          if (extractedText.length < MIN_CV_LENGTH) {
+            setPdfError(errorMessages.insufficientText);
+            Analytics.event('cv_optimization', 'pdf_extraction_error', 'insufficient_text');
+          } else {
+            setCvText(extractedText);
+            Analytics.event('cv_optimization', 'pdf_extraction_success');
+          }
+        } catch (extractError) {
+          logger.error('PDF extraction error:', extractError);
+          setPdfError(errorMessages.processingError);
+          Analytics.event('cv_optimization', 'pdf_extraction_error', 'extraction_failed');
+        }
+      } catch (uploadError) {
+        logger.error('PDF upload error:', uploadError);
+        setPdfError(errorMessages.uploadError);
+        Analytics.event('cv_optimization', 'pdf_upload_error', 'upload_failed');
       }
     } catch (error) {
-      console.error('Error processing PDF:', error);
-      setPdfError('Failed to process PDF. Please try again or paste your CV text manually.');
-      Analytics.event('cv_optimization', 'pdf_extraction_error', 'processing_failed');
+      logger.error('PDF processing error:', error);
+      setPdfError(errorMessages.processingError);
+      Analytics.event('cv_optimization', 'pdf_processing_error', 'unknown_error');
     } finally {
       setIsPdfProcessing(false);
     }

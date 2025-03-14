@@ -2,9 +2,12 @@
 
 import * as pdfjsLib from 'pdfjs-dist';
 import setPdfWorker from '../../lib/pdf-worker-loader'; // Import the worker loader
+import { createLogger } from '@/services/logger/logger';
 
 // Initialize the worker
 setPdfWorker();
+
+const logger = createLogger({ module: 'PDFService' });
 
 class PDFService {
   /**
@@ -12,7 +15,7 @@ class PDFService {
    */
   async smartExtractTextFromPDF(file: File): Promise<string> {
     try {
-      console.log("Starting PDF text extraction...");
+      logger.info("Starting PDF text extraction...");
       
       // Check if file is actually a PDF
       if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
@@ -21,18 +24,22 @@ class PDFService {
       
       // Verify worker initialization
       if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
-        console.log("Worker source not set, setting it now");
+        logger.info("Worker source not set, setting it now");
         setPdfWorker(); // Use the worker loader function
       }
       
-      console.log("Using PDF.js worker:", pdfjsLib.GlobalWorkerOptions.workerSrc);
+      logger.debug("Using PDF.js worker:", pdfjsLib.GlobalWorkerOptions.workerSrc);
       
       // Log file details for debugging
-      console.log(`Processing PDF file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
+      logger.debug(`Processing PDF file:`, { 
+        name: file.name, 
+        size: file.size, 
+        type: file.type 
+      });
       
       // Convert file to ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
-      console.log(`File converted to ArrayBuffer, size: ${arrayBuffer.byteLength} bytes`);
+      logger.debug(`File converted to ArrayBuffer`, { size: arrayBuffer.byteLength });
       
       // Load the PDF document with compatible options
       const loadingTask = pdfjsLib.getDocument({
@@ -43,9 +50,9 @@ class PDFService {
         standardFontDataUrl: 'https://unpkg.com/browse/pdfjs-dist@4.10.38/standard_fonts/'
       });
       
-      console.log("PDF loading task created, waiting for promise...");
+      logger.debug("PDF loading task created, waiting for promise...");
       const pdf = await loadingTask.promise;
-      console.log(`PDF loaded successfully. Number of pages: ${pdf.numPages}`);
+      logger.info(`PDF loaded successfully`, { pages: pdf.numPages });
       
       // Extract text from each page
       let fullText = '';
@@ -55,7 +62,7 @@ class PDFService {
       
       for (let i = 1; i <= numPages; i++) {
         try {
-          console.log(`Processing page ${i} of ${numPages}`);
+          logger.debug(`Processing page ${i} of ${numPages}`);
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
           
@@ -65,9 +72,9 @@ class PDFService {
             .join(' ');
           
           fullText += pageText + '\n\n';
-          console.log(`Page ${i} processed, extracted ${pageText.length} characters`);
+          logger.debug(`Page ${i} processed`, { characters: pageText.length });
         } catch (pageError) {
-          console.error(`Error processing page ${i}:`, pageError);
+          logger.error(`Error processing page ${i}:`, pageError);
           // Continue with next page instead of failing completely
         }
       }
@@ -81,7 +88,7 @@ class PDFService {
         // Clean up any PDF artifacts
         .replace(/[^\x20-\x7E\n]/g, '');
       
-      console.log(`Extracted ${fullText.length} characters of text`);
+      logger.info(`Text extraction complete`, { characters: fullText.length });
       
       if (fullText.length < 50) {
         throw new Error('Could not extract sufficient text from the PDF. Please try a different file or paste your CV text manually.');
@@ -89,7 +96,7 @@ class PDFService {
       
       return fullText;
     } catch (error) {
-      console.error('Error in PDF extraction:', error);
+      logger.error('Error in PDF extraction:', error);
       throw new Error(`Failed to process PDF. Please try again or paste your CV text manually.`);
     }
   }
