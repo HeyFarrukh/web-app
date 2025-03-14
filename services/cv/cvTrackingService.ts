@@ -1,8 +1,7 @@
 import supabase from '@/config/supabase';
-import { Analytics } from '@/services/analytics/analytics';
+import { AIAnalysisResponse } from '../ai/geminiService';
 import { createLogger } from '@/services/logger/logger';
-
-const logger = createLogger({ module: 'CVTrackingService' });
+import { Analytics } from '@/services/analytics/analytics';
 
 interface OptimisationRecord {
   id: string;
@@ -10,128 +9,148 @@ interface OptimisationRecord {
   cvText: string;
   jobDescription: string;
   overallScore: number;
-  metadata: Record<string, any>;
+  createdAt: Date;
+  metadata?: Record<string, any>;
   userEmail: string;
 }
 
-interface Metadata {
-  tokenCount: number;
-  processingTime: number;
-  apiVersion: string;
-}
+export class CVTrackingService {
+  private logger = createLogger({ module: 'CVTrackingService' });
 
-export const cvTrackingService = {
   async recordOptimisation(
     userId: string,
-    cv: string,
+    cvText: string,
     jobDescription: string,
-    analysis: any,
-    metadata: Metadata,
+    analysis: AIAnalysisResponse,
+    metadata: Record<string, any>,
     userEmail: string
   ) {
     try {
-      logger.info('Recording CV optimization', { 
+      this.logger.info('Recording CV optimization', { 
         userId,
         userEmail,
         tokenCount: metadata.tokenCount,
         apiVersion: metadata.apiVersion
       });
 
-      const { data, error } = await supabase
+      const { data: optimisation, error: optimisationError } = await supabase
         .from('cv_optimisations')
         .insert({
           user_id: userId,
-          cv_text: cv,
+          cv_text: cvText,
           job_description: jobDescription,
-          analysis_result: analysis,
+          overall_score: analysis.overallScore,
+          metadata: metadata,
+          user_email: userEmail,
           token_count: metadata.tokenCount,
           processing_time_ms: metadata.processingTime,
-          api_version: metadata.apiVersion,
-          email: userEmail
+          api_version: metadata.apiVersion
         })
         .select()
         .single();
 
-      if (error) {
-        logger.error('Failed to record optimization:', { 
-          error: error.message,
-          userId,
-          userEmail,
-          apiVersion: metadata.apiVersion
-        });
-        throw error;
+      if (optimisationError) {
+        this.logger.error('Failed to record optimization:', { error: optimisationError, userId, userEmail, apiVersion: metadata.apiVersion });
+        Analytics.event('cv_optimization', 'record_error', optimisationError.message);
+        throw optimisationError;
       }
 
-      logger.info('Successfully recorded CV optimization', {
-        optimizationId: data.id,
+      const improvements = analysis.improvements.map(imp => ({
+        optimisation_id: optimisation.id,
+        section: imp.section,
+        score: imp.score,
+        impact: imp.impact,
+        context: imp.context,
+        suggestions: JSON.stringify(imp.suggestions),
+        optimised_content: imp.optimisedContent,
+        user_email: userEmail
+      }));
+
+      const { error: improvementsError } = await supabase
+        .from('cv_optimisation_improvements')
+        .insert(improvements);
+
+      if (improvementsError) {
+        this.logger.error('Failed to record optimization improvements:', { error: improvementsError, optimisationId: optimisation.id });
+        Analytics.event('cv_optimization', 'improvements_error', improvementsError.message);
+        throw improvementsError;
+      }
+
+      this.logger.info('Successfully recorded optimization', { 
+        optimizationId: optimisation.id,
         userId,
         processingTime: metadata.processingTime
       });
-
-      return data;
-    } catch (error: unknown) {
+      return optimisation;
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to record optimization:', { error: errorMessage });
+      this.logger.error('Failed to record optimization:', { error: errorMessage });
       Analytics.event('cv_optimization', 'record_error', errorMessage);
       throw error;
     }
-  },
+  }
 
   async getUserStats(userId: string) {
     try {
-      logger.info('Fetching user stats', { userId });
+      this.logger.info('Fetching user stats', { userId });
 
       const { data, error } = await supabase
         .from('cv_optimisations')
-        .select('created_at, analysis_result->overallScore')
+        .select('created_at, overall_score')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) {
-        logger.error('Failed to get user stats:', { error: error.message, userId });
+        this.logger.error('Failed to get user stats:', { error, userId });
+        Analytics.event('cv_optimization', 'stats_error', error.message);
         throw error;
       }
 
-      logger.info('Successfully fetched user stats', { 
+      this.logger.info('Successfully fetched user stats', {
         userId,
-        optimizationCount: data.length 
+        optimizationCount: data?.length
       });
-
       return data;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to get user stats:', { error: errorMessage, userId });
+      this.logger.error('Failed to get user stats:', { error: errorMessage, userId });
       Analytics.event('cv_optimization', 'stats_error', errorMessage);
       throw error;
     }
-  },
+  }
 
-  async getUserOptimisations(userId: string) {
+  async getUserOptimisations(userId: string, limit = 10, offset = 0) {
     try {
-      logger.info('Fetching user optimizations', { userId });
+      this.logger.info('Fetching user optimizations', { userId });
 
       const { data, error } = await supabase
         .from('cv_optimisations')
-        .select('*')
+        .select(`
+          *,
+          cv_optimisation_improvements (*)
+        `)
         .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
 
       if (error) {
-        logger.error('Failed to get user optimizations:', { error: error.message, userId });
+        this.logger.error('Failed to get user optimizations:', { error, userId });
+        Analytics.event('cv_optimization', 'history_error', error.message);
         throw error;
       }
 
-      logger.info('Successfully fetched user optimizations', { 
+      this.logger.info('Successfully fetched user optimizations', {
         userId,
-        count: data.length 
+        count: data?.length
       });
-
       return data;
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to get user optimizations:', { error: errorMessage, userId });
+      this.logger.error('Failed to get user optimizations:', { error: errorMessage, userId });
       Analytics.event('cv_optimization', 'history_error', errorMessage);
       throw error;
     }
   }
-};
+}
+
+export const cvTrackingService = new CVTrackingService();

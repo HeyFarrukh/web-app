@@ -108,7 +108,7 @@ IMPORTANT: Response must be valid JSON only, with no additional text or markdown
       logger.info('Starting CV analysis with Gemini', {
         cvLength: cvText.length,
         jobDescLength: jobDescription.length,
-        model: 'gemini-pro'
+        model: 'gemini-2.0-flash'
       });
 
       const prompt = `
