@@ -2,16 +2,16 @@
   "name": "apprenticewatch",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "prebuild": "node ignore-files.js",
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "lint": "next lint",
-  "export": "next export",
-  "deploy": "next build && firebase deploy",
-  "build:all": "npm run build"
-},
+  "scripts": {
+    "prebuild": "node ignore-files.js",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "export": "next export",
+    "deploy": "next build && firebase deploy",
+    "build:all": "npm run build"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.2.0",
     "@next/third-parties": "^14.1.0",
@@ -24,8 +24,11 @@
     "lucide-react": "^0.323.0",
     "mapbox-gl": "^3.10.0",
     "next": "^14.2.24",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^4.10.38",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.3.8",
     "react-ga4": "^2.1.0",
     "react-icons": "^5.4.0",
     "rehype-autolink-headings": "^7.1.0",
@@ -41,6 +44,7 @@
     "remark-html": "^16.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.1",
+    "tesseract.js": "^6.0.0",
     "unified": "^11.0.5"
   },
   "devDependencies": {

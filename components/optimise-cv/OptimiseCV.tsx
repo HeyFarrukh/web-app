@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, AlertCircle, X, Sparkles, Zap, Bot, Cpu, Target, TrendingUp, FileText, Key, Copy, Check } from 'lucide-react';
+import { Lock, AlertCircle, X, Sparkles, Zap, Bot, Cpu, Target, TrendingUp, FileText, Key, Copy, Check, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { geminiService } from '@/services/ai/geminiService';
 import { cvTrackingService } from '@/services/cv/cvTrackingService';
 import { useAuth } from '@/hooks/useAuth';
 import { Analytics } from '@/services/analytics/analytics';
+import { FileUpload } from '@/components/ui/FileUpload';
+import { pdfService } from '@/services/pdf/pdfService';
 
 interface ScoreCategory {
   name: string;
@@ -66,6 +68,9 @@ export const OptimiseCV = () => {
     jobDesc: string;
     timestamp: number;
   } | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [isPdfProcessing, setIsPdfProcessing] = useState(false);
+  const [pdfError, setPdfError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     // Track CV Optimisation page view
@@ -246,6 +251,39 @@ export const OptimiseCV = () => {
     }
   };
 
+  const handlePdfSelect = async (file: File) => {
+    try {
+      setPdfFile(file);
+      setPdfError(undefined);
+      setIsPdfProcessing(true);
+      
+      // Track PDF upload event
+      Analytics.event('cv_optimization', 'pdf_upload_start');
+      
+      // Extract text from PDF
+      const extractedText = await pdfService.smartExtractTextFromPDF(file);
+      
+      if (extractedText.length < MIN_CV_LENGTH) {
+        setPdfError('The extracted text seems too short. Please ensure your PDF contains readable text or try pasting your CV manually.');
+        Analytics.event('cv_optimization', 'pdf_extraction_error', 'insufficient_text');
+      } else {
+        setCvText(extractedText);
+        Analytics.event('cv_optimization', 'pdf_extraction_success');
+      }
+    } catch (error) {
+      console.error('Error processing PDF:', error);
+      setPdfError('Failed to process PDF. Please try again or paste your CV text manually.');
+      Analytics.event('cv_optimization', 'pdf_extraction_error', 'processing_failed');
+    } finally {
+      setIsPdfProcessing(false);
+    }
+  };
+
+  const handlePdfRemove = () => {
+    setPdfFile(null);
+    setPdfError(undefined);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen pt-24 flex items-center justify-center">
@@ -283,29 +321,27 @@ export const OptimiseCV = () => {
             className="space-y-4"
           >
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
-              <div className="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-lg" />
-                <div className="relative">
-                  <Lock className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    PDF Upload Coming Soon
-                  </p>
-                </div>
-              </div>
+              <FileUpload
+                onFileSelect={handlePdfSelect}
+                onFileRemove={handlePdfRemove}
+                selectedFile={pdfFile}
+                isProcessing={isPdfProcessing}
+                error={pdfError}
+              />
             </div>
 
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
               <div className="flex items-center space-x-2 mb-2">
                 <Cpu className="w-4 h-4 text-orange-500" />
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Paste Your CV Text
+                  {pdfFile ? 'Extracted CV Text' : 'Paste Your CV Text'}
                 </label>
               </div>
               <textarea
                 value={cvText}
                 onChange={(e) => setCvText(e.target.value)}
                 className="w-full h-48 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm"
-                placeholder="Copy and paste your CV content here..."
+                placeholder={pdfFile ? "Text extracted from your PDF..." : "Copy and paste your CV content here..."}
               />
             </div>
 
