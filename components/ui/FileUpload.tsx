@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FileText, Upload, X, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Analytics } from '@/services/analytics/analytics';
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -13,6 +14,7 @@ interface FileUploadProps {
   selectedFile: File | null;
   isProcessing: boolean;
   error?: string;
+  onError?: (message: string) => void;
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
@@ -22,7 +24,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   maxFileSize = 5 * 1024 * 1024, // 5MB default
   selectedFile,
   isProcessing,
-  error
+  error,
+  onError
 }) => {
   const [dragActive, setDragActive] = useState(false);
 
@@ -31,17 +34,40 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
         if (file.size > maxFileSize) {
-          // Handle file too large error
+          onError?.(`File size exceeds ${formatFileSize(maxFileSize)} limit. Please upload a smaller PDF file. 📄`);
+          Analytics.event('cv_optimization', 'pdf_upload_error', 'file_size_exceeded');
           return;
         }
         onFileSelect(file);
       }
     },
-    [maxFileSize, onFileSelect]
+    [maxFileSize, onFileSelect, onError]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const onDropRejected = useCallback(
+    (rejections: any[]) => {
+      if (rejections.length > 0) {
+        const rejection = rejections[0];
+        const error = rejection.errors[0];
+        
+        if (error?.code === 'file-too-large') {
+          onError?.(`File size exceeds ${formatFileSize(maxFileSize)} limit. Please upload a smaller PDF file. 📄`);
+          Analytics.event('cv_optimization', 'pdf_upload_error', 'file_size_exceeded');
+        } else if (error?.code === 'too-many-files') {
+          onError?.('Please upload only one PDF file at a time. 📄');
+          Analytics.event('cv_optimization', 'pdf_upload_error', 'too_many_files');
+        } else if (error?.code === 'file-invalid-type') {
+          onError?.('Please upload a PDF file. Other file types are not supported. 📄');
+          Analytics.event('cv_optimization', 'pdf_upload_error', 'invalid_file_type');
+        }
+      }
+    },
+    [maxFileSize, onError]
+  );
+
+  const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
     onDrop,
+    onDropRejected,
     accept: acceptedFileTypes.reduce((acc, type) => {
       acc[type] = [];
       return acc;
@@ -51,7 +77,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     disabled: !!selectedFile || isProcessing
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setDragActive(isDragActive);
   }, [isDragActive]);
 

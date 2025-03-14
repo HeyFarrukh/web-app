@@ -35,6 +35,7 @@ interface CopyState {
 const MIN_CV_LENGTH = 200;
 const MIN_JOB_DESC_LENGTH = 50;
 const ANALYSIS_COOLDOWN = 20000; // 20 seconds cooldown
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
 const LoadingMessages = [
   "Let the AI cook... 👨‍🍳🔥",
@@ -99,9 +100,10 @@ export const OptimiseCV = () => {
       show: true,
       message
     });
+    // Increased timeout to give users more time to read the message
     setTimeout(() => {
       setWarning({ show: false, message: '' });
-    }, 5000);
+    }, 7000); // 7 seconds instead of 5
   };
 
   const validateInput = () => {
@@ -342,6 +344,7 @@ export const OptimiseCV = () => {
                 selectedFile={pdfFile}
                 isProcessing={isPdfProcessing}
                 error={pdfError}
+                onError={showWarning}
               />
             </div>
 
