@@ -1,5 +1,4 @@
-# Ignore specific files in production
-content/articles/readme.md
-content/articles/cv-guide.md
+# Vercel ignore file
+# Files that should be ignored in all environments
 
-# Add other files to ignore below
+# Add files to ignore below
