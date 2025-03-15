@@ -57,7 +57,7 @@ A "Master CV" is a comprehensive document that contains *all* of your work exper
 *   Ensures Completeness: You won't forget any important details.
 *   Provides a Foundation: It's easier to tailor a CV than to create one from nothing.
 
-**Action Step:** Create a new document titled "Master CV" and start listing *everything* you've ever done, both professionally and academically. We'll show you how to organize it in the following sections.
+**Action Step:** Create a new document titled "Master CV" and start listing *everything* you've ever done, both professionally and academically. We'll show you how to organise it in the following sections.
 
 **:icon[lucide-link-2] Free CV Templates:**
 
