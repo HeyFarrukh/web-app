@@ -2,55 +2,65 @@ import supabase from '@/config/supabase';
 import { AIAnalysisResponse } from '../ai/geminiService';
 import { createLogger } from '@/services/logger/logger';
 import { Analytics } from '@/services/analytics/analytics';
+import { anonymousUserService } from '../storage/anonymousUserService';
 
 interface OptimisationRecord {
   id: string;
-  userId: string;
+  userId?: string;
   cvText: string;
   jobDescription: string;
   overallScore: number;
   createdAt: Date;
   metadata?: Record<string, any>;
-  userEmail: string;
+  userEmail?: string;
+  isAnonymous: boolean;
 }
 
 export class CVTrackingService {
   private logger = createLogger({ module: 'CVTrackingService' });
 
   async recordOptimisation(
-    userId: string,
     cvText: string,
     jobDescription: string,
     analysis: AIAnalysisResponse,
     metadata: Record<string, any>,
-    userEmail: string
+    userId?: string,
+    userEmail?: string
   ) {
     try {
+      const isAnonymous = !userId;
+      
       this.logger.info('Recording CV optimization', { 
-        userId,
-        userEmail,
+        userId: userId || 'anonymous',
+        userEmail: userEmail || 'anonymous',
         tokenCount: metadata.tokenCount,
-        apiVersion: metadata.apiVersion
+        apiVersion: metadata.apiVersion,
+        isAnonymous
       });
+
+      if (isAnonymous) {
+        anonymousUserService.recordOptimization();
+      }
 
       const { data: optimisation, error: optimisationError } = await supabase
         .from('cv_optimisations')
         .insert({
-          user_id: userId,
+          user_id: userId || null,
           cv_text: cvText,
           job_description: jobDescription,
           overall_score: analysis.overallScore,
           metadata: metadata,
-          user_email: userEmail,
+          user_email: userEmail || null,
           token_count: metadata.tokenCount,
           processing_time_ms: metadata.processingTime,
-          api_version: metadata.apiVersion
+          api_version: metadata.apiVersion,
+          is_anonymous: isAnonymous
         })
         .select()
         .single();
 
       if (optimisationError) {
-        this.logger.error('Failed to record optimization:', { error: optimisationError, userId, userEmail, apiVersion: metadata.apiVersion });
+        this.logger.error('Failed to record optimization:', { error: optimisationError, userId: userId || 'anonymous', userEmail: userEmail || 'anonymous', apiVersion: metadata.apiVersion });
         Analytics.event('cv_optimization', 'record_error', optimisationError.message);
         throw optimisationError;
       }
@@ -63,7 +73,8 @@ export class CVTrackingService {
         context: imp.context,
         suggestions: JSON.stringify(imp.suggestions),
         optimised_content: imp.optimisedContent,
-        user_email: userEmail
+        user_email: userEmail || null,
+        is_anonymous: isAnonymous
       }));
 
       const { error: improvementsError } = await supabase
@@ -78,8 +89,9 @@ export class CVTrackingService {
 
       this.logger.info('Successfully recorded optimization', { 
         optimizationId: optimisation.id,
-        userId,
-        processingTime: metadata.processingTime
+        userId: userId || 'anonymous',
+        processingTime: metadata.processingTime,
+        isAnonymous
       });
       return optimisation;
     } catch (error) {
@@ -98,6 +110,7 @@ export class CVTrackingService {
         .from('cv_optimisations')
         .select('created_at, overall_score')
         .eq('user_id', userId)
+        .eq('is_anonymous', false)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -130,6 +143,7 @@ export class CVTrackingService {
           cv_optimisation_improvements (*)
         `)
         .eq('user_id', userId)
+        .eq('is_anonymous', false)
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
@@ -150,6 +164,10 @@ export class CVTrackingService {
       Analytics.event('cv_optimization', 'history_error', errorMessage);
       throw error;
     }
+  }
+
+  shouldPromptForSignIn(): boolean {
+    return anonymousUserService.hasOptimizedBefore();
   }
 }
 
