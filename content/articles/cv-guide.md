@@ -254,7 +254,7 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 - Keep margins at 0.5” to 1” for professional formatting.
 - Make sure your CV is between 1-2 pages.
 
-### 4. How to Write Impactful Bullet Points (STAAR)
+### 4. How to Write Impactful Bullet Points
 - **Situation**: Describe the context.
 - **Task**: What was your responsibility?
 - **Action**: What did you do?
@@ -292,12 +292,11 @@ Good luck with your applications & let us know if we helped you land an Apprenti
 
 <br/>
 
-## :icon[lucide-rocket] Ready to Optimise your CV for FREE?
+## :icon[lucide-rocket] Ready to Optimise Your CV for FREE?
 
 <div class="article-cta">
-  <h3 class="article-cta-title">Our AI-powered CV optimiser tailors your CV and gives instant feedback.</h3>
-  <p class="article-cta-description">Did we mention the whole process takes under 20 seconds?  </p>
-  <a href="/optimise-cv" class="article-cta-button">Try CV Optimiser Now!</a>
+  <h3 class="article-cta-title">Instantly improve your CV with AI-powered feedback and tailored optimisation.</h3>
+  <a href="/optimise-cv" class="article-cta-button">Optimise My CV Now!</a>
 </div>
 
 <br/>
