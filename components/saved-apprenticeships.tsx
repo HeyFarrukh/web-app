@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAuthProtection } from '@/hooks/useAuthProtection';
 import { Bookmark, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { savedApprenticeshipEvents, APPRENTICESHIP_UNSAVED, ALL_APPRENTICESHIPS_REMOVED } from '@/services/events/savedApprenticeshipEvents';
 
 export default function SavedApprenticeships() {
   const { userData, isLoading: authLoading } = useAuth();
@@ -43,6 +44,8 @@ export default function SavedApprenticeships() {
       if (success) {
         setSavedListings(prevListings => prevListings.filter(listing => listing.id !== selectedVacancyId));
         setShowRemoveSingleDialog(false);
+        // Emit event that this apprenticeship was unsaved
+        savedApprenticeshipEvents.emit(APPRENTICESHIP_UNSAVED, selectedVacancyId);
       } else {
         throw new Error('Failed to delete saved apprenticeship');
       }
@@ -64,8 +67,20 @@ export default function SavedApprenticeships() {
     try {
       const success = await savedApprenticeshipService.removeAllSavedApprenticeships(userData.id);
       if (success) {
+        // Store the IDs of all listings that were removed
+        const removedIds = savedListings.map(listing => listing.id);
+        
+        // Clear the listings
         setSavedListings([]);
         setShowRemoveAllDialog(false);
+        
+        // Emit events for each removed listing
+        removedIds.forEach(id => {
+          savedApprenticeshipEvents.emit(APPRENTICESHIP_UNSAVED, id);
+        });
+        
+        // Also emit the 'all removed' event
+        savedApprenticeshipEvents.emit(ALL_APPRENTICESHIPS_REMOVED, '');
       }
       else {
         throw new Error('Failed to remove all saved apprenticeships');
