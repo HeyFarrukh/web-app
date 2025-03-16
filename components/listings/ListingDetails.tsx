@@ -52,9 +52,13 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const referringPage = searchParams?.get('fromPage') || '1';
   const scrollToId = searchParams?.get('scrollToId');
   const fromSavedPage = searchParams?.get('fromSaved') === 'true';
+  const filterParams = {
+    search: searchParams?.get('search'),
+    location: searchParams?.get('location'),
+    level: searchParams?.get('level')
+  };
 
   useEffect(() => {
-    // Track apprenticeship view
     if (typeof window !== 'undefined') {
       Analytics.event('apprenticeship', 'view_details', `${listing.title} - ${listing.employerName}`);
     }
@@ -71,7 +75,6 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   }, [userData, listing.id]);
 
   const handleApplyClick = () => {
-    // Track apply button click
     if (typeof window !== 'undefined') {
       Analytics.event('apprenticeship', 'apply_click', `${listing.title} - ${listing.employerName}`);
     }
@@ -79,16 +82,10 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
   const handleSaveToggle = async () => {
     if (!isAuthenticated) {
-      // Store the ID of the current listing in localStorage so we can redirect back after auth
       if (typeof window !== 'undefined') {
-        // Create a full relative URL path to return to
         const returnPath = `/apprenticeships/${listing.id}`;
-        
-        // Store in localStorage directly to avoid problems with OAuth redirects
         localStorage.setItem('postauth_redirect', returnPath);
         console.log('[ListingDetails] Stored redirect path for post-auth:', returnPath);
-        
-        // Navigate to sign-in page
         router.push('/signin');
       }
       return;
@@ -121,12 +118,10 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(employerName)}&background=random`;
   };
 
-  // Helper function to check if a string is not empty or undefined
   const isValidString = (str: string | undefined | null): boolean => {
     return Boolean(str && str !== 'undefined' && str.trim() !== '');
   };
 
-  // Helper to check if any address fields are valid
   const hasValidAddressFields = (): boolean => {
     if (!listing.address) return false;
 
@@ -148,8 +143,18 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               if (fromSavedPage) {
                 router.push('/saved-apprenticeships');
               } else {
-                const url = `/apprenticeships?page=${referringPage}${scrollToId ? `&scrollToId=${scrollToId}` : ''}`;
-                router.push(url);
+                const url = new URL('/apprenticeships', window.location.origin);
+                url.searchParams.set('page', referringPage);
+                if (scrollToId) {
+                  url.searchParams.set('scrollToId', scrollToId);
+                }
+                Object.keys(filterParams).forEach(key => {
+                  const value = filterParams[key as keyof typeof filterParams];
+                  if (value) {
+                    url.searchParams.set(key, value);
+                  }
+                });
+                router.push(url.toString());
               }
             }}
             className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
@@ -356,16 +361,14 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               </div>
             </section>
 
-            {/* Location - Only show if there are valid address fields */}
+            {/* Location */}
             {hasValidAddressFields() && (
               <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                   <MapPin className="w-5 h-5 text-orange-500 mr-2" aria-hidden="true" />
                   Location
                 </h2>
-                  <ListingMap
-                      listing={listing} // Pass the entire listing object
-                  />
+                <ListingMap listing={listing} />
                 <address className="not-italic text-gray-700 dark:text-gray-200">
                   {isValidString(listing.address.addressLine1) && (
                     <>{listing.address.addressLine1}<br /></>
@@ -383,7 +386,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               </section>
             )}
 
-            {/* Contact Information - Only show if at least one valid contact method exists */}
+            {/* Contact Information */}
             {(isValidString(listing.employerContactEmail) ||
               isValidString(listing.employerContactPhone) ||
               isValidString(listing.employerWebsiteUrl)) && (

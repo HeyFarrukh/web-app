@@ -1,4 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Analytics } from '@/services/analytics/analytics';
+import { createLogger } from '@/services/logger/logger';
+
+const logger = createLogger({ module: 'GeminiService' });
 
 export interface AIAnalysisResponse {
   overallScore: number;
@@ -101,6 +105,12 @@ IMPORTANT: Response must be valid JSON only, with no additional text or markdown
 
   async analyzeCV(cvText: string, jobDescription: string): Promise<AIAnalysisResponse> {
     try {
+      logger.info('Starting CV analysis with Gemini', {
+        cvLength: cvText.length,
+        jobDescLength: jobDescription.length,
+        model: 'gemini-2.0-flash'
+      });
+
       const prompt = `
 CV Text:
 ${cvText}
@@ -111,24 +121,40 @@ ${jobDescription}
 Analyze the CV against this job description and provide structured feedback following the specified format.`;
 
       const result = await this.model.generateContent(this.SYSTEM_PROMPT + "\n\n" + prompt);
-      const response = await result.response;
-      const text = response.text();
+      const text = result.response.text();
+      logger.debug('Raw Gemini response received', { responseLength: text.length });
 
-      // Log raw response
-      console.log("Raw Gemini Response:", text)
-      
-      // Remove any markdown formatting if present
-      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
-      
       try {
-        return JSON.parse(cleanText) as AIAnalysisResponse;
+        // Clean the response text to ensure it's valid JSON
+        const cleanText = text
+          .replace(/```json\n?/g, '')
+          .replace(/```\n?/g, '')
+          .trim();
+
+        const analysis = JSON.parse(cleanText);
+        logger.info('Successfully parsed Gemini response', {
+          score: analysis.overallScore,
+          categories: analysis.categories.length,
+          improvements: analysis.improvements.length
+        });
+
+        return analysis;
       } catch (parseError) {
-        console.error('Failed to parse Gemini response:', parseError);
-        console.error("Raw response content:", cleanText)
-        throw new Error('Invalid response format from AI');
+        logger.error('Failed to parse Gemini response:', { 
+          error: parseError instanceof Error ? parseError.message : 'Unknown error',
+          responseLength: text.length
+        });
+        logger.debug('Raw response content:', { content: text });
+        throw new Error('Failed to parse AI response. Please try again.');
       }
-    } catch (error) {
-      console.error('Gemini API error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Gemini API error:', { 
+        error: errorMessage,
+        cvLength: cvText.length,
+        jobDescLength: jobDescription.length
+      });
+      Analytics.event('cv_optimization', 'gemini_error', errorMessage);
       throw error;
     }
   }
