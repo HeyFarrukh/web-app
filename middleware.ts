@@ -1,10 +1,36 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req: request, res });
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    throw new Error("Supabase configuration missing! Please set the required env variables.");
+  }
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name) => request.cookies.get(name)?.value,
+        set: (name, value, options) => {
+          res.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove: (name, options) => {
+          res.cookies.set({
+            name,
+            value: '',
+            ...options,
+            maxAge: 0,
+          });
+        },
+      },
+    }
+  );
 
   try {
     const { data: { session }, error } = await supabase.auth.getSession();
