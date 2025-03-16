@@ -8,12 +8,16 @@ import { savedApprenticeshipService } from '@/services/supabase/savedApprentices
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthProtection } from '@/hooks/useAuthProtection';
 import { Bookmark, Trash2 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 export default function SavedApprenticeships() {
   const { userData, isLoading: authLoading } = useAuth();
   const { isAuthenticated } = useAuthProtection();
   const [savedListings, setSavedListings] = useState<ListingType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showRemoveAllDialog, setShowRemoveAllDialog] = useState(false);
+  const [showRemoveSingleDialog, setShowRemoveSingleDialog] = useState(false);
+  const [selectedVacancyId, setSelectedVacancyId] = useState<string>('');
   const router = useRouter();
 
   useEffect(() => {
@@ -31,13 +35,14 @@ export default function SavedApprenticeships() {
     }
   }, [isAuthenticated, userData, authLoading]);
 
-  const handleDelete = async (vacancyId: string) => {
-    if (!userData) return;
+  const handleDeleteConfirm = async () => {
+    if (!userData || !selectedVacancyId) return;
     
     try {
-      const success = await savedApprenticeshipService.unsaveApprenticeship(userData.id, vacancyId);
+      const success = await savedApprenticeshipService.unsaveApprenticeship(userData.id, selectedVacancyId);
       if (success) {
-        setSavedListings(prevListings => prevListings.filter(listing => listing.id !== vacancyId));
+        setSavedListings(prevListings => prevListings.filter(listing => listing.id !== selectedVacancyId));
+        setShowRemoveSingleDialog(false);
       } else {
         throw new Error('Failed to delete saved apprenticeship');
       }
@@ -48,17 +53,19 @@ export default function SavedApprenticeships() {
     }
   };
 
+  const promptDeleteSingle = (vacancyId: string) => {
+    setSelectedVacancyId(vacancyId);
+    setShowRemoveSingleDialog(true);
+  };
+
   const handleDeleteAll = async () => {
     if (!userData) return;
-    
-    // Add confirmation dialog
-    const confirmDelete = confirm("Are you sure you want to remove all saved apprenticeships? This action cannot be undone.");
-    if (!confirmDelete) return;
     
     try {
       const success = await savedApprenticeshipService.removeAllSavedApprenticeships(userData.id);
       if (success) {
         setSavedListings([]);
+        setShowRemoveAllDialog(false);
       }
       else {
         throw new Error('Failed to remove all saved apprenticeships');
@@ -112,7 +119,7 @@ export default function SavedApprenticeships() {
           <div>
             <div className="flex justify-end mb-6">
               <button
-                onClick={handleDeleteAll}
+                onClick={() => setShowRemoveAllDialog(true)}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
               >
                 <Trash2 className="w-5 h-5" />
@@ -123,7 +130,7 @@ export default function SavedApprenticeships() {
               {savedListings.map((listing) => (
                 <div key={listing.id} className="relative">
                   <button 
-                    onClick={() => handleDelete(listing.id)}
+                    onClick={() => promptDeleteSingle(listing.id)}
                     className="absolute top-4 right-4 z-10 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
                     aria-label="Delete saved apprenticeship"
                   >
@@ -139,6 +146,30 @@ export default function SavedApprenticeships() {
             </div>
           </div>
         )}
+
+        {/* Remove All Confirmation Dialog */}
+        <ConfirmDialog 
+          isOpen={showRemoveAllDialog}
+          title="Remove All Saved Apprenticeships"
+          message="Are you sure you want to remove all saved apprenticeships? This action cannot be undone."
+          confirmLabel="Remove All"
+          cancelLabel="Cancel"
+          variant="danger"
+          onConfirm={handleDeleteAll}
+          onCancel={() => setShowRemoveAllDialog(false)}
+        />
+
+        {/* Remove Single Confirmation Dialog */}
+        <ConfirmDialog 
+          isOpen={showRemoveSingleDialog}
+          title="Remove Saved Apprenticeship"
+          message="Are you sure you want to remove this apprenticeship from your saved list?"
+          confirmLabel="Remove"
+          cancelLabel="Cancel"
+          variant="danger"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setShowRemoveSingleDialog(false)}
+        />
       </div>
     </div>
   );
