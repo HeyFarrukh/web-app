@@ -8,6 +8,7 @@ import {
   ArrowLeft, Building2, MapPin, GraduationCap,
   Clock, Calendar, Timer, Mail, Phone, Globe, Users,
   Check, X, Briefcase, Share2 as Share, Clipboard, Linkedin,
+  Bookmark,
 } from 'lucide-react';
 import { SiWhatsapp as WhatsApp } from 'react-icons/si';
 import { ListingType } from '@/types/listing';
@@ -15,6 +16,8 @@ import { formatDate } from '@/utils/dateUtils';
 import { companies } from './companyData';
 import { Analytics } from '@/services/analytics/analytics';
 import { ListingMap } from './ListingMap';
+import { useAuth } from '@/hooks/useAuth';
+import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
 
 interface InfoCardProps {
   icon: React.ElementType;
@@ -42,10 +45,13 @@ interface ListingDetailsProps {
 
 export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const [showDropdown, setShowDropdown] = React.useState(false);
+  const [isSaved, setIsSaved] = React.useState(false);
+  const { isAuthenticated, userData } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
   const referringPage = searchParams?.get('fromPage') || '1';
   const scrollToId = searchParams?.get('scrollToId');
+  const fromSavedPage = searchParams?.get('fromSaved') === 'true';
   const filterParams = {
     search: searchParams?.get('search'),
     location: searchParams?.get('location'),
@@ -53,16 +59,49 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   };
 
   useEffect(() => {
-    // Track apprenticeship view
     if (typeof window !== 'undefined') {
       Analytics.event('apprenticeship', 'view_details', `${listing.title} - ${listing.employerName}`);
     }
   }, [listing]);
 
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      if (userData && listing.id) {
+        const savedListings = await savedApprenticeshipService.getSavedApprenticeships(userData.id);
+        setIsSaved(savedListings.some(saved => saved.id === listing.id));
+      }
+    };
+    checkIfSaved();
+  }, [userData, listing.id]);
+
   const handleApplyClick = () => {
-    // Track apply button click
     if (typeof window !== 'undefined') {
       Analytics.event('apprenticeship', 'apply_click', `${listing.title} - ${listing.employerName}`);
+    }
+  };
+
+  const handleSaveToggle = async () => {
+    if (!isAuthenticated) {
+      if (typeof window !== 'undefined') {
+        const returnPath = `/apprenticeships/${listing.id}`;
+        localStorage.setItem('postauth_redirect', returnPath);
+        console.log('[ListingDetails] Stored redirect path for post-auth:', returnPath);
+        router.push('/signin');
+      }
+      return;
+    }
+
+    if (!userData) return;
+
+    try {
+      if (isSaved) {
+        await savedApprenticeshipService.unsaveApprenticeship(userData.id, listing.id);
+      } else {
+        await savedApprenticeshipService.saveApprenticeship(userData.id, listing.id);
+      }
+      setIsSaved(!isSaved);
+    } catch (error) {
+      console.error('Error toggling save status:', error);
     }
   };
 
@@ -79,12 +118,10 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(employerName)}&background=random`;
   };
 
-  // Helper function to check if a string is not empty or undefined
   const isValidString = (str: string | undefined | null): boolean => {
     return Boolean(str && str !== 'undefined' && str.trim() !== '');
   };
 
-  // Helper to check if any address fields are valid
   const hasValidAddressFields = (): boolean => {
     if (!listing.address) return false;
 
@@ -103,26 +140,38 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <button
             onClick={() => {
-              const url = new URL('/apprenticeships', window.location.origin);
-              url.searchParams.set('page', referringPage);
-              if (scrollToId) {
-                url.searchParams.set('scrollToId', scrollToId);
-              }
-              Object.keys(filterParams).forEach(key => {
-                const value = filterParams[key as keyof typeof filterParams];
-                if (value) {
-                  url.searchParams.set(key, value);
+              if (fromSavedPage) {
+                router.push('/saved-apprenticeships');
+              } else {
+                const url = new URL('/apprenticeships', window.location.origin);
+                url.searchParams.set('page', referringPage);
+                if (scrollToId) {
+                  url.searchParams.set('scrollToId', scrollToId);
                 }
-              });
-              router.push(url.toString());
+                Object.keys(filterParams).forEach(key => {
+                  const value = filterParams[key as keyof typeof filterParams];
+                  if (value) {
+                    url.searchParams.set(key, value);
+                  }
+                });
+                router.push(url.toString());
+              }
             }}
             className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
-            aria-label="Back to Apprenticeships"
+            aria-label={fromSavedPage ? "Back to Saved Apprenticeships" : "Back to Apprenticeships"}
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
-            <span>Back to Apprenticeships</span>
+            <span>{fromSavedPage ? "Back to Saved Apprenticeships" : "Back to Apprenticeships"}</span>
           </button>
-          <div className="relative flex justify-center items-center">
+          <div className="relative flex justify-center items-center space-x-4">
+            <button
+              className={`text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base ${isSaved ? 'text-orange-500 dark:text-orange-400' : ''}`}
+              aria-label={isSaved ? "Unsave Apprenticeship" : "Save Apprenticeship"}
+              onClick={handleSaveToggle}
+            >
+              <span>{isSaved ? "Saved" : "Save"}</span>
+              <Bookmark className="w-6 h-6" aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
+            </button>
             <button
               className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
               aria-label="Share"
@@ -312,16 +361,14 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               </div>
             </section>
 
-            {/* Location - Only show if there are valid address fields */}
+            {/* Location */}
             {hasValidAddressFields() && (
               <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                   <MapPin className="w-5 h-5 text-orange-500 mr-2" aria-hidden="true" />
                   Location
                 </h2>
-                  <ListingMap
-                      listing={listing} // Pass the entire listing object
-                  />
+                <ListingMap listing={listing} />
                 <address className="not-italic text-gray-700 dark:text-gray-200">
                   {isValidString(listing.address.addressLine1) && (
                     <>{listing.address.addressLine1}<br /></>
@@ -339,7 +386,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               </section>
             )}
 
-            {/* Contact Information - Only show if at least one valid contact method exists */}
+            {/* Contact Information */}
             {(isValidString(listing.employerContactEmail) ||
               isValidString(listing.employerContactPhone) ||
               isValidString(listing.employerWebsiteUrl)) && (

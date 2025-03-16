@@ -1,19 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { OptimiseCV } from '@/components/optimise-cv/OptimiseCV';
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useAuthProtection } from '@/hooks/useAuthProtection';
 
 export default function OptimiseCVPage() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/signin?redirect=/optimise-cv');
-    }
-  }, [isLoading, isAuthenticated, router]);
+  const { isAuthenticated, isLoading } = useAuthProtection();
 
   if (isLoading) {
     return (
