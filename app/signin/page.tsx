@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { GoogleSignIn } from '@/components/auth/GoogleSignIn';
 import { Analytics } from '@/services/analytics/analytics';
@@ -10,57 +10,22 @@ import { useRouter } from 'next/navigation';
 export default function SignInPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
-  const [redirectTo, setRedirectTo] = useState<string>('/optimise-cv');
-  const [showLoading, setShowLoading] = useState(true);
 
-  // Get the redirect URL from URL search params
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirect = urlParams.get('redirect');
-      if (redirect) {
-        // Save the redirect URL in localStorage directly
-        // This bypasses any issues with the OAuth redirect process
-        localStorage.setItem('postauth_redirect', redirect);
-        console.log('[SignInPage] Stored redirect URL in localStorage:', redirect);
-        setRedirectTo(redirect);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
+  React.useEffect(() => {
     Analytics.event('auth', 'view_signin_page');
   }, []);
 
-  useEffect(() => {
-    console.log('[SignInPage] Auth state changed:', { isLoading, isAuthenticated });
+  React.useEffect(() => {
+    console.log('Auth state:', { isLoading, isAuthenticated });
     if (!isLoading && isAuthenticated) {
-      // Debug localStorage values again when auth state changes
-      console.log('===== AUTH STATE CHANGE DEBUG =====');
-      console.log('localStorage.postauth_redirect:', localStorage.getItem('postauth_redirect'));
-      console.log('localStorage.auth_redirect_url:', localStorage.getItem('auth_redirect_url'));
-      console.log('redirectTo state:', redirectTo);
-      console.log('==================================');
-
-      // Check if we have a stored redirect URL from the login process
-      const storedRedirect = localStorage.getItem('postauth_redirect');
-      if (storedRedirect) {
-        console.log('[SignInPage] Found stored redirect URL:', storedRedirect);
-        // Clear the stored redirect URL
-        localStorage.removeItem('postauth_redirect');
-        // Redirect the user
-        console.log('[SignInPage] Redirecting to stored URL:', storedRedirect);
-        router.push(storedRedirect);
-      } else {
-        // Fall back to the original redirectTo state
-        console.log('[SignInPage] No stored redirect found, using default:', redirectTo);
-        router.push(redirectTo);
-      }
+      router.push('/optimise-cv');
     }
-  }, [isLoading, isAuthenticated, router, redirectTo]);
+  }, [isLoading, isAuthenticated, router]);
 
   // Show loading state for a maximum of 3 seconds
-  useEffect(() => {
+  const [showLoading, setShowLoading] = React.useState(true);
+  
+  React.useEffect(() => {
     const timer = setTimeout(() => {
       setShowLoading(false);
     }, 3000);
@@ -71,6 +36,13 @@ export default function SignInPage() {
 
     return () => clearTimeout(timer);
   }, [isLoading]);
+
+      //Log location
+      React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            console.log("The location is :", window.location.origin);
+        }
+      }, []);
 
   if (showLoading) {
     return (
@@ -92,7 +64,7 @@ export default function SignInPage() {
         </h2>
 
         <div className="space-y-6 flex flex-col items-center">
-          <GoogleSignIn redirect={redirectTo} />
+          <GoogleSignIn />
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             By continuing, you agree to our{' '}
             <a href="/terms" className="text-orange-600 hover:text-orange-500 dark:text-orange-400">
