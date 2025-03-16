@@ -66,6 +66,7 @@ A "Master CV" is a comprehensive document that contains *all* of your work exper
 *   [CV Template UK](https://www.cvtemplate.co.uk/)
 *   [Adobe Express CV Templates](https://www.adobe.com/uk/express/templates/resume/cv)
 *   [CV-Library CV Templates](https://www.cv-library.co.uk/career-advice/cv/cv-templates/)
+*   [Canva CV Templates ](https://www.canva.com/resumes/templates/)
 
 ---
 
