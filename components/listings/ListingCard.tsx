@@ -118,9 +118,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
           <div className="mt-4 flex items-center justify-between">
             <Link
               href={customLinkUrl || createDetailUrl()}
-              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+              className={`px-4 py-2 ${listing.is_active ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-500'} text-white rounded-lg transition-colors`}
             >
-              View Details
+              {listing.is_active ? 'View Details' : 'EXPIRED'}
             </Link>
             <span className="text-sm text-gray-500 dark:text-gray-400">
               {listing.numberOfPositions} position{listing.numberOfPositions !== 1 ? 's' : ''} available

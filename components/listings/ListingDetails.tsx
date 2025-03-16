@@ -348,16 +348,22 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   <div className="text-sm text-gray-600 dark:text-gray-300">Closing Date</div>
                   <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.closingDate)}</div>
                 </div>
-                <a
-                  href={listing.vacancyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
-                  aria-label="Apply Now"
-                  onClick={handleApplyClick}
-                >
-                  Apply Now
-                </a>
+                {listing.is_active ? (
+                  <a
+                    href={listing.vacancyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
+                    aria-label="Apply Now"
+                    onClick={handleApplyClick}
+                  >
+                    Apply Now
+                  </a>
+                ) : (
+                  <div className="block w-full bg-gray-500 text-white text-center py-3 rounded-lg">
+                    EXPIRED
+                  </div>
+                )}
               </div>
             </section>
 
