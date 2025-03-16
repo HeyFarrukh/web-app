@@ -20,12 +20,12 @@ const partnerLogos = [
   { 
     name: 'Digital Catapult', 
     url: '/assets/logos/Digital_Catapult.svg',
-    width: 160
+    width: 110
   },
   { 
-    name: 'HSBC', 
-    url: '/assets/logos/HSBC.svg',
-    width: 120
+    name: 'IBM', 
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png',
+    width: 100
   }
 ];
 

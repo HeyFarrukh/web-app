@@ -1,6 +1,6 @@
 ---
 title: "How to Write a CV That Gets You Hired (Reviewed by Accenture & HSBC)"
-description: "Struggling to get interviews? Learn how to write a CV that stands out to recruiters. Reviewed by Accenture, HSBC & more, this guide helps you land the apprenticeship you want."
+description: "Struggling to get interviews? Learn how to write a CV that stands out to recruiters. Reviewed by Accenture, IBM & more, this guide helps you land the apprenticeship you want."
 category: "Guides"
 image: "/resources/articles/cv-guide.png"
 author: "Jamal"
@@ -9,11 +9,11 @@ keywords: ["CV tips", "apprenticeship CV", "CV guide", "resume tips", "how to wr
 featured: true
 partnerships:
   - company: "Accenture"
-    collaborators: ["apprentice", "recruiter"]
-  - company: "HSBC"
-    collaborators: ["apprentice", "recruiter"]
+    collaborators: ["apprentice"]
+  - company: "IBM"
+    collaborators: ["apprentice"]
   - company: "Digital Catapult"
-    collaborators: ["apprentice", "recruiter"]
+    collaborators: ["recruiter"]
 ---
 
 #  CV Writing Guide: Make a Lasting First Impression
@@ -178,7 +178,7 @@ London, UK
 
 _Showcase your personality and well-roundedness._ (Use the same format as Work Experience).
 
-| Activities               | Description  (Optional, But Recommended)          |
+| Activities               | Description            |
 | :---------------------- | :------------------- |
 | Basketball Coaching     |  Designed training drills and managed game strategies for a youth basketball team.   |
 | Personal Project      |  Built a responsive e-commerce site using React, complete with user authentication.     |
