@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
 import { Analytics } from '@/services/analytics/analytics';
+import { savedApprenticeshipEvents, APPRENTICESHIP_UNSAVED, APPRENTICESHIP_SAVED, ALL_APPRENTICESHIPS_REMOVED } from '@/services/events/savedApprenticeshipEvents';
 
 interface SaveButtonProps {
   vacancyId: string;
@@ -35,6 +36,38 @@ export const SaveButton: React.FC<SaveButtonProps> = ({ vacancyId, className = '
     }
   }, [isAuthenticated, userData, vacancyId, isLoading]);
 
+  // Listen for save/unsave events to keep state in sync across components
+  useEffect(() => {
+    // Subscribe to unsave events
+    const unsaveListener = savedApprenticeshipEvents.on(APPRENTICESHIP_UNSAVED, (id) => {
+      if (id === vacancyId) {
+        console.log(`[SaveButton] Received unsave event for vacancy ${id}`);
+        setIsSaved(false);
+      }
+    });
+    
+    // Subscribe to save events
+    const saveListener = savedApprenticeshipEvents.on(APPRENTICESHIP_SAVED, (id) => {
+      if (id === vacancyId) {
+        console.log(`[SaveButton] Received save event for vacancy ${id}`);
+        setIsSaved(true);
+      }
+    });
+    
+    // Subscribe to "remove all" events
+    const removeAllListener = savedApprenticeshipEvents.on(ALL_APPRENTICESHIPS_REMOVED, () => {
+      console.log(`[SaveButton] Received remove all event, resetting save status for ${vacancyId}`);
+      setIsSaved(false);
+    });
+    
+    // Cleanup subscriptions when component unmounts
+    return () => {
+      unsaveListener();
+      saveListener();
+      removeAllListener();
+    };
+  }, [vacancyId]); // Only re-subscribe if vacancyId changes
+
   const handleSaveClick = async () => {
     if (!isAuthenticated) {
       // Simplify the approach - temporarily store the ID of what the user was trying to save
@@ -60,6 +93,8 @@ export const SaveButton: React.FC<SaveButtonProps> = ({ vacancyId, className = '
         if (success) {
           setIsSaved(false);
           Analytics.event('user_action', 'apprenticeship_unsaved');
+          // Emit event for other components to update
+          savedApprenticeshipEvents.emit(APPRENTICESHIP_UNSAVED, vacancyId);
         }
       } else {
         // Save the apprenticeship
@@ -67,6 +102,8 @@ export const SaveButton: React.FC<SaveButtonProps> = ({ vacancyId, className = '
         if (success) {
           setIsSaved(true);
           Analytics.event('user_action', 'apprenticeship_saved');
+          // Emit event for other components to update
+          savedApprenticeshipEvents.emit(APPRENTICESHIP_SAVED, vacancyId);
         }
       }
     } catch (error) {
