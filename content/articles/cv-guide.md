@@ -62,9 +62,9 @@ A "Master CV" is a comprehensive document that contains *all* of your work exper
 
 **:icon[lucide-link-2] Free CV Templates:**
 
+*   [Reactive Resume - Open-Source](https://rxresu.me/)
 *   [Microsoft Resume Templates](https://create.microsoft.com/en-us/templates/resumes)
 *   [CV Template UK](https://www.cvtemplate.co.uk/)
-*   [Adobe Express CV Templates](https://www.adobe.com/uk/express/templates/resume/cv)
 *   [CV-Library CV Templates](https://www.cv-library.co.uk/career-advice/cv/cv-templates/)
 *   [Canva CV Templates ](https://www.canva.com/resumes/templates/)
 
