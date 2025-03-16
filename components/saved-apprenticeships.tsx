@@ -38,22 +38,35 @@ export default function SavedApprenticeships() {
       const success = await savedApprenticeshipService.unsaveApprenticeship(userData.id, vacancyId);
       if (success) {
         setSavedListings(prevListings => prevListings.filter(listing => listing.id !== vacancyId));
+      } else {
+        throw new Error('Failed to delete saved apprenticeship');
       }
     } catch (error) {
       console.error('Error deleting saved apprenticeship:', error);
+      // Show error to the user
+      alert(error instanceof Error ? error.message : 'Error deleting saved apprenticeship');
     }
   };
 
   const handleDeleteAll = async () => {
     if (!userData) return;
     
+    // Add confirmation dialog
+    const confirmDelete = confirm("Are you sure you want to remove all saved apprenticeships? This action cannot be undone.");
+    if (!confirmDelete) return;
+    
     try {
       const success = await savedApprenticeshipService.removeAllSavedApprenticeships(userData.id);
       if (success) {
         setSavedListings([]);
       }
+      else {
+        throw new Error('Failed to remove all saved apprenticeships');
+      }
     } catch (error) {
       console.error('Error removing all saved apprenticeships:', error);
+      // Show error to the user
+      alert(error instanceof Error ? error.message : 'Error removing all saved apprenticeships');
     }
   };
 

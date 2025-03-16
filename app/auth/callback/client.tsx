@@ -11,15 +11,6 @@ export function AuthCallbackClient() {
 
   useEffect(() => {
     console.log('[AuthCallbackClient] Component mounted');
-    
-    // Debug all storage values
-    if (typeof window !== 'undefined') {
-      console.log('===== AUTH CALLBACK DEBUG =====');
-      console.log('localStorage.save_after_auth:', localStorage.getItem('save_after_auth'));
-      console.log('sessionStorage.save_after_auth:', sessionStorage.getItem('save_after_auth'));
-      console.log('window.location:', window.location.href);
-      console.log('==============================');
-    }
 
     const handleRedirect = async () => {
       // Check if we have a vacancy ID to return to

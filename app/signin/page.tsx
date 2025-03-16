@@ -13,17 +13,6 @@ export default function SignInPage() {
   const [redirectTo, setRedirectTo] = useState<string>('/optimise-cv');
   const [showLoading, setShowLoading] = useState(true);
 
-  // Debug localStorage when component mounts
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      console.log('===== SIGNIN PAGE DEBUG =====');
-      console.log('localStorage.postauth_redirect:', localStorage.getItem('postauth_redirect'));
-      console.log('localStorage.auth_redirect_url:', localStorage.getItem('auth_redirect_url'));
-      console.log('window.location:', window.location.href);
-      console.log('============================');
-    }
-  }, []);
-
   // Get the redirect URL from URL search params
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -82,13 +71,6 @@ export default function SignInPage() {
 
     return () => clearTimeout(timer);
   }, [isLoading]);
-
-  //Log location
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      console.log("The location is:", window.location.origin);
-    }
-  }, []);
 
   if (showLoading) {
     return (
