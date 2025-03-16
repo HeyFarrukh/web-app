@@ -37,10 +37,17 @@ export const SaveButton: React.FC<SaveButtonProps> = ({ vacancyId, className = '
 
   const handleSaveClick = async () => {
     if (!isAuthenticated) {
-      // Redirect to sign in page with return URL
-      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      // Simplify the approach - temporarily store the ID of what the user was trying to save
+      // We'll look it up after authentication
+      if (typeof window !== 'undefined') {
+        // Store just the vacancy ID in different storage mechanisms for reliability
+        localStorage.setItem('save_after_auth', vacancyId);
+        sessionStorage.setItem('save_after_auth', vacancyId);
+        console.log('[SaveButton] Stored vacancy ID for post-auth saving:', vacancyId);
+      }
+      
       Analytics.event('user_action', 'save_attempt_unauthenticated');
-      router.push(`/signin?redirect=${returnUrl}&action=save`);
+      router.push('/signin');
       return;
     }
 

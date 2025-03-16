@@ -6,10 +6,12 @@ import { ListingCard } from '@/components/listings/ListingCard';
 import { ListingType } from '@/types/listing';
 import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthProtection } from '@/hooks/useAuthProtection';
 import { Bookmark, Trash2 } from 'lucide-react';
 
 export default function SavedApprenticeships() {
-  const { isAuthenticated, userData, isLoading } = useAuth();
+  const { userData, isLoading: authLoading } = useAuth();
+  const { isAuthenticated } = useAuthProtection();
   const [savedListings, setSavedListings] = useState<ListingType[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -24,14 +26,10 @@ export default function SavedApprenticeships() {
       }
     };
 
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        router.push('/signin?redirect=/saved-apprenticeships');
-      } else {
-        fetchSavedApprenticeships();
-      }
+    if (!authLoading && isAuthenticated && userData) {
+      fetchSavedApprenticeships();
     }
-  }, [isAuthenticated, userData, isLoading, router]);
+  }, [isAuthenticated, userData, authLoading]);
 
   const handleDelete = async (vacancyId: string) => {
     if (!userData) return;
@@ -59,7 +57,7 @@ export default function SavedApprenticeships() {
     }
   };
 
-  if (isLoading || loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

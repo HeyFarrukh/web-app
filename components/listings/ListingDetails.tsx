@@ -79,7 +79,18 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
   const handleSaveToggle = async () => {
     if (!isAuthenticated) {
-      router.push(`/signin?redirect=/apprenticeships/${listing.id}`);
+      // Store the ID of the current listing in localStorage so we can redirect back after auth
+      if (typeof window !== 'undefined') {
+        // Create a full relative URL path to return to
+        const returnPath = `/apprenticeships/${listing.id}`;
+        
+        // Store in localStorage directly to avoid problems with OAuth redirects
+        localStorage.setItem('postauth_redirect', returnPath);
+        console.log('[ListingDetails] Stored redirect path for post-auth:', returnPath);
+        
+        // Navigate to sign-in page
+        router.push('/signin');
+      }
       return;
     }
 
