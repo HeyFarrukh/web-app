@@ -44,6 +44,23 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
 
   const searchParams = useSearchParams();
   const currentPage = searchParams?.get('page') || '1';
+  const filterParams = {
+    search: searchParams?.get('search'),
+    location: searchParams?.get('location'),
+    level: searchParams?.get('level'),
+  };
+
+  const createDetailUrl = () => {
+    const url = new URL(`/apprenticeships/${listing.id}`, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+    url.searchParams.set('fromPage', currentPage);
+    url.searchParams.set('scrollToId', listing.id.toString());
+    
+    if (filterParams.search) url.searchParams.set('search', filterParams.search);
+    if (filterParams.location) url.searchParams.set('location', filterParams.location);
+    if (filterParams.level) url.searchParams.set('level', filterParams.level);
+    
+    return url.pathname + url.search;
+  };
 
   return (
     <div 
@@ -100,7 +117,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
 
           <div className="mt-4 flex items-center justify-between">
             <Link
-              href={customLinkUrl || `/apprenticeships/${listing.id}?fromPage=${currentPage}&scrollToId=${listing.id}`}
+              href={customLinkUrl || createDetailUrl()}
               className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
             >
               View Details
