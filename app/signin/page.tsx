@@ -18,7 +18,7 @@ export default function SignInPage() {
   React.useEffect(() => {
     console.log('Auth state:', { isLoading, isAuthenticated });
     if (!isLoading && isAuthenticated) {
-      router.push('/optimise-cv');
+      router.push('/');
     }
   }, [isLoading, isAuthenticated, router]);
 

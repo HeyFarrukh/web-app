@@ -13,7 +13,7 @@ export function AuthCallbackClient() {
     console.log('[AuthCallbackClient] Component mounted');
 
     const handleRedirect = async () => {
-      const redirectTo = searchParams?.get('redirect') || '/optimise-cv';
+      const redirectTo = searchParams?.get('redirect') || '/';
       console.log('[AuthCallbackClient] Redirecting to:', redirectTo);
       Analytics.event('auth', 'callback_redirect'); // Track redirect
       router.replace(decodeURIComponent(redirectTo));
