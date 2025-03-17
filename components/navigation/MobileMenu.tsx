@@ -4,6 +4,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sun, Moon, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { UserProfile } from '../UserProfile';
+import { useAuth } from '@/hooks/useAuth';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -19,6 +21,8 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   isDark,
   onThemeToggle 
 }) => {
+  const { isAuthenticated } = useAuth();
+  
   const handleNavigation = (to: string) => {
     onClose();
     if (to.startsWith('#')) {
@@ -52,12 +56,15 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                   <span className="text-gray-900 dark:text-white">APPRENTICE</span>
                   <span className="text-orange-500">WATCH</span>
                 </Link>
-                <button
-                  onClick={onClose}
-                  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  <X className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-                </button>
+                <div className="flex items-center space-x-3">
+                  {isAuthenticated && <UserProfile />}
+                  <button
+                    onClick={onClose}
+                    className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <X className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                  </button>
+                </div>
               </div>
 
               <nav className="space-y-2">
@@ -97,7 +104,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 className="mt-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.2, ease: 'ease-out' }}
               >
                 <button
                   onClick={onThemeToggle}
