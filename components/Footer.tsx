@@ -12,7 +12,7 @@ const footerSections = [
       { label: 'About Us', href: '/about' },
       { label: 'Our Team', href: '/team' },
       { label: 'Join Us', href: '/join' },
-      { label: 'Contact', href: '/contact' }
+      //{ label: 'Contact', href: '/contact' }
     ]
   },
   {
@@ -20,7 +20,7 @@ const footerSections = [
     links: [
       { label: 'Apprenticeships', href: '/apprenticeships' },
       { label: 'Optimise CV', href: '/optimise-cv' },
-      { label: 'Success Stories', href: '/success-stories' },
+      //{ label: 'Success Stories', href: '/success-stories' },
       { label: 'Resources', href: '/resources' }
     ]
   },
@@ -30,7 +30,7 @@ const footerSections = [
       { label: 'Privacy Policy', href: '/privacy' },
       { label: 'Terms of Service', href: '/terms' },
       { label: 'Cookie Policy', href: '/cookie-policy' },
-      { label: 'Accessibility', href: '/accessibility' }
+      //{ label: 'Accessibility', href: '/accessibility' }
     ]
   }
 ];

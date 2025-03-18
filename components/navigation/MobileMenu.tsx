@@ -2,8 +2,12 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sun, Moon, Sparkles } from 'lucide-react';
+import { X, Sun, Moon, Sparkles, LogOut, User, Mail, Bookmark } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+import supabase from '@/config/supabase';
+import { Analytics } from '@/services/analytics/analytics';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -19,11 +23,33 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   isDark,
   onThemeToggle 
 }) => {
+  const { isAuthenticated, userData } = useAuth();
+  const router = useRouter();
+  
   const handleNavigation = (to: string) => {
     onClose();
     if (to.startsWith('#')) {
       const element = document.querySelector(to);
       element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      onClose();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Clear user data cookie
+      document.cookie = 'user_data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      
+      // Track successful logout
+      Analytics.event('auth', 'sign_out_success');
+      
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      Analytics.event('auth', 'sign_out_error');
     }
   };
 
@@ -93,11 +119,56 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 ))}
               </nav>
 
+              {isAuthenticated && userData && (
+                <div className="mt-6 border-t border-gray-100 dark:border-gray-800 pt-6">
+                  <div className="flex items-center space-x-4 px-4 mb-4">
+                    {userData.picture ? (
+                      <img 
+                        src={userData.picture} 
+                        alt={userData.name || ''} 
+                        className="w-12 h-12 rounded-full border-2 border-orange-500"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center border-2 border-orange-500">
+                        <User className="w-6 h-6 text-orange-500" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {userData.name || 'User'}
+                      </p>
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <Mail className="w-4 h-4 mr-1" />
+                        <span className="truncate">{userData.email}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Link
+                      href="/saved-apprenticeships"
+                      className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl flex items-center space-x-3 transition-colors block"
+                      onClick={onClose}
+                    >
+                      <Bookmark className="w-5 h-5" />
+                      <span className="font-medium">Saved Apprenticeships</span>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl flex items-center space-x-3 transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span className="font-medium">Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <motion.div 
                 className="mt-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.2, ease: 'ease-out' }}
               >
                 <button
                   onClick={onThemeToggle}
