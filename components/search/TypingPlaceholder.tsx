@@ -33,13 +33,13 @@ export const TypingPlaceholder = () => {
           duration: 0.2,
           ease: "easeOut"
         }}
-        className="flex items-center"
+        className="flex items-center w-full"
       >
         <motion.span 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.1 }}
-          className="whitespace-nowrap"
+          className="whitespace-nowrap max-w-[calc(100%-10px)] truncate"
         >
           {placeholders[currentIndex]}
         </motion.span>
@@ -50,7 +50,7 @@ export const TypingPlaceholder = () => {
             duration: 0.5,
             ease: "easeInOut"
           }}
-          className="inline-block w-0.5 h-5 bg-current ml-0.5 -mb-0.5"
+          className="inline-block w-0.5 h-5 bg-current ml-0.5 -mb-0.5 flex-shrink-0"
         />
       </motion.div>
     </AnimatePresence>
