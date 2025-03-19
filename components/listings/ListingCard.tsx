@@ -29,6 +29,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
     return wage.wageAdditionalInformation || `${wage.wageType} (${wage.wageUnit})`;
   };
 
+  const isExpired = (closingDate: Date): boolean => {
+    if (!closingDate) return false;
+    const now = new Date();
+    return now > new Date(closingDate);
+  };
+
   const getLogoUrl = (employerName: string) => {
     const normalizedEmployerName = employerName.toLowerCase();
     const company = companies.find((company) =>
@@ -103,7 +109,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
             </div>
             <div className="flex items-center space-x-1">
               <Clock className="w-4 h-4" />
-              <span>Closes {formatDate(listing.closingDate)}</span>
+              <span>
+                {isExpired(listing.closingDate) ? 'Closed' : 'Closes'} {formatDate(listing.closingDate)}
+              </span>
             </div>
             <div className="flex items-center space-x-1">
               <PoundSterling className="w-4 h-4" />

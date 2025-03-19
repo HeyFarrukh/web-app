@@ -133,6 +133,12 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     );
   };
 
+  const isExpired = (closingDate: Date): boolean => {
+    if (!closingDate) return false;
+    const now = new Date();
+    return now > new Date(closingDate);
+  };
+
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -345,7 +351,9 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.postedDate)}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Closing Date</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    {isExpired(listing.closingDate) ? 'Closed' : 'Closing Date'}
+                  </div>
                   <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.closingDate)}</div>
                 </div>
                 {listing.is_active ? (
