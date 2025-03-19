@@ -25,6 +25,7 @@ class VacancyService {
       numberOfPositions: listing.number_of_positions,
       isDisabilityConfident: listing.is_disability_confident,
       isNationalVacancy: listing.is_national_vacancy ?? false,
+      is_active: listing.is_active ?? true,
       address: {
         addressLine1: listing.address_line1,
         addressLine2: listing.address_line2,
