@@ -7,24 +7,25 @@ export const Privacy = () => {
   const email = "privacy@apprenticewatch.com";
 
   return (
-    <div className="min-h-screen pt-16 md:pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
       <motion.div
-        className="w-full max-w-4xl mx-auto px-3 sm:px-6 lg:px-8"
+        className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 sm:p-8 rounded-2xl shadow-lg prose dark:prose-invert prose-base sm:prose-lg max-w-none overflow-hidden">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg prose dark:prose-invert prose-lg max-w-none overflow-hidden">
           <div className="
             prose-headings:text-gray-900 dark:prose-headings:text-white
-            prose-h1:text-3xl sm:prose-h1:text-4xl prose-h1:font-bold prose-h1:mb-6 sm:prose-h1:mb-8
-            prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:font-semibold prose-h2:text-orange-600 dark:prose-h2:text-orange-400
-            prose-h3:text-lg sm:prose-h3:text-xl prose-h3:font-medium prose-h3:text-gray-800 dark:prose-h3:text-gray-200
-            prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:text-sm sm:prose-p:text-base
+            prose-h1:text-4xl prose-h1:font-bold prose-h1:mb-8
+            prose-h2:text-2xl prose-h2:font-semibold prose-h2:text-orange-600 dark:prose-h2:text-orange-400
+            prose-h3:text-xl prose-h3:font-medium prose-h3:text-gray-800 dark:prose-h3:text-gray-200
+            prose-p:text-gray-700 dark:prose-p:text-gray-300
             prose-strong:text-gray-900 dark:prose-strong:text-white
-            prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-ul:text-sm sm:prose-ul:text-base
+            prose-ul:text-gray-700 dark:prose-ul:text-gray-300
             prose-li:marker:text-orange-500 dark:prose-li:marker:text-orange-400
             prose-a:text-orange-600 dark:prose-a:text-orange-400
             prose-a:no-underline hover:prose-a:text-orange-700 dark:hover:prose-a:text-orange-300
+            break-words
           ">
             <h1>Privacy Policy</h1>
             <p>Last updated: March 03, 2025</p>
