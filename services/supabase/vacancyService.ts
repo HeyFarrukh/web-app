@@ -8,6 +8,33 @@ class VacancyService {
   private readonly REVALIDATION_SECRET = process.env.REVALIDATION_SECRET_TOKEN;
 
   private transformListing(listing: SupabaseListing): ListingType {
+    // Parse qualifications if it exists and is a string
+    let qualifications = listing.qualifications;
+    
+    // Handle different possible formats of qualifications
+    if (qualifications) {
+      if (typeof qualifications === 'string') {
+        try {
+          // Try to parse if it's a JSON string
+          qualifications = JSON.parse(qualifications);
+        } catch (e) {
+          // If it fails to parse, keep it as a string
+          console.warn('Failed to parse qualifications JSON:', e);
+        }
+      }
+      
+      // If it's not an array but should be, convert it
+      if (qualifications && !Array.isArray(qualifications)) {
+        if (typeof qualifications === 'object') {
+          // If it's a single object, wrap it in an array
+          qualifications = [qualifications];
+        } else {
+          // If it's something else, make it an empty array
+          qualifications = [];
+        }
+      }
+    }
+
     return {
       id: listing.id,
       title: listing.title,
@@ -53,7 +80,11 @@ class VacancyService {
       employerContactPhone: listing.employer_contact_phone,
       employerWebsiteUrl: listing.employer_website_url,
       ukprn: listing.ukprn ?? 0,
-      logo: listing.logo
+      logo: listing.logo,
+      fullDescription: listing.full_description,
+      skills: listing.skills,
+      qualifications: qualifications,
+      employerDescription: listing.employer_description
     };
   }
 
@@ -106,7 +137,7 @@ class VacancyService {
       // Apply filters *BEFORE* pagination
       if (filters.search) {
         query = query.or(
-          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%,full_description.ilike.%${filters.search}%,employer_description.ilike.%${filters.search}%,skills.ilike.%${filters.search}%,qualifications.ilike.%${filters.search}%,wage_type.ilike.%${filters.search}%,wage_unit.ilike.%${filters.search}%,wage_additional_information.ilike.%${filters.search}%`
         );
       }
 
@@ -313,7 +344,7 @@ class VacancyService {
       // Apply filters
       if (filters.search) {
         query = query.or(
-          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%,full_description.ilike.%${filters.search}%,employer_description.ilike.%${filters.search}%,skills.ilike.%${filters.search}%,qualifications.ilike.%${filters.search}%,wage_type.ilike.%${filters.search}%,wage_unit.ilike.%${filters.search}%,wage_additional_information.ilike.%${filters.search}%`
         );
       }
 

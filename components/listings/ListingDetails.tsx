@@ -283,6 +283,118 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               </div>
             </section>
 
+            {/* Full Description - Only show if available */}
+            {isValidString(listing.fullDescription) && (
+              <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  About the Role
+                </h2>
+                <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
+                  dangerouslySetInnerHTML={{ __html: listing.fullDescription || '' }}
+                />
+              </section>
+            )}
+
+            {/* Skills - Only show if available */}
+            {listing.skills && listing.skills.length > 0 && (
+              <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Skills Required
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {listing.skills.map((skill, index) => (
+                    <span 
+                      key={index} 
+                      className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 px-3 py-1 rounded-full text-sm"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Qualifications - Only show if available */}
+            {listing.qualifications && listing.qualifications.length > 0 && (
+              <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Qualifications
+                </h2>
+                <div className="space-y-4">
+                  {listing.qualifications.map((qualification, index) => {
+                    // Handle string or object qualifications
+                    if (typeof qualification === 'string') {
+                      return (
+                        <div key={index} className="flex items-start">
+                          <Check className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700 dark:text-gray-200">{qualification}</span>
+                        </div>
+                      );
+                    }
+                    
+                    // Parse JSON string if needed
+                    let qualObj = qualification;
+                    if (typeof qualification === 'string' && qualification.startsWith('{')) {
+                      try {
+                        qualObj = JSON.parse(qualification);
+                      } catch (e) {
+                        qualObj = { text: qualification };
+                      }
+                    }
+                    
+                    // Format qualification object
+                    return (
+                      <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-grow">
+                            <div className="flex items-center">
+                              <span className="font-medium text-gray-800 dark:text-gray-100">
+                                {qualObj.subject || qualObj.name || ''}
+                              </span>
+                              {qualObj.weighting === 'Essential' && (
+                                <span className="ml-2 px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-full">
+                                  Required
+                                </span>
+                              )}
+                              {qualObj.weighting === 'Desirable' && (
+                                <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
+                                  Preferred
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                              {qualObj.qualificationType && (
+                                <span className="inline-block mr-2">
+                                  {qualObj.qualificationType}
+                                </span>
+                              )}
+                              {qualObj.grade && (
+                                <span className="inline-block">
+                                  Grade: {qualObj.grade}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Employer Description - Only show if available */}
+            {isValidString(listing.employerDescription) && (
+              <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  About {isValidString(listing.employerName) ? listing.employerName : 'Employer'}
+                </h2>
+                <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
+                  dangerouslySetInnerHTML={{ __html: listing.employerDescription || '' }}
+                />
+              </section>
+            )}
+
             {/* Key Information */}
             <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
