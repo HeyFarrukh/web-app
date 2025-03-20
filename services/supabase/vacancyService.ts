@@ -137,7 +137,7 @@ class VacancyService {
       // Apply filters *BEFORE* pagination
       if (filters.search) {
         query = query.or(
-          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%,full_description.ilike.%${filters.search}%,employer_description.ilike.%${filters.search}%,skills.ilike.%${filters.search}%,qualifications.ilike.%${filters.search}%,wage_type.ilike.%${filters.search}%,wage_unit.ilike.%${filters.search}%,wage_additional_information.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%,wage_type.ilike.%${filters.search}%,wage_unit.ilike.%${filters.search}%,wage_additional_information.ilike.%${filters.search}%`
         );
       }
 
@@ -344,7 +344,7 @@ class VacancyService {
       // Apply filters
       if (filters.search) {
         query = query.or(
-          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%,full_description.ilike.%${filters.search}%,employer_description.ilike.%${filters.search}%,skills.ilike.%${filters.search}%,qualifications.ilike.%${filters.search}%,wage_type.ilike.%${filters.search}%,wage_unit.ilike.%${filters.search}%,wage_additional_information.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%,wage_type.ilike.%${filters.search}%,wage_unit.ilike.%${filters.search}%,wage_additional_information.ilike.%${filters.search}%`
         );
       }
 
