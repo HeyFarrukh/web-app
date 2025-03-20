@@ -13,7 +13,7 @@ export const Privacy = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg prose dark:prose-invert prose-lg max-w-none">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg prose dark:prose-invert prose-lg max-w-none overflow-hidden">
           <div className="
             prose-headings:text-gray-900 dark:prose-headings:text-white
             prose-h1:text-4xl prose-h1:font-bold prose-h1:mb-8
@@ -25,6 +25,7 @@ export const Privacy = () => {
             prose-li:marker:text-orange-500 dark:prose-li:marker:text-orange-400
             prose-a:text-orange-600 dark:prose-a:text-orange-400
             prose-a:no-underline hover:prose-a:text-orange-700 dark:hover:prose-a:text-orange-300
+            break-words
           ">
             <h1>Privacy Policy</h1>
             <p>Last updated: March 03, 2025</p>
@@ -34,7 +35,7 @@ export const Privacy = () => {
             <h3>Interpretation</h3>
             <p>The words with capital letters have specific meanings, as defined below. These definitions apply whether the words are singular or plural.</p>
             <h3>Definitions</h3>
-            <p>For the purposes of this Privacy Policy:</p>
+            <p>For the purposes of this Privacy Policy, the following terms apply:</p>
             <ul>
             <li>
             <p><strong>Account</strong> means your unique account, which allows you to access certain features of ApprenticeWatch.</p>

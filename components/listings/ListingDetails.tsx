@@ -133,6 +133,12 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     );
   };
 
+  const isExpired = (closingDate: Date): boolean => {
+    if (!closingDate) return false;
+    const now = new Date();
+    return now > new Date(closingDate);
+  };
+
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -164,14 +170,16 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             <span>{fromSavedPage ? "Back to Saved Apprenticeships" : "Back to Apprenticeships"}</span>
           </button>
           <div className="relative flex justify-center items-center space-x-4">
-            <button
-              className={`text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base ${isSaved ? 'text-orange-500 dark:text-orange-400' : ''}`}
-              aria-label={isSaved ? "Unsave Apprenticeship" : "Save Apprenticeship"}
-              onClick={handleSaveToggle}
-            >
-              <span>{isSaved ? "Saved" : "Save"}</span>
-              <Bookmark className="w-6 h-6" aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
-            </button>
+            {!isExpired(listing.closingDate) && (
+              <button
+                className={`text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base ${isSaved ? 'text-orange-500 dark:text-orange-400' : ''}`}
+                aria-label={isSaved ? "Unsave Apprenticeship" : "Save Apprenticeship"}
+                onClick={handleSaveToggle}
+              >
+                <span>{isSaved ? "Saved" : "Save"}</span>
+                <Bookmark className="w-6 h-6" aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
+              </button>
+            )}
             <button
               className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
               aria-label="Share"
@@ -345,19 +353,27 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.postedDate)}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Closing Date</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    {isExpired(listing.closingDate) ? 'Closed' : 'Closing Date'}
+                  </div>
                   <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.closingDate)}</div>
                 </div>
-                <a
-                  href={listing.vacancyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
-                  aria-label="Apply Now"
-                  onClick={handleApplyClick}
-                >
-                  Apply Now
-                </a>
+                {listing.is_active ? (
+                  <a
+                    href={listing.vacancyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
+                    aria-label="Apply Now"
+                    onClick={handleApplyClick}
+                  >
+                    Apply Now
+                  </a>
+                ) : (
+                  <div className="block w-full bg-gray-500 text-white text-center py-3 rounded-lg">
+                    EXPIRED
+                  </div>
+                )}
               </div>
             </section>
 
