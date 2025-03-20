@@ -34,9 +34,11 @@ export const Navbar = () => {
         transition-all duration-300
       `}>
         <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, transform: 'translateY(-20px)' }}
+          animate={{ opacity: 1, transform: 'translateY(0px)' }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
           className="px-6 py-4"
+          style={{ willChange: 'transform, opacity', transform: 'translateZ(0)' }}
         >
           <div className="flex items-center justify-between">
             <Link href="/" className="text-2xl font-extrabold shrink-0">

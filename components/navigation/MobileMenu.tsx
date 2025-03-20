@@ -66,11 +66,20 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             onClick={onClose}
           />
           <motion.div
-            initial={{ y: '-100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 z-50 md:hidden shadow-xl rounded-b-2xl"
+            initial={{ transform: 'translateY(-100%)' }}
+            animate={{ transform: 'translateY(0%)' }}
+            exit={{ transform: 'translateY(-100%)' }}
+            transition={{ 
+              duration: 0.3,
+              ease: 'easeOut',
+              staggerChildren: 0.05
+            }}
+            className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 z-50 md:hidden shadow-xl rounded-b-2xl will-change-transform"
+            style={{
+              willChange: 'transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden'
+            }}
           >
             <div className="p-6">
               <div className="flex justify-between items-center mb-8">
@@ -99,8 +108,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 ].map(({ to, label, icon: Icon, special }) => (
                   <motion.div
                     key={to}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ transform: 'translateZ(0) scale(1.02)' }}
+                    whileTap={{ transform: 'translateZ(0) scale(0.98)' }}
+                    style={{ 
+                      willChange: 'transform',
+                      transform: 'translateZ(0)'
+                    }}
                   >
                     <Link href={to}>
                       <button
@@ -168,7 +181,8 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 className="mt-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.2, ease: 'ease-out' }}
+                transition={{ delay: 0.1, duration: 0.2, ease: 'easeOut' }}
+                style={{ willChange: 'opacity' }}
               >
                 <button
                   onClick={onThemeToggle}
