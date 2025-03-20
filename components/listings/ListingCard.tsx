@@ -68,6 +68,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
     return url.pathname + url.search;
   };
 
+  // Check if the apprenticeship is expired
+  const expired = isExpired(listing.closingDate);
+
   return (
     <div 
       className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6"
@@ -89,7 +92,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {listing.title}
             </h3>
-            {!hideSaveButton && <SaveButton vacancyId={listing.id} />}
+            {!hideSaveButton && !expired && <SaveButton vacancyId={listing.id} />}
           </div>
 
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-300">
@@ -110,7 +113,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
             <div className="flex items-center space-x-1">
               <Clock className="w-4 h-4" />
               <span>
-                {isExpired(listing.closingDate) ? 'Closed' : 'Closes'} {formatDate(listing.closingDate)}
+                {expired ? 'Closed' : 'Closes'} {formatDate(listing.closingDate)}
               </span>
             </div>
             <div className="flex items-center space-x-1">

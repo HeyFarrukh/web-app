@@ -170,14 +170,16 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             <span>{fromSavedPage ? "Back to Saved Apprenticeships" : "Back to Apprenticeships"}</span>
           </button>
           <div className="relative flex justify-center items-center space-x-4">
-            <button
-              className={`text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base ${isSaved ? 'text-orange-500 dark:text-orange-400' : ''}`}
-              aria-label={isSaved ? "Unsave Apprenticeship" : "Save Apprenticeship"}
-              onClick={handleSaveToggle}
-            >
-              <span>{isSaved ? "Saved" : "Save"}</span>
-              <Bookmark className="w-6 h-6" aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
-            </button>
+            {!isExpired(listing.closingDate) && (
+              <button
+                className={`text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base ${isSaved ? 'text-orange-500 dark:text-orange-400' : ''}`}
+                aria-label={isSaved ? "Unsave Apprenticeship" : "Save Apprenticeship"}
+                onClick={handleSaveToggle}
+              >
+                <span>{isSaved ? "Saved" : "Save"}</span>
+                <Bookmark className="w-6 h-6" aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
+              </button>
+            )}
             <button
               className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
               aria-label="Share"
