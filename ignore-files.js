@@ -7,8 +7,7 @@ console.log(`🔍 Current environment: ${isProduction ? "production" : "preview/
 
 // Files that should only be available in preview/development
 const previewOnlyFiles = [
-  "content/articles/readme.md",
-  "content/articles/cv-guide.md"
+  "content/articles/readme.md"
 ];
 
 // Instead of modifying .vercelignore, we'll control file availability by
