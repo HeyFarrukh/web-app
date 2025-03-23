@@ -1,5 +1,5 @@
 ---
-title: "How to Write a CV That Gets You Hired (Reviewed by Accenture & HSBC)"
+title: "Learn How to Write a CV That Gets You Hired"
 description: "Struggling to get interviews? Learn how to write a CV that stands out to recruiters. Reviewed by Accenture, IBM & more, this guide helps you land the apprenticeship you want."
 category: "Guides"
 image: "/resources/articles/cv-guide.png"
