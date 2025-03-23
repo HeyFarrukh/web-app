@@ -29,6 +29,36 @@ const partnerLogos = [
   }
 ];
 
+// Schema.org types
+type SchemaOrg = {
+  '@context': string;
+  '@type': string;
+  headline: string;
+  description?: string;
+  image?: string[];
+  datePublished?: string;
+  dateModified?: string;
+  author?: Array<{
+    '@type': string;
+    name: string;
+  }>;
+  publisher: {
+    '@type': string;
+    name: string;
+    logo: {
+      '@type': string;
+      url: string;
+    };
+  };
+  mainEntityOfPage: {
+    '@type': string;
+    '@id': string;
+  };
+  keywords?: string;
+  articleSection?: string;
+  wordCount?: number;
+};
+
 // This makes the page static at build time for optimal performance and SEO
 export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidate every hour
@@ -59,6 +89,40 @@ export async function generateMetadata(
   
   // Get parent metadata (for site-wide defaults)
   const previousImages = (await parent).openGraph?.images || [];
+
+  // Construct the full URL for the article
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk';
+  const articleUrl = `${baseUrl}/resources/${slug}`;
+  
+  // Construct the schema data
+  const schemaData: SchemaOrg = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.description,
+    image: article.image ? [article.image] : undefined,
+    datePublished: article._rawDate,
+    dateModified: article._rawLastModified,
+    author: article.author ? [{
+      '@type': 'Person',
+      name: article.author,
+    }] : undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: 'ApprenticeWatch',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${baseUrl}/assets/apprenticewatch-logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': articleUrl,
+    },
+    keywords: article.keywords?.join(', '),
+    articleSection: article.category || 'Resources',
+    wordCount: article.content?.split(/\s+/).length || 0,
+  };
   
   return {
     title: article.title,
@@ -73,6 +137,7 @@ export async function generateMetadata(
       modifiedTime: article._rawLastModified,
       authors: article.author ? [article.author] : undefined,
       images: article.image ? [article.image, ...previousImages] : previousImages,
+      url: articleUrl,
     },
     twitter: {
       card: 'summary_large_image',
@@ -80,7 +145,20 @@ export async function generateMetadata(
       description: article.description,
       images: article.image ? [article.image] : undefined,
     },
+    alternates: {
+      canonical: articleUrl,
+    },
   };
+}
+
+// Add script component for JSON-LD
+function JsonLd({ data }: { data: any }) {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
 }
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
@@ -324,6 +402,34 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </div>
         </div>
       </article>
+      <JsonLd data={{
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: article.title,
+        description: article.description,
+        image: article.image ? [article.image] : undefined,
+        datePublished: article._rawDate,
+        dateModified: article._rawLastModified,
+        author: article.author ? [{
+          '@type': 'Person',
+          name: article.author,
+        }] : undefined,
+        publisher: {
+          '@type': 'Organization',
+          name: 'ApprenticeWatch',
+          logo: {
+            '@type': 'ImageObject',
+            url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk'}/assets/apprenticewatch-logo.png`,
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `${process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk'}/resources/${slug}`,
+        },
+        keywords: article.keywords?.join(', '),
+        articleSection: article.category || 'Resources',
+        wordCount: article.content?.split(/\s+/).length || 0,
+      }} />
     </div>
   );
 }
