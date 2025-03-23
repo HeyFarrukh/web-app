@@ -4,7 +4,7 @@ description: "Discover expert tips on researching companies for apprenticeships.
 category: "Apprenticeship Preparation"
 image: "/resources/articles/research-companies.png"
 author: "Jamal"
-#date: "2025-03-14"
+date: "2025-03-23"
 authorImage: "/media/jamal-av.png"
 keywords: [
   "apprenticeship research", 

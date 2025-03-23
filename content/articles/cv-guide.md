@@ -4,7 +4,7 @@ description: "Struggling to get interviews? Learn how to write a CV that stands 
 category: "Guides"
 image: "/resources/articles/cv-guide.png"
 author: "Jamal"
-#date: "2025-03-14"
+date: "2025-03-23"
 authorImage: "/media/jamal-av.png"
 keywords: ["CV tips", "apprenticeship CV", "CV guide", "resume tips", "how to write a CV", "job application help", "career guide", "ATS-friendly CV", "best CV format"]
 featured: true
