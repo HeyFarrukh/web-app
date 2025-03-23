@@ -94,13 +94,16 @@ export async function generateMetadata(
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk';
   const articleUrl = `${baseUrl}/resources/${slug}`;
 
+  // Ensure article image is absolute URL if it exists
+  const articleImage = article.image ? (article.image.startsWith('http') ? article.image : `${baseUrl}${article.image}`) : undefined;
+
   // Construct the schema data
   const schemaData: SchemaOrg = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: article.title,
     description: article.description,
-    image: article.image ? [`${baseUrl}${article.image}`] : undefined, // Changed to absolute URL
+    image: articleImage ? [articleImage] : undefined,
     datePublished: article._rawDate,
     dateModified: article._rawLastModified,
     author: article.author ? [{
@@ -136,14 +139,14 @@ export async function generateMetadata(
       publishedTime: article._rawDate,
       modifiedTime: article._rawLastModified,
       authors: article.author ? [article.author] : undefined,
-      images: article.image ? [article.image, ...previousImages] : previousImages,
+      images: articleImage ? [{ url: articleImage, width: 1200, height: 630, alt: article.title }] : undefined,
       url: articleUrl,
     },
     twitter: {
       card: 'summary_large_image',
       title: article.title,
       description: article.description,
-      images: article.image ? [article.image] : undefined,
+      images: articleImage ? [articleImage] : undefined,
     },
     alternates: {
       canonical: articleUrl,
@@ -177,6 +180,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     );
   }
 
+  // Ensure article image is absolute URL if it exists
+  const articleImage = article.image ? (article.image.startsWith('http') ? article.image : `${process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk'}${article.image}`) : undefined;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <article className="relative">
@@ -185,7 +191,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <div className="relative h-[60vh] w-full">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900/90 z-10" />
             <Image
-              src={article.image}
+              src={articleImage || '/media/apprentice-watch.png'}
               alt={article.title}
               fill
               className="object-cover"
@@ -407,7 +413,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         '@type': 'Article',
         headline: article.title,
         description: article.description,
-        image: article.image ? [`${process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk'}${article.image}`] : undefined,
+        image: articleImage ? [articleImage] : undefined,
         datePublished: article._rawDate,
         dateModified: article._rawLastModified,
         author: article.author ? [{
