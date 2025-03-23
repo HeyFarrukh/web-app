@@ -20,7 +20,7 @@ keywords: [
   "researching company culture", 
   "tailoring apprenticeship applications"
 ]
-featured: false
+featured: true
 ---
 
 # How to Research Companies

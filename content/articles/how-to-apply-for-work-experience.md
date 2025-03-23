@@ -8,7 +8,7 @@ date: "2025-03-23T12:18:37Z"
 lastModified: "2025-03-23T12:18:37Z"
 authorImage: "/media/jamal-av.png"
 keywords: ["work experience", "apply for work experience", "student work experience", "work experience placement", "work experience application", "find work experience", "virtual work experience"]
-featured: false
+featured: true
 ---
 
 ## How to Apply for Work Experience
