@@ -37,6 +37,8 @@ export const JoinUs = () => {
   const handleApplyClick = () => {
     // Track ambassador application click
     Analytics.event('ambassador', 'apply_click');
+    
+    window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSc7hxOsfrgcIXNYpUy5WXvJL7VXX7NOU4O_gQxy4NEMTbxu0Q/viewform?usp=dialog";
   };
 
   return (

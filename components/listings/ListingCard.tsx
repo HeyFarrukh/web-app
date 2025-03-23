@@ -29,6 +29,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
     return wage.wageAdditionalInformation || `${wage.wageType} (${wage.wageUnit})`;
   };
 
+  const isExpired = (closingDate: Date): boolean => {
+    if (!closingDate) return false;
+    const now = new Date();
+    return now > new Date(closingDate);
+  };
+
   const getLogoUrl = (employerName: string) => {
     const normalizedEmployerName = employerName.toLowerCase();
     const company = companies.find((company) =>
@@ -62,6 +68,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
     return url.pathname + url.search;
   };
 
+  // Check if the apprenticeship is expired
+  const expired = isExpired(listing.closingDate);
+
   return (
     <div 
       className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6"
@@ -83,7 +92,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {listing.title}
             </h3>
-            {!hideSaveButton && <SaveButton vacancyId={listing.id} />}
+            {!hideSaveButton && !expired && <SaveButton vacancyId={listing.id} />}
           </div>
 
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-300">
@@ -103,7 +112,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
             </div>
             <div className="flex items-center space-x-1">
               <Clock className="w-4 h-4" />
-              <span>Closes {formatDate(listing.closingDate)}</span>
+              <span>
+                {expired ? 'Closed' : 'Closes'} {formatDate(listing.closingDate)}
+              </span>
             </div>
             <div className="flex items-center space-x-1">
               <PoundSterling className="w-4 h-4" />
@@ -118,9 +129,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
           <div className="mt-4 flex items-center justify-between">
             <Link
               href={customLinkUrl || createDetailUrl()}
-              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+              className={`px-4 py-2 ${listing.is_active ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-500'} text-white rounded-lg transition-colors`}
             >
-              View Details
+              {listing.is_active ? 'View Details' : 'EXPIRED'}
             </Link>
             <span className="text-sm text-gray-500 dark:text-gray-400">
               {listing.numberOfPositions} position{listing.numberOfPositions !== 1 ? 's' : ''} available

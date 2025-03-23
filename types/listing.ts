@@ -35,6 +35,7 @@ export interface ListingType {
   hoursPerWeek: number;
   isDisabilityConfident: boolean;
   isNationalVacancy: boolean;
+  is_active: boolean;
   location: {
     latitude: number;
     longitude: number;

@@ -133,6 +133,12 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     );
   };
 
+  const isExpired = (closingDate: Date): boolean => {
+    if (!closingDate) return false;
+    const now = new Date();
+    return now > new Date(closingDate);
+  };
+
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -164,14 +170,16 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             <span>{fromSavedPage ? "Back to Saved Apprenticeships" : "Back to Apprenticeships"}</span>
           </button>
           <div className="relative flex justify-center items-center space-x-4">
-            <button
-              className={`text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base ${isSaved ? 'text-orange-500 dark:text-orange-400' : ''}`}
-              aria-label={isSaved ? "Unsave Apprenticeship" : "Save Apprenticeship"}
-              onClick={handleSaveToggle}
-            >
-              <span>{isSaved ? "Saved" : "Save"}</span>
-              <Bookmark className="w-6 h-6" aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
-            </button>
+            {!isExpired(listing.closingDate) && (
+              <button
+                className={`text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base ${isSaved ? 'text-orange-500 dark:text-orange-400' : ''}`}
+                aria-label={isSaved ? "Unsave Apprenticeship" : "Save Apprenticeship"}
+                onClick={handleSaveToggle}
+              >
+                <span>{isSaved ? "Saved" : "Save"}</span>
+                <Bookmark className="w-6 h-6" aria-hidden="true" fill={isSaved ? "currentColor" : "none"} />
+              </button>
+            )}
             <button
               className="text-gray-700 dark:text-gray-200 hover:text-orange-500 dark:hover:text-orange-400 flex items-center space-x-2 text-sm sm:text-base"
               aria-label="Share"
@@ -345,19 +353,27 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.postedDate)}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Closing Date</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">
+                    {isExpired(listing.closingDate) ? 'Closed' : 'Closing Date'}
+                  </div>
                   <div className="text-gray-800 dark:text-gray-100">{formatDate(listing.closingDate)}</div>
                 </div>
-                <a
-                  href={listing.vacancyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
-                  aria-label="Apply Now"
-                  onClick={handleApplyClick}
-                >
-                  Apply Now
-                </a>
+                {listing.is_active ? (
+                  <a
+                    href={listing.vacancyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors"
+                    aria-label="Apply Now"
+                    onClick={handleApplyClick}
+                  >
+                    Apply Now
+                  </a>
+                ) : (
+                  <div className="block w-full bg-gray-500 text-white text-center py-3 rounded-lg">
+                    EXPIRED
+                  </div>
+                )}
               </div>
             </section>
 
@@ -390,46 +406,51 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             {(isValidString(listing.employerContactEmail) ||
               isValidString(listing.employerContactPhone) ||
               isValidString(listing.employerWebsiteUrl)) && (
-                <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                    Contact Information
-                  </h2>
-                  <div className="space-y-3">
-                    {isValidString(listing.employerContactEmail) && (
-                      <a
-                        href={`mailto:${listing.employerContactEmail}`}
-                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-600 break-all"
-                        aria-label={`Email ${listing.employerContactEmail}`}
-                      >
-                        <Mail className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                        <span>{listing.employerContactEmail}</span>
-                      </a>
-                    )}
-                    {isValidString(listing.employerContactPhone) && (
-                      <a
-                        href={`tel:${listing.employerContactPhone}`}
-                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
-                        aria-label={`Call ${listing.employerContactPhone}`}
-                      >
-                        <Phone className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                        <span>{listing.employerContactPhone}</span>
-                      </a>
-                    )}
-                    {isValidString(listing.employerWebsiteUrl) && (
-                      <a
-                        href={listing.employerWebsiteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
-                        aria-label="Company Website"
-                      >
-                        <Globe className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
-                        <span>Company Website</span>
-                      </a>
-                    )}
-                  </div>
-                </section>
-              )}
+              <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Contact Information
+                </h2>
+                <div className="space-y-3">
+                  {isValidString(listing.employerContactEmail) && (
+                    <a
+                      href={`mailto:${listing.employerContactEmail}`}
+                      className="flex items-center space-x-2 text-orange-500 hover:text-orange-600 break-all"
+                      aria-label={`Email ${listing.employerContactEmail}`}
+                    >
+                      <Mail className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                      <span>{listing.employerContactEmail}</span>
+                    </a>
+                  )}
+                  {isValidString(listing.employerContactPhone) && (
+                    <a
+                      href={`tel:${listing.employerContactPhone}`}
+                      className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
+                      aria-label={`Call ${listing.employerContactPhone}`}
+                    >
+                      <Phone className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                      <span>{listing.employerContactPhone}</span>
+                    </a>
+                  )}
+                  {isValidString(listing.employerWebsiteUrl) && (
+                    <a
+                      href={
+                        listing.employerWebsiteUrl!.startsWith('http://') || 
+                        listing.employerWebsiteUrl!.startsWith('https://') 
+                          ? listing.employerWebsiteUrl! 
+                          : `https://${listing.employerWebsiteUrl!}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
+                      aria-label="Company Website"
+                    >
+                      <Globe className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                      <span>Company Website</span>
+                    </a>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
         </div>
       </div>

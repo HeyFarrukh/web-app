@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { Analytics } from '@/services/analytics/analytics';
+import { debounce } from '@/utils/debounce';
 
 interface ListingsFilterProps {
   onFilterChange: (filters: { search: string; location: string; level: string }) => void;
@@ -12,9 +13,27 @@ interface ListingsFilterProps {
 
 export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, initialFilters }) => {
   const [filters, setFilters] = useState(initialFilters);
+  const [searchInputValue, setSearchInputValue] = useState(initialFilters.search);
   const [locations, setLocations] = useState<string[]>([]);
   const [levels, setLevels] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Create a debounced version of the filter change function for search
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSearchChange = useCallback(
+    debounce((value: string) => {
+      const newFilters = { ...filters, search: value };
+      setFilters(newFilters);
+      
+      // Track search analytics
+      if (typeof window !== 'undefined' && value.length >= 3) {
+        Analytics.event('search_detail', 'search_term_entered', value);
+      }
+      
+      onFilterChange(newFilters);
+    }, 500), // 500ms delay
+    [filters, onFilterChange]
+  );
 
   useEffect(() => {
     const loadFilterOptions = async () => {
@@ -36,45 +55,62 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
     loadFilterOptions();
   }, []);
 
+  // Handle immediate filter change for dropdown selects
   const handleFilterChange = (field: string, value: string) => {
-    const newFilters = { ...filters, [field]: value };
+    if (field === 'search') {
+      setSearchInputValue(value);
+      debouncedSearchChange(value);
+    } else {
+      const newFilters = { ...filters, [field]: value };
+      setFilters(newFilters);
+      
+      // Track specific filter interactions with more detailed analytics
+      if (typeof window !== 'undefined') {
+        // Only track when a value is selected (not when cleared)
+        if (value) {
+          if (field === 'location') {
+            Analytics.event('filter_detail', 'location_selected', value);
+          } else if (field === 'level') {
+            Analytics.event('filter_detail', 'level_selected', value);
+          }
+        } else {
+          // Track when filters are cleared
+          Analytics.event('filter_detail', `${field}_cleared`, 'Filter Cleared');
+        }
+      }
+      
+      onFilterChange(newFilters); // Call onFilterChange directly for non-search filters
+    }
+  };
+  
+  // Handle form submission (when user presses Enter)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newFilters = { ...filters, search: searchInputValue };
     setFilters(newFilters);
     
-    // Track specific filter interactions with more detailed analytics
-    if (typeof window !== 'undefined') {
-      // Only track when a value is selected (not when cleared)
-      if (value) {
-        if (field === 'location') {
-          Analytics.event('filter_detail', 'location_selected', value);
-        } else if (field === 'level') {
-          Analytics.event('filter_detail', 'level_selected', value);
-        } else if (field === 'search') {
-          // Only track search when user has typed at least 3 characters
-          if (value.length >= 3) {
-            Analytics.event('search_detail', 'search_term_entered', value);
-          }
-        }
-      } else {
-        // Track when filters are cleared
-        Analytics.event('filter_detail', `${field}_cleared`, 'Filter Cleared');
-      }
+    // Track search analytics on submit
+    if (typeof window !== 'undefined' && searchInputValue.length >= 3) {
+      Analytics.event('search_detail', 'search_submitted', searchInputValue);
     }
     
-    onFilterChange(newFilters); // Call onFilterChange directly
+    onFilterChange(newFilters);
   };
   
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md space-y-4">
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Search apprenticeships..."
-          value={filters.search}
-          onChange={(e) => handleFilterChange('search', e.target.value)}
-          className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-        />
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search apprenticeships..."
+            value={searchInputValue}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+        </div>
+      </form>
 
       <div className="space-y-4">
         <div>
