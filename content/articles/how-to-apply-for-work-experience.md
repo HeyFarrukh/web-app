@@ -4,7 +4,8 @@ description: "Discover how to successfully apply for work experience in 2025 wit
 category: "Career Development"
 image: "/resources/articles/work-experience.png"
 author: "Jamal"
-date: "2025-03-23"
+date: "2025-03-23T12:18:37Z"
+lastModified: "2025-03-23T12:18:37Z"
 authorImage: "/media/jamal-av.png"
 keywords: ["work experience", "apply for work experience", "student work experience", "work experience placement", "work experience application", "find work experience", "virtual work experience"]
 featured: false

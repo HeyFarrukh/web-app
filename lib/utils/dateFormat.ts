@@ -4,13 +4,13 @@ export function formatDateForSEO(dateStr: string): string {
     
     // Check if date is valid
     if (isNaN(date.getTime())) {
-      return new Date().toISOString().split('T')[0]; // Return current date if invalid
+      return new Date().toISOString(); // Return full ISO string
     }
     
-    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+    return date.toISOString(); // Return full ISO string with time
   } catch (error) {
     console.error('Error formatting date for SEO:', error);
-    return new Date().toISOString().split('T')[0]; // Return current date on error
+    return new Date().toISOString(); // Return full ISO string on error
   }
 }
 

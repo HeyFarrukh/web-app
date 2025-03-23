@@ -20,6 +20,23 @@ import { calculateReadingTime } from './utils/readingTime';
 // Get the articles directory path
 const articlesDirectory = path.join(process.cwd(), 'content/articles');
 
+// Function to validate and format ISO date
+function validateAndFormatDate(dateStr: string | undefined): string {
+  if (!dateStr) {
+    return new Date().toISOString();
+  }
+
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+      return new Date().toISOString();
+    }
+    return date.toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+}
+
 // Function to get file dates
 function getFileDates(filePath: string) {
   const stats = fs.statSync(filePath);
@@ -105,7 +122,11 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
     const { data } = matter(fileContents);
     
     // Get file dates
-    const { createdAt, modifiedAt } = getFileDates(filePath);
+    const fileDates = getFileDates(filePath);
+    
+    // Ensure date is in ISO format for both display and SEO
+    const rawDate = validateAndFormatDate(data.date);
+    const rawLastModified = validateAndFormatDate(data.lastModified || fileDates.modifiedAt);
     
     // Validate required fields
     if (!data.title || !data.description || !data.category) {
@@ -113,26 +134,21 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
       return null;
     }
     
-    // Use current date if no date is provided in frontmatter
-    const currentDate = new Date().toISOString();
-    const articleDate = data.date ? new Date(data.date).toISOString() : createdAt;
-    const lastModifiedDate = data.lastModified ? new Date(data.lastModified).toISOString() : modifiedAt;
-    
     // Create article metadata object
     return {
       id: slug,
-      slug: slug,
       title: data.title,
       description: data.description,
       category: data.category,
-      date: formatDateForDisplay(articleDate),
-      _rawDate: formatDateForSEO(articleDate),
+      date: formatDateForDisplay(rawDate),
+      _rawDate: rawDate,
+      slug: slug,
       image: data.image ?? undefined,
       author: data.author ?? undefined,
       authorImage: data.authorImage ?? undefined,
       keywords: data.keywords ?? undefined,
-      lastModified: formatDateForDisplay(lastModifiedDate),
-      _rawLastModified: formatDateForSEO(lastModifiedDate),
+      lastModified: formatDateForDisplay(rawLastModified),
+      _rawLastModified: rawLastModified,
       readingTime: calculateReadingTime(fileContents),
       featured: data.featured ?? undefined,
       partnerships: data.partnerships ?? undefined
@@ -214,7 +230,11 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
     const { data, content } = matter(fileContents);
     
     // Get file dates
-    const { createdAt, modifiedAt } = getFileDates(filePath);
+    const fileDates = getFileDates(filePath);
+    
+    // Ensure date is in ISO format for both display and SEO
+    const rawDate = validateAndFormatDate(data.date);
+    const rawLastModified = validateAndFormatDate(data.lastModified || fileDates.modifiedAt);
     
     // Validate required fields
     if (!data.title || !data.description || !data.category) {
@@ -232,14 +252,14 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       title: data.title,
       description: data.description,
       category: data.category,
-      date: formatDateForDisplay(data.date || createdAt),
-      _rawDate: formatDateForSEO(data.date || createdAt),
+      date: formatDateForDisplay(rawDate),
+      _rawDate: rawDate,
       image: data.image || undefined,
       author: data.author || undefined,
       authorImage: data.authorImage || undefined,
       keywords: data.keywords || undefined,
-      lastModified: formatDateForDisplay(modifiedAt),
-      _rawLastModified: formatDateForSEO(modifiedAt),
+      lastModified: formatDateForDisplay(rawLastModified),
+      _rawLastModified: rawLastModified,
       readingTime: calculateReadingTime(content),
       featured: data.featured || undefined,
       partnerships: data.partnerships || undefined,
