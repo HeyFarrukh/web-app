@@ -1,19 +1,20 @@
 ---
-title: "How to Write a CV That Gets You Hired (Reviewed by Accenture & HSBC)"
-description: "Struggling to get interviews? Learn how to write a CV that stands out to recruiters. Reviewed by Accenture, HSBC & more, this guide helps you land the apprenticeship you want."
+title: "Learn How to Write a CV That Gets You Hired"
+description: "Struggling to get interviews? Learn how to write a CV that stands out to recruiters. Reviewed by Accenture, IBM & more, this guide helps you land the apprenticeship you want."
 category: "Guides"
 image: "/resources/articles/cv-guide.png"
 author: "Jamal"
+date: "2025-03-23"
 authorImage: "/media/jamal-av.png"
 keywords: ["CV tips", "apprenticeship CV", "CV guide", "resume tips", "how to write a CV", "job application help", "career guide", "ATS-friendly CV", "best CV format"]
 featured: true
 partnerships:
   - company: "Accenture"
-    collaborators: ["apprentice", "recruiter"]
-  - company: "HSBC"
-    collaborators: ["apprentice", "recruiter"]
+    collaborators: ["apprentice"]
+  - company: "IBM"
+    collaborators: ["apprentice"]
   - company: "Digital Catapult"
-    collaborators: ["apprentice", "recruiter"]
+    collaborators: ["recruiter"]
 ---
 
 #  CV Writing Guide: Make a Lasting First Impression
@@ -57,14 +58,15 @@ A "Master CV" is a comprehensive document that contains *all* of your work exper
 *   Ensures Completeness: You won't forget any important details.
 *   Provides a Foundation: It's easier to tailor a CV than to create one from nothing.
 
-**Action Step:** Create a new document titled "Master CV" and start listing *everything* you've ever done, both professionally and academically. We'll show you how to organize it in the following sections.
+**Action Step:** Create a new document titled "Master CV" and start listing *everything* you've ever done, both professionally and academically. We'll show you how to organise it in the following sections.
 
 **:icon[lucide-link-2] Free CV Templates:**
 
+*   [Reactive Resume - Open-Source](https://rxresu.me/)
 *   [Microsoft Resume Templates](https://create.microsoft.com/en-us/templates/resumes)
 *   [CV Template UK](https://www.cvtemplate.co.uk/)
-*   [Adobe Express CV Templates](https://www.adobe.com/uk/express/templates/resume/cv)
 *   [CV-Library CV Templates](https://www.cv-library.co.uk/career-advice/cv/cv-templates/)
+*   [Canva CV Templates ](https://www.canva.com/resumes/templates/)
 
 ---
 
@@ -178,7 +180,7 @@ London, UK
 
 _Showcase your personality and well-roundedness._ (Use the same format as Work Experience).
 
-| Activities               | Description  (Optional, But Recommended)          |
+| Activities               | Description            |
 | :---------------------- | :------------------- |
 | Basketball Coaching     |  Designed training drills and managed game strategies for a youth basketball team.   |
 | Personal Project      |  Built a responsive e-commerce site using React, complete with user authentication.     |

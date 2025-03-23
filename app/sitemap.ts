@@ -77,7 +77,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Generate sitemap URLs for each article
   const articleUrls: MetadataRoute.Sitemap = articles
-  .filter(article => article.slug !== 'readme' && article.slug !== 'cv-guide')   
+  .filter(article => article.slug !== 'readme')   
   .map((article) => ({
     url: `https://apprenticewatch.com/resources/${article.slug}`,
     lastModified: new Date(article._rawDate), 

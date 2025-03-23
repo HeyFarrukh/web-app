@@ -87,9 +87,9 @@ const partnerLogos = [
     width: 160
   },
   { 
-    name: 'HSBC', 
-    url: '/assets/logos/HSBC.svg',
-    width: 120
+    name: 'IBM', 
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png',
+    width: 100
   },
   // { 
   //   name: 'Ada', 
