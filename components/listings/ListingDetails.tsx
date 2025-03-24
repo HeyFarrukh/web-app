@@ -640,7 +640,20 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
         {/* Tab Content */}
         <div className="mt-6 px-4 sm:px-0">
-          {tabs.find((tab) => tab.id === activeTab)?.content}
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ 
+                duration: 0.25,
+                ease: "easeInOut"
+              }}
+            >
+              {tabs.find((tab) => tab.id === activeTab)?.content}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>
