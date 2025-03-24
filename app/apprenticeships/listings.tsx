@@ -42,6 +42,9 @@ export default function Listings() {
     level: searchParams?.get('level') || ''
   });
   const [showMapAnimation, setShowMapAnimation] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 2000; // 2 seconds
 
   // Track view mode changes
   const handleViewModeChange = (mode: 'list' | 'map') => {
@@ -91,20 +94,16 @@ export default function Listings() {
   };
 
   useEffect(() => {
-    const fetchListings = async () => {
+    const fetchListings = async (attempt = 0) => {
+      let fetchError = false;
       try {
         setLoading(true);
         
         let result;
         if (viewMode === 'map') {
           // For map view, fetch all vacancies
-          console.log("Fetching all vacancies for map view");
-          const allVacancies = await vacancyService.getAllVacanciesForMap(filters);
-          console.log(`Fetched ${allVacancies.length} vacancies for map view`);
-          result = {
-            vacancies: allVacancies,
-            total: allVacancies.length
-          };
+          const vacancies = await vacancyService.getAllVacanciesForMap(filters);
+          result = { vacancies, total: vacancies.length };
         } else {
           // For list view, use pagination
           result = await vacancyService.getVacancies({
@@ -117,13 +116,33 @@ export default function Listings() {
         setListings(result.vacancies);
         setTotalItems(result.total);
         setError(null);
+        setRetryCount(0); // Reset retry count on success
       } catch (err: any) {
-        setError('Failed to fetch apprenticeships. Please try again later.');
+        fetchError = true;
         console.error('Error fetching listings:', err);
+        
+        if (attempt < MAX_RETRIES) {
+          // Set error message to show we're retrying
+          setError(`Failed to fetch apprenticeships. Retrying in ${RETRY_DELAY/1000} seconds... (Attempt ${attempt + 1}/${MAX_RETRIES})`);
+          
+          // Wait for RETRY_DELAY milliseconds before retrying
+          setTimeout(() => {
+            fetchListings(attempt + 1);
+          }, RETRY_DELAY);
+        } else {
+          setError(
+            `We're sorry! We couldn't fetch apprenticeship listings after multiple attempts. 
+             Please try again later or contact us at feedback@apprenticewatch.com for assistance.`
+          );
+          setRetryCount(0); // Reset retry count
+        }
       } finally {
-        setLoading(false);
+        if (attempt === MAX_RETRIES || !fetchError) {
+          setLoading(false);
+        }
       }
     };
+
     fetchListings();
   }, [currentPage, filters, viewMode]);
 

@@ -126,14 +126,14 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
             {truncateDescription(listing.description)}
           </p>
 
-          <div className="mt-4 flex items-center justify-between">
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between items-center">
             <Link
               href={customLinkUrl || createDetailUrl()}
-              className={`px-4 py-2 ${listing.is_active ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-500'} text-white rounded-lg transition-colors`}
+              className={`w-full sm:w-auto whitespace-nowrap px-4 py-2 ${listing.is_active ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-500'} text-white rounded-lg transition-colors text-center`}
             >
               {listing.is_active ? 'View Details' : 'EXPIRED'}
             </Link>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-gray-500 dark:text-gray-400 text-center">
               {listing.numberOfPositions} position{listing.numberOfPositions !== 1 ? 's' : ''} available
             </span>
           </div>

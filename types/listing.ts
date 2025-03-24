@@ -51,6 +51,10 @@ export interface ListingType {
   wage: ApprenticeshipWage;
   workingWeekDescription: string;
   logo?: string;
+  fullDescription?: string;
+  skills?: string[];
+  qualifications?: any[];
+  employerDescription?: string;
 }
 
 export interface SupabaseListing {
@@ -91,4 +95,8 @@ export interface SupabaseListing {
   wage_additional_information?: string;
   logo?: string;
   ukprn: number;
+  full_description?: string;
+  skills?: string[];
+  qualifications?: any;
+  employer_description?: string;
 }
