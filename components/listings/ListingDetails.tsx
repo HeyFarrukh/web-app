@@ -19,6 +19,7 @@ import { ListingMap } from './ListingMap';
 import { useAuth } from '@/hooks/useAuth';
 import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
 import clsx from 'clsx';
+import DOMPurify from 'dompurify';
 
 interface TabProps {
   id: string;
@@ -50,6 +51,14 @@ const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, title, children }) => (
 interface ListingDetailsProps {
   listing: ListingType;
 }
+
+const sanitizeHTML = (html: string) => {
+  const sanitized = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  });
+  return sanitized;
+};
 
 export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -154,9 +163,12 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             <div className="lg:col-span-2 space-y-6">
               <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">Description</h2>
-                <div className="prose dark:prose-invert max-w-none">
-                  <p className="whitespace-pre-line text-gray-700 dark:text-gray-200 text-sm sm:text-base">{listing.description}</p>
-                </div>
+                <div 
+                  className="prose dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ 
+                    __html: sanitizeHTML(listing.description || '') 
+                  }} 
+                />
               </section>
 
               {/* Key Information */}
@@ -303,8 +315,11 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
           {isValidString(listing.fullDescription) && (
             <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">About the Role</h2>
-              <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
-                dangerouslySetInnerHTML={{ __html: listing.fullDescription || '' }}
+              <div 
+                className="prose dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ 
+                  __html: sanitizeHTML(listing.fullDescription || '') 
+                }} 
               />
             </section>
           )}
@@ -318,7 +333,11 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                     return (
                       <div key={index} className="flex items-start">
                         <Check className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 dark:text-gray-200">{qualification}</span>
+                        <div 
+                          dangerouslySetInnerHTML={{ 
+                            __html: sanitizeHTML(qualification) 
+                          }} 
+                        />
                       </div>
                     );
                   }
@@ -385,8 +404,11 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 About {isValidString(listing.employerName) ? listing.employerName : 'Employer'}
               </h2>
-              <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
-                dangerouslySetInnerHTML={{ __html: listing.employerDescription || '' }}
+              <div 
+                className="prose dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ 
+                  __html: sanitizeHTML(listing.employerDescription || '') 
+                }} 
               />
             </section>
           )}
