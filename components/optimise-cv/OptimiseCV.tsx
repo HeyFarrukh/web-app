@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, AlertCircle, X, Sparkles, Zap, Bot, Cpu, Target, TrendingUp, FileText, Key, Copy, Check, Upload, Search } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -103,6 +103,11 @@ export const OptimiseCV = () => {
   const [isPdfProcessing, setIsPdfProcessing] = useState(false);
   const [pdfError, setPdfError] = useState<string | undefined>(undefined);
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const ITEMS_PER_PAGE = 4;
+  const listRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     // Track CV Optimisation page view
     Analytics.event('page_view', 'optimise_cv_page');
@@ -128,14 +133,21 @@ export const OptimiseCV = () => {
     const loadApprenticeships = async () => {
       try {
         setIsLoadingApprenticeships(true);
-        const { vacancies } = await vacancyService.getVacancies({
-          page: 1,
-          pageSize: 100,
+        const { vacancies, total } = await vacancyService.getVacancies({
+          page,
+          pageSize: ITEMS_PER_PAGE,
           filters: {
             search: searchQuery || undefined
           }
         });
-        setApprenticeships(vacancies || []);
+
+        if (page === 1) {
+          setApprenticeships(vacancies || []);
+        } else {
+          setApprenticeships(prev => [...prev, ...(vacancies || [])]);
+        }
+
+        setHasMore((vacancies || []).length === ITEMS_PER_PAGE);
       } catch (error) {
         console.error('Failed to load apprenticeships:', error);
         showWarning('Failed to load apprenticeships. Please try again.');
@@ -144,9 +156,63 @@ export const OptimiseCV = () => {
       }
     };
 
-    const debounceTimer = setTimeout(loadApprenticeships, 300);
+    const debounceTimer = setTimeout(() => {
+      setPage(1);
+      loadApprenticeships();
+    }, 300);
+
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
+
+  // Load more when scrolling
+  useEffect(() => {
+    if (page > 1) {
+      const loadMore = async () => {
+        try {
+          setIsLoadingApprenticeships(true);
+          const { vacancies } = await vacancyService.getVacancies({
+            page,
+            pageSize: ITEMS_PER_PAGE,
+            filters: {
+              search: searchQuery || undefined
+            }
+          });
+
+          setApprenticeships(prev => [...prev, ...(vacancies || [])]);
+          setHasMore((vacancies || []).length === ITEMS_PER_PAGE);
+        } catch (error) {
+          console.error('Failed to load more apprenticeships:', error);
+        } finally {
+          setIsLoadingApprenticeships(false);
+        }
+      };
+
+      loadMore();
+    }
+  }, [page]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingApprenticeships) {
+          setPage(prev => prev + 1);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    const currentRef = listRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasMore, isLoadingApprenticeships]);
 
   useEffect(() => {
     // If apprenticeship ID is in URL, select it
@@ -512,45 +578,41 @@ export const OptimiseCV = () => {
                     />
                   </div>
                   
-                  {isLoadingApprenticeships ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                  <div className="max-h-96 overflow-y-auto space-y-2 custom-scrollbar">
+                    {apprenticeships.map((apprenticeship) => (
+                      <button
+                        key={apprenticeship.id}
+                        onClick={() => setSelectedApprenticeship(apprenticeship)}
+                        className={`w-full p-4 rounded-lg border ${
+                          selectedApprenticeship?.id === apprenticeship.id
+                            ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+                        } hover:border-orange-500 transition-colors duration-200 text-left group`}
+                      >
+                        <div className="flex flex-col space-y-1">
+                          <span className="font-medium text-gray-900 dark:text-white group-hover:text-orange-500">
+                            {apprenticeship.title}
+                          </span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            {apprenticeship.employerName}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+
+                    {/* Loading indicator and scroll sentinel */}
+                    <div ref={listRef} className="h-4">
+                      {isLoadingApprenticeships && (
+                        <div className="flex items-center justify-center py-4">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                        </div>
+                      )}
                     </div>
-                  ) : apprenticeships.length > 0 ? (
-                    <div className="max-h-96 overflow-y-auto space-y-2 custom-scrollbar">
-                      {apprenticeships.map((apprenticeship) => (
-                        <button
-                          key={apprenticeship.id}
-                          onClick={() => setSelectedApprenticeship(apprenticeship)}
-                          className={`w-full p-4 rounded-lg border ${
-                            selectedApprenticeship?.id === apprenticeship.id
-                              ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                          } hover:border-orange-500 transition-colors duration-200 text-left group`}
-                        >
-                          <div className="flex flex-col space-y-1">
-                            <span className="font-medium text-gray-900 dark:text-white group-hover:text-orange-500">
-                              {apprenticeship.title}
-                            </span>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                              {apprenticeship.employerName}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
+                  </div>
+
+                  {apprenticeships.length === 0 && !isLoadingApprenticeships && (
                     <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                       No apprenticeships found
-                    </div>
-                  )}
-
-                  {selectedApprenticeship && (
-                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                      <h3 className="font-medium text-gray-900 dark:text-white mb-2">Selected Apprenticeship</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {selectedApprenticeship.title} at {selectedApprenticeship.employerName}
-                      </p>
                     </div>
                   )}
                 </div>
@@ -831,7 +893,7 @@ export const OptimiseCV = () => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Hold Up!
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mt-2">
+                  <p className="text-gray-600 dark:text-gray-400 mt-2">
                     {warning.message}
                   </p>
                 </div>
