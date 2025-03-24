@@ -27,6 +27,26 @@ interface TabProps {
   content: React.ReactNode;
 }
 
+interface InfoCardProps {
+  icon: React.ElementType;
+  title: string;
+  children: React.ReactNode;
+}
+
+const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, title, children }) => (
+  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+    <div className="flex items-center space-x-2 mb-2">
+      <Icon className="w-5 h-5 text-orange-500" />
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        {title}
+      </h3>
+    </div>
+    <div className="text-gray-700 dark:text-gray-300">
+      {children}
+    </div>
+  </div>
+);
+
 interface ListingDetailsProps {
   listing: ListingType;
 }
@@ -130,7 +150,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
       content: (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Description and Role Info Column */}
+            {/* Description and Key Info Column */}
             <div className="lg:col-span-2 space-y-6">
               <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Description</h2>
@@ -139,12 +159,73 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                 </div>
               </section>
 
-              {isValidString(listing.fullDescription) && (
+              {/* Key Information */}
+              <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Key Information
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <InfoCard icon={GraduationCap} title="Apprenticeship Level">
+                    <div className="text-gray-800 dark:text-gray-100">
+                      Level {listing.course.level} - {listing.apprenticeshipLevel}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      {listing.course.route} - {listing.course.title}
+                    </div>
+                  </InfoCard>
+
+                  <InfoCard icon={Timer} title="Working Hours">
+                    <div className="text-gray-800 dark:text-gray-100">
+                      {listing.hoursPerWeek} hours per week
+                    </div>
+                    {isValidString(listing.workingWeekDescription) && (
+                      <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                        {listing.workingWeekDescription}
+                      </div>
+                    )}
+                  </InfoCard>
+
+                  <InfoCard icon={Calendar} title="Duration">
+                    <div className="text-gray-800 dark:text-gray-100">
+                      {listing.expectedDuration}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                      Start Date: {formatDate(listing.startDate)}
+                    </div>
+                  </InfoCard>
+
+                  <InfoCard icon={Users} title="Positions">
+                    <div className="text-gray-800 dark:text-gray-100">
+                      {listing.numberOfPositions} position{listing.numberOfPositions !== 1 ? 's' : ''} available
+                    </div>
+                    <div className="text-sm mt-1">
+                      {listing.isDisabilityConfident ? (
+                        <span className="flex items-center text-green-600 dark:text-green-400">
+                          <Check className="w-4 h-4 mr-1" aria-hidden="true" />
+                          Disability Confident Employer
+                        </span>
+                      ) : (
+                        <span className="flex items-center text-gray-600 dark:text-gray-300">
+                          <X className="w-4 h-4 mr-1" aria-hidden="true" />
+                          Not Disability Confident
+                        </span>
+                      )}
+                    </div>
+                  </InfoCard>
+                </div>
+              </section>
+
+              {/* Skills Required */}
+              {listing.skills && listing.skills.length > 0 && (
                 <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">About the Role</h2>
-                  <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
-                    dangerouslySetInnerHTML={{ __html: listing.fullDescription || '' }}
-                  />
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Skills Required</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {listing.skills.map((skill, index) => (
+                      <span key={index} className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 px-3 py-1 rounded-full text-sm">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
                 </section>
               )}
             </div>
@@ -208,18 +289,6 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             </div>
           </div>
 
-          {listing.skills && listing.skills.length > 0 && (
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Skills Required</h2>
-              <div className="flex flex-wrap gap-2">
-                {listing.skills.map((skill, index) => (
-                  <span key={index} className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 px-3 py-1 rounded-full text-sm">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </section>
-          )}
         </div>
       ),
     },
@@ -229,66 +298,14 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
       icon: Info,
       content: (
         <div className="space-y-6">
-          <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Key Information</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Course Level</div>
-                  <div className="text-gray-900 dark:text-white font-medium">
-                    Level {listing.course.level} - {listing.apprenticeshipLevel}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {listing.course.route} - {listing.course.title}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Working Hours</div>
-                  <div className="text-gray-900 dark:text-white font-medium">
-                    {listing.hoursPerWeek} hours per week
-                  </div>
-                  {isValidString(listing.workingWeekDescription) && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {listing.workingWeekDescription}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Duration</div>
-                  <div className="text-gray-900 dark:text-white font-medium">
-                    {listing.expectedDuration}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Start Date: {formatDate(listing.startDate)}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Positions</div>
-                  <div className="text-gray-900 dark:text-white font-medium">
-                    {listing.numberOfPositions} position{listing.numberOfPositions !== 1 ? 's' : ''} available
-                  </div>
-                  <div className="text-sm mt-1">
-                    {listing.isDisabilityConfident ? (
-                      <span className="flex items-center text-green-600 dark:text-green-400">
-                        <Check className="w-4 h-4 mr-1" aria-hidden="true" />
-                        Disability Confident Employer
-                      </span>
-                    ) : (
-                      <span className="flex items-center text-gray-600 dark:text-gray-300">
-                        <X className="w-4 h-4 mr-1" aria-hidden="true" />
-                        Not Disability Confident
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+          {isValidString(listing.fullDescription) && (
+            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">About the Role</h2>
+              <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
+                dangerouslySetInnerHTML={{ __html: listing.fullDescription || '' }}
+              />
+            </section>
+          )}
 
           {listing.qualifications && listing.qualifications.length > 0 && (
             <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
@@ -315,7 +332,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
                   return (
                     <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-center justify-between">
                         <div className="flex-grow">
                           <div className="flex items-center">
                             <span className="font-medium text-gray-800 dark:text-gray-100">
@@ -535,7 +552,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
         {/* Application Details Card */}
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
               <div className="text-sm text-gray-600 dark:text-gray-300">Posted</div>
               <div className="text-gray-800 dark:text-gray-100 font-medium">{formatDate(listing.postedDate)}</div>
@@ -545,6 +562,14 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                 {isExpired(listing.closingDate) ? 'Closed' : 'Closing Date'}
               </div>
               <div className="text-gray-800 dark:text-gray-100 font-medium">{formatDate(listing.closingDate)}</div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">Wage</div>
+              <div className="text-gray-800 dark:text-gray-100 font-medium">
+                {listing.wage.wageType === 'CompetitiveSalary' 
+                  ? 'Competitive Salary'
+                  : listing.wage.wageAdditionalInformation || `${listing.wage.wageType} (${listing.wage.wageUnit})`}
+              </div>
             </div>
             <div className="sm:text-right">
               {listing.is_active ? (
