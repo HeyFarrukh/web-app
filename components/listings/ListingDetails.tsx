@@ -152,10 +152,10 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Description and Key Info Column */}
             <div className="lg:col-span-2 space-y-6">
-              <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Description</h2>
+              <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">Description</h2>
                 <div className="prose dark:prose-invert max-w-none">
-                  <p className="whitespace-pre-line text-gray-700 dark:text-gray-200">{listing.description}</p>
+                  <p className="whitespace-pre-line text-gray-700 dark:text-gray-200 text-sm sm:text-base">{listing.description}</p>
                 </div>
               </section>
 
@@ -164,7 +164,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Key Information
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <InfoCard icon={GraduationCap} title="Apprenticeship Level">
                     <div className="text-gray-800 dark:text-gray-100">
                       Level {listing.course.level} - {listing.apprenticeshipLevel}
@@ -301,8 +301,8 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
       content: (
         <div className="space-y-6">
           {isValidString(listing.fullDescription) && (
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">About the Role</h2>
+            <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">About the Role</h2>
               <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
                 dangerouslySetInnerHTML={{ __html: listing.fullDescription || '' }}
               />
@@ -310,8 +310,8 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
           )}
 
           {listing.qualifications && listing.qualifications.length > 0 && (
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Qualifications Required</h2>
+            <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">Qualifications Required</h2>
               <div className="space-y-4">
                 {listing.qualifications.map((qualification, index) => {
                   if (typeof qualification === 'string') {
@@ -381,8 +381,8 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
       content: (
         <div className="space-y-6">
           {isValidString(listing.employerDescription) && (
-            <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 About {isValidString(listing.employerName) ? listing.employerName : 'Employer'}
               </h2>
               <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-200"
@@ -394,8 +394,8 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
           {(isValidString(listing.employerContactEmail) ||
             isValidString(listing.employerContactPhone) ||
             isValidString(listing.employerWebsiteUrl)) && (
-              <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Contact Information</h2>
+              <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">Contact Information</h2>
                 <div className="space-y-3">
                   {isValidString(listing.employerContactEmail) && (
                     <a
@@ -553,19 +553,19 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
         </div>
 
         {/* Application Details Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div>
+            <div className="text-center sm:text-left">
               <div className="text-sm text-gray-600 dark:text-gray-300">Posted</div>
               <div className="text-gray-800 dark:text-gray-100 font-medium">{formatDate(listing.postedDate)}</div>
             </div>
-            <div>
+            <div className="text-center sm:text-left">
               <div className="text-sm text-gray-600 dark:text-gray-300">
                 {isExpired(listing.closingDate) ? 'Closed' : 'Closing Date'}
               </div>
               <div className="text-gray-800 dark:text-gray-100 font-medium">{formatDate(listing.closingDate)}</div>
             </div>
-            <div>
+            <div className="text-center sm:text-left">
               <div className="text-sm text-gray-600 dark:text-gray-300">Wage</div>
               <div className="text-gray-800 dark:text-gray-100 font-medium">
                 {listing.wage.wageType === 'CompetitiveSalary' 
@@ -579,13 +579,13 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   href={listing.vacancyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block bg-orange-500 text-white text-center py-2 px-6 rounded-lg hover:bg-orange-600 transition-colors"
+                  className="block w-full bg-orange-500 text-white text-center py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-orange-600 transition-colors font-medium"
                   onClick={handleApplyClick}
                 >
                   Apply Now
                 </a>
               ) : (
-                <div className="inline-block bg-gray-500 text-white text-center py-2 px-6 rounded-lg">
+                <div className="block w-full bg-gray-500 text-white text-center py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-medium">
                   EXPIRED
                 </div>
               )}
@@ -594,43 +594,32 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
         </div>
 
         {/* Tabs */}
-        <div className="mb-6">
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="-mb-px flex space-x-8">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={clsx(
-                      'flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors',
-                      activeTab === tab.id
-                        ? 'border-orange-500 text-orange-500'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    )}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <nav className="flex overflow-x-auto sm:overflow-visible" aria-label="Tabs">
+            <div className="flex min-w-full sm:min-w-0 justify-center sm:justify-start space-x-4 px-4 sm:px-0">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={clsx(
+                    'flex items-center whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+                    activeTab === tab.id
+                      ? 'border-orange-500 text-orange-600 dark:text-orange-500'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                  )}
+                >
+                  <tab.icon className="w-5 h-5 mr-2" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </nav>
         </div>
 
         {/* Tab Content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {tabs.find(tab => tab.id === activeTab)?.content}
-          </motion.div>
-        </AnimatePresence>
+        <div className="mt-6 px-4 sm:px-0">
+          {tabs.find((tab) => tab.id === activeTab)?.content}
+        </div>
       </div>
     </div>
   );
