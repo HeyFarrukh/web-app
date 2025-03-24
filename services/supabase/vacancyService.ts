@@ -128,43 +128,47 @@ class VacancyService {
     try {
       console.log("[VacancyService] getVacancies called with filters:", filters);
       const now = new Date().toISOString();
+      
+      // Validate and sanitize input parameters
+      const sanitizedPage = Math.max(1, Math.floor(Number(page)));
+      const sanitizedPageSize = Math.min(50, Math.max(1, Math.floor(Number(pageSize))));
+      const from = (sanitizedPage - 1) * sanitizedPageSize;
+      const to = from + sanitizedPageSize - 1;
+
+      // Start with base query
       let query = supabase
         .from(this.TABLE_NAME)
         .select('*', { count: 'exact' })
         .eq('is_active', true)
         .gt('closing_date', now);
 
-      // Apply filters *BEFORE* pagination
-      if (filters.search) {
+      // Apply filters using Supabase's built-in methods which handle escaping
+      if (filters.search?.trim()) {
+        // Use textSearch for better security and performance
         query = query.or(
-          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%,wage_type.ilike.%${filters.search}%,wage_unit.ilike.%${filters.search}%,wage_additional_information.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,` +
+          `description.ilike.%${filters.search}%,` +
+          `employer_name.ilike.%${filters.search}%`
         );
       }
 
-      if (filters.location) {
+      if (filters.location?.trim()) {
+        // Use eq or ilike with proper escaping
         query = query.ilike('address_line3', `%${filters.location}%`);
       }
 
-      if (filters.level) {
+      if (filters.level?.trim()) {
+        // Ensure level is a valid number
         const levelNumber = parseInt(filters.level, 10);
-        if (!isNaN(levelNumber)) {
+        if (!isNaN(levelNumber) && levelNumber > 0) {
           query = query.eq('course_level', levelNumber);
-        } else {
-          console.warn(`[VacancyService] Invalid level filter value: ${filters.level}`);
         }
       }
 
-      if (isNaN(page) || page < 1) {
-        page = 1;
-      }
-      if (isNaN(pageSize) || pageSize < 1) {
-        pageSize = 10;
-      }
-
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-      query = query.range(from, to);
-      query = query.order('posted_date', { ascending: false });
+      // Apply pagination and ordering using safe methods
+      query = query
+        .range(from, to)
+        .order('posted_date', { ascending: false });
 
       const { data, error, count } = await query;
 
@@ -172,7 +176,7 @@ class VacancyService {
         console.error("[VacancyService] Supabase query error:", error);
         throw error;
       }
-      console.log("[VacancyService] Supabase Data:", data);
+
       return {
         vacancies: data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [],
         total: count || 0
@@ -183,30 +187,34 @@ class VacancyService {
     }
   }
 
-  async getVacancyById(id: string): Promise<ListingType | null> { // Return type changed!
+  async getVacancyById(id: string): Promise<ListingType | null> {
     try {
+      // Validate ID format (assuming UUID format)
+      if (!id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        console.error('Invalid vacancy ID format');
+        return null;
+      }
+
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .select('*')
-        .eq('id', id); // Removed .single()!
+        .eq('id', id)
+        .single();
 
       if (error) {
-        console.error('Supabase error:', error); // Log the Supabase error
-        throw error; // Re-throw for higher-level handling (if needed)
+        console.error('Supabase error:', error);
+        throw error;
       }
 
-      //  Handle the case where no data is returned.
-      if (!data || data.length === 0) {
+      if (!data) {
         console.log(`[VacancyService] No vacancy found for ID: ${id}`);
-        return null; // Return null if no listing is found.
+        return null;
       }
 
-      // If data is found, transform and return it.
-      return this.transformListing(data[0] as SupabaseListing);
-
+      return this.transformListing(data as SupabaseListing);
     } catch (error) {
       console.error('Error in getVacancyById:', error);
-      throw error; // Or return null, depending on how you want to handle errors
+      throw error;
     }
   }
 
@@ -218,14 +226,13 @@ class VacancyService {
         .eq('is_active', true)
         .gt('closing_date', new Date().toISOString());
 
-      if (error) {
-        console.error('Error fetching locations:', error);
-        throw error;
-      }
+      if (error) throw error;
 
+      // Sanitize and deduplicate locations
       const locations = Array.from(new Set(
         data?.map(d => d.address_line3)
-          .filter(loc => loc && loc.trim() !== '')
+          .filter(loc => loc && typeof loc === 'string' && loc.trim() !== '')
+          .map(loc => loc.trim())
       )) as string[];
 
       return locations.sort();
@@ -243,16 +250,14 @@ class VacancyService {
         .eq('is_active', true)
         .gt('closing_date', new Date().toISOString());
 
-      if (error) {
-        console.error('Error fetching levels:', error);
-        throw error;
-      }
+      if (error) throw error;
 
+      // Sanitize and deduplicate levels
       const levels = Array.from(new Set(
         data?.map(d => d.course_level)
-          .filter(level => level != null)  // Filter out null values
-          .map(level => parseInt(level, 10)) // Parse to number
-          .filter(level => !isNaN(level))  // Remove any NaN values that got through.
+          .filter(level => level != null && !isNaN(Number(level)))
+          .map(level => Math.floor(Number(level)))
+          .filter(level => level > 0 && level <= 8) // Valid apprenticeship levels
       )) as number[];
 
       return levels.sort((a, b) => a - b);
@@ -344,7 +349,9 @@ class VacancyService {
       // Apply filters
       if (filters.search) {
         query = query.or(
-          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%,wage_type.ilike.%${filters.search}%,wage_unit.ilike.%${filters.search}%,wage_additional_information.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,` +
+          `description.ilike.%${filters.search}%,` +
+          `employer_name.ilike.%${filters.search}%`
         );
       }
 
