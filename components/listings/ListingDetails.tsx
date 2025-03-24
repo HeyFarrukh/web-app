@@ -269,6 +269,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                     </div>
                     <div className="text-gray-800 dark:text-gray-100 font-medium">{formatDate(listing.closingDate)}</div>
                   </div>
+                  
                   {listing.is_active ? (
                     <a
                       href={listing.vacancyUrl}
@@ -285,6 +286,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                     </div>
                   )}
                 </div>
+                
               </section>
             </div>
           </div>
@@ -309,7 +311,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
           {listing.qualifications && listing.qualifications.length > 0 && (
             <section className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Qualifications</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Qualifications Required</h2>
               <div className="space-y-4">
                 {listing.qualifications.map((qualification, index) => {
                   if (typeof qualification === 'string') {
