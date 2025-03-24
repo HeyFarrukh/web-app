@@ -12,22 +12,52 @@ import ArticleContentEnhancer from '@/components/ui/ArticleContentEnhancer';
 
 // Company logos mapping
 const partnerLogos = [
-  { 
-    name: 'Accenture', 
+  {
+    name: 'Accenture',
     url: '/assets/logos/accenture.svg',
     width: 120
   },
-  { 
-    name: 'Digital Catapult', 
+  {
+    name: 'Digital Catapult',
     url: '/assets/logos/Digital_Catapult.svg',
-    width: 160
+    width: 110
   },
-  { 
-    name: 'HSBC', 
-    url: '/assets/logos/HSBC.svg',
-    width: 120
+  {
+    name: 'IBM',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png',
+    width: 100
   }
 ];
+
+// Schema.org types
+type SchemaOrg = {
+  '@context': string;
+  '@type': string;
+  headline: string;
+  description?: string;
+  image?: string[];
+  datePublished?: string;
+  dateModified?: string;
+  author?: Array<{
+    '@type': string;
+    name: string;
+  }>;
+  publisher: {
+    '@type': string;
+    name: string;
+    logo: {
+      '@type': string;
+      url: string;
+    };
+  };
+  mainEntityOfPage: {
+    '@type': string;
+    '@id': string;
+  };
+  keywords?: string;
+  articleSection?: string;
+  wordCount?: number;
+};
 
 // This makes the page static at build time for optimal performance and SEO
 export const dynamic = 'force-static';
@@ -48,7 +78,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug } = params;
   const article = await getArticleBySlug(slug);
-  
+
   // Use default metadata if article not found
   if (!article) {
     return {
@@ -56,10 +86,47 @@ export async function generateMetadata(
       description: 'The requested article could not be found.',
     };
   }
-  
+
   // Get parent metadata (for site-wide defaults)
   const previousImages = (await parent).openGraph?.images || [];
-  
+
+  // Construct the full URL for the article
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk';
+  const articleUrl = `${baseUrl}/resources/${slug}`;
+
+  // Ensure article image is absolute URL if it exists
+  const articleImage = article.image ? (article.image.startsWith('http') ? article.image : `${baseUrl}${article.image}`) : undefined;
+
+  // Construct the schema data
+  const schemaData: SchemaOrg = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.description,
+    image: articleImage ? [articleImage] : undefined,
+    datePublished: article._rawDate,
+    dateModified: article._rawLastModified,
+    author: article.author ? [{
+      '@type': 'Person',
+      name: article.author,
+    }] : undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: 'ApprenticeWatch',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${baseUrl}/assets/apprenticewatch-logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': articleUrl,
+    },
+    keywords: article.keywords?.join(', '),
+    articleSection: article.category || 'Resources',
+    wordCount: article.content?.split(/\s+/).length || 0,
+  };
+
   return {
     title: article.title,
     description: article.description,
@@ -72,15 +139,29 @@ export async function generateMetadata(
       publishedTime: article._rawDate,
       modifiedTime: article._rawLastModified,
       authors: article.author ? [article.author] : undefined,
-      images: article.image ? [article.image, ...previousImages] : previousImages,
+      images: articleImage ? [{ url: articleImage, width: 1200, height: 630, alt: article.title }] : undefined,
+      url: articleUrl,
     },
     twitter: {
       card: 'summary_large_image',
       title: article.title,
       description: article.description,
-      images: article.image ? [article.image] : undefined,
+      images: articleImage ? [`${baseUrl}${article.image}`] : undefined,
+    },
+    alternates: {
+      canonical: articleUrl,
     },
   };
+}
+
+// Add script component for JSON-LD
+function JsonLd({ data }: { data: any }) {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
 }
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
@@ -98,6 +179,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       </div>
     );
   }
+
+  // Ensure article image is absolute URL if it exists
+  const articleImage = article.image ? (article.image.startsWith('http') ? article.image : `${process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk'}${article.image}`) : undefined;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -162,8 +246,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         <div className="max-w-4xl mx-auto px-4 py-12">
           {/* Back to Resources Link and Share buttons - added at the top of the article content */}
           <div className="flex items-center justify-between mb-8">
-            <Link 
-              href="/resources" 
+            <Link
+              href="/resources"
               className="text-gray-600 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 flex items-center group transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" />
@@ -227,7 +311,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                   const allCollaborators = article.partnerships.flatMap(p => p.collaborators);
                   const hasApprentices = allCollaborators.includes('apprentice');
                   const hasRecruiters = allCollaborators.includes('recruiter');
-                  
+
                   if (hasApprentices && hasRecruiters) {
                     return 'apprentices and recruiters at';
                   } else if (hasApprentices) {
@@ -249,8 +333,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                         alt={`${logo.name} logo`}
                         style={{ width: logo.width }}
                         className={`h-12 object-contain transition-all duration-300 ${
-                          logo.name === 'Digital Catapult' 
-                            ? 'brightness-0' 
+                          logo.name === 'Digital Catapult'
+                            ? 'brightness-0'
                             : 'grayscale'
                         } hover:grayscale-0 dark:invert`}
                       />
@@ -263,20 +347,20 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 md:p-12">
             <article className="prose prose-lg max-w-none dark:prose-invert article-content
-              prose-headings:text-gray-900 dark:prose-headings:text-white 
+              prose-headings:text-gray-900 dark:prose-headings:text-white
               prose-a:text-orange-500 hover:prose-a:text-orange-600
               prose-img:rounded-xl prose-img:shadow-md
               prose-blockquote:border-orange-500 prose-blockquote:bg-orange-50 dark:prose-blockquote:bg-orange-900/10 prose-blockquote:rounded-r-lg prose-blockquote:py-2 prose-blockquote:px-6
               prose-code:text-orange-500 dark:prose-code:text-orange-400 prose-code:bg-orange-50 dark:prose-code:bg-orange-900/10 prose-code:rounded prose-code:px-1
-              prose-pre:bg-gray-50 dark:prose-pre:bg-gray-700/50 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-600 
+              prose-pre:bg-gray-50 dark:prose-pre:bg-gray-700/50 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-600
               prose-pre:rounded-xl prose-pre:shadow-sm
               prose-table:border-collapse prose-table:overflow-hidden prose-table:w-full
               prose-th:bg-gray-50 dark:prose-th:bg-gray-800 prose-th:p-3 prose-th:text-left
               prose-td:p-3 prose-td:border-b prose-td:border-gray-200 dark:prose-td:border-gray-700
               prose-tr:hover:bg-gray-50 dark:prose-tr:hover:bg-gray-800/50
               prose-hr:my-8">
-              <div 
-                dangerouslySetInnerHTML={{ __html: article.contentHtml }} 
+              <div
+                dangerouslySetInnerHTML={{ __html: article.contentHtml }}
                 className="article-content-wrapper"
               />
               <LucideIconRenderer />
@@ -284,15 +368,15 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <ArticleContentEnhancer />
             </article>
           </div>
-          
+
           {/* Keywords section */}
           {article.keywords && article.keywords.length > 0 && (
             <div className="mt-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Related Topics</h3>
               <div className="flex flex-wrap gap-2">
                 {article.keywords.map((keyword, index) => (
-                  <span 
-                    key={index} 
+                  <span
+                    key={index}
                     className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full transition-colors cursor-pointer"
                   >
                     {keyword}
@@ -301,11 +385,11 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               </div>
             </div>
           )}
-          
+
           {/* Back to Resources and Share buttons - added at the bottom of the article */}
           <div className="mt-12 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-8">
-            <Link 
-              href="/resources" 
+            <Link
+              href="/resources"
               className="px-5 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-orange-100 dark:hover:bg-orange-900/20 text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 rounded-full flex items-center group transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" />
@@ -324,6 +408,34 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </div>
         </div>
       </article>
+      <JsonLd data={{
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: article.title,
+        description: article.description,
+        image: articleImage ? [articleImage] : undefined,
+        datePublished: article._rawDate,
+        dateModified: article._rawLastModified,
+        author: article.author ? [{
+          '@type': 'Person',
+          name: article.author,
+        }] : undefined,
+        publisher: {
+          '@type': 'Organization',
+          name: 'ApprenticeWatch',
+          logo: {
+            '@type': 'ImageObject',
+            url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk'}/assets/apprenticewatch-logo.png`,
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `${process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk'}/resources/${slug}`,
+        },
+        keywords: article.keywords?.join(', '),
+        articleSection: article.category || 'Resources',
+        wordCount: article.content?.split(/\s+/).length || 0,
+      }} />
     </div>
   );
 }
