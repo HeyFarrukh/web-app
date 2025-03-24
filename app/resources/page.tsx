@@ -11,15 +11,26 @@ export const revalidate = 3600; // Revalidate every hour
 
 // Generate metadata for the resources page
 export const metadata: Metadata = {
-  title: 'Resources',
-  description: 'Discover helpful guides, articles, and resources to support your apprenticeship journey.',
+  title: 'Apprenticeship Resources: Guides & Career Advice',
+  description: 'Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.',
   keywords: ['apprenticeship', 'resources', 'guides', 'career advice', 'skills development'],
-  openGraph: {
-    title: 'Resources | ApprenticeWatch',
-    description: 'Discover helpful guides, articles, and resources to support your apprenticeship journey.',
-    type: 'website',
+  alternates: {
+    canonical: 'https://apprenticewatch.com/resources'
   },
+  openGraph: {
+    title: 'Apprenticeship Resources: Guides & Career Advice | ApprenticeWatch',
+    description: 'Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.',
+    type: 'website',
+    url: 'https://apprenticewatch.com/resources',
+    images: ['/media/meta/resource-hub.png'],
+  },
+  twitter: {
+    title: 'Apprenticeship Resources: Guides & Career Advice | ApprenticeWatch',
+    description: 'Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.',
+    images: ['/media/meta/resource-hub.png'],
+  }
 };
+
 
 // Article card component to avoid duplication
 const ArticleCard = ({ article }: { article: ReturnType<typeof getAllArticlesMetadata>[0] }) => (
