@@ -336,18 +336,21 @@ class VacancyService {
     search?: string;
     location?: string;
     level?: string;
-  } = {}): Promise<ListingType[]> {
+  } = {}, attempt = 0): Promise<ListingType[]> {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 2000;
+
     try {
       console.log("[VacancyService] getAllVacanciesForMap called with filters:", filters);
       const now = new Date().toISOString();
       let query = supabase
         .from(this.TABLE_NAME)
-        .select('*')  // Select all fields to ensure transformListing works correctly
+        .select('*')
         .eq('is_active', true)
         .gt('closing_date', now);
 
-      // Apply filters
-      if (filters.search) {
+      // Apply filters using Supabase's built-in methods which handle escaping
+      if (filters.search?.trim()) {
         query = query.or(
           `title.ilike.%${filters.search}%,` +
           `description.ilike.%${filters.search}%,` +
@@ -355,30 +358,36 @@ class VacancyService {
         );
       }
 
-      if (filters.location) {
+      if (filters.location?.trim()) {
         query = query.ilike('address_line3', `%${filters.location}%`);
       }
 
-      if (filters.level) {
+      if (filters.level?.trim()) {
         const levelNumber = parseInt(filters.level, 10);
-        if (!isNaN(levelNumber)) {
+        if (!isNaN(levelNumber) && levelNumber > 0) {
           query = query.eq('course_level', levelNumber);
-        } else {
-          console.warn(`[VacancyService] Invalid level filter value: ${filters.level}`);
         }
       }
 
       const { data, error } = await query;
 
-      if (error) {
-        console.error("[VacancyService] Supabase query error:", error);
-        throw error;
-      }
+      if (error) throw error;
       
       console.log(`[VacancyService] Found ${data?.length || 0} vacancies for map`);
       return data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [];
     } catch (error: any) {
       console.error("Error in getAllVacanciesForMap:", error);
+      
+      // If we haven't reached max retries, wait and try again
+      if (attempt < MAX_RETRIES) {
+        console.log(`[VacancyService] Retrying getAllVacanciesForMap (Attempt ${attempt + 1}/${MAX_RETRIES})`);
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(this.getAllVacanciesForMap(filters, attempt + 1));
+          }, RETRY_DELAY);
+        });
+      }
+      
       throw error;
     }
   }
