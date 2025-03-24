@@ -21,6 +21,9 @@ import { savedApprenticeshipService } from '@/services/supabase/savedApprentices
 import clsx from 'clsx';
 import DOMPurify from 'dompurify';
 
+// Initialize DOMPurify for client-side use
+const createDOMPurify = DOMPurify;
+
 interface TabProps {
   id: string;
   label: string;
@@ -53,7 +56,9 @@ interface ListingDetailsProps {
 }
 
 const sanitizeHTML = (html: string) => {
-  const sanitized = DOMPurify.sanitize(html, {
+  if (!html) return '';
+  if (typeof window === 'undefined') return html; // Return unsanitized on server
+  const sanitized = createDOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a'],
     ALLOWED_ATTR: ['href', 'target', 'rel'],
   });
