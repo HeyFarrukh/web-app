@@ -446,7 +446,11 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   )}
                   {isValidString(listing.employerWebsiteUrl) && (
                     <a
-                      href={listing.employerWebsiteUrl}
+                      href={listing.employerWebsiteUrl!.startsWith('http://') || 
+                        listing.employerWebsiteUrl!.startsWith('https://')
+                        ? listing.employerWebsiteUrl!
+                        : `https://${listing.employerWebsiteUrl!}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
