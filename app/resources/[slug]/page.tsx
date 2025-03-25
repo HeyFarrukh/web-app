@@ -194,7 +194,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               src={article.image}
               alt={article.title}
               fill
-              className="object-cover"
+              className="object-cover blur-sm"  
               priority
             />
             <div className="absolute bottom-0 left-0 right-0 z-20 p-8">
