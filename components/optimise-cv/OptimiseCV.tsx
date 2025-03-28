@@ -532,21 +532,6 @@ export const OptimiseCV = () => {
 
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
               <div className="flex items-center space-x-2 mb-2">
-                <Cpu className="w-4 h-4 text-orange-500" />
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {pdfFile ? 'Extracted CV Text' : 'Paste Your CV Text'}
-                </label>
-              </div>
-              <textarea
-                value={cvText}
-                onChange={(e) => setCvText(e.target.value)}
-                className="w-full h-48 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm"
-                placeholder={pdfFile ? "Text extracted from your PDF..." : "Copy and paste your CV content here..."}
-              />
-            </div>
-
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
-              <div className="flex items-center space-x-2 mb-2">
                 <Zap className="w-4 h-4 text-orange-500" />
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Job Description
