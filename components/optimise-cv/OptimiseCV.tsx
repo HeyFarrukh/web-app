@@ -105,7 +105,8 @@ export const OptimiseCV = () => {
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const ITEMS_PER_PAGE = 4;
+  const ITEMS_PER_PAGE = 10; // Preload more items at once for smoother experience
+  const VISIBLE_ITEMS = 3; // Only show 3 items in the UI
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -578,7 +579,13 @@ export const OptimiseCV = () => {
                     />
                   </div>
                   
-                  <div className="max-h-96 overflow-y-auto space-y-2 custom-scrollbar">
+                  <div 
+                    className="overflow-y-auto space-y-2 custom-scrollbar"
+                    style={{ 
+                      maxHeight: `${VISIBLE_ITEMS * 84}px`, // Fixed height for 3 items (each item is approximately 84px high)
+                      position: 'relative'
+                    }}
+                  >
                     {apprenticeships.map((apprenticeship) => (
                       <button
                         key={apprenticeship.id}
