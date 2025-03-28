@@ -105,13 +105,7 @@ IMPORTANT: Response must be valid JSON only, with no additional text or markdown
 
   async analyzeCV(cvText: string, jobDescription: string): Promise<AIAnalysisResponse> {
     try {
-      logger.info('Starting CV analysis with Gemini', {
-        cvLength: cvText.length,
-        jobDescLength: jobDescription.length,
-        model: 'gemini-2.0-flash'
-      });
-
-      const prompt = `
+      const fullPrompt = this.SYSTEM_PROMPT + "\n\n" + `
 CV Text:
 ${cvText}
 
@@ -120,7 +114,20 @@ ${jobDescription}
 
 Analyze the CV against this job description and provide structured feedback following the specified format.`;
 
-      const result = await this.model.generateContent(this.SYSTEM_PROMPT + "\n\n" + prompt);
+      logger.info('Starting CV analysis with Gemini', {
+        cvLength: cvText.length,
+        jobDescLength: jobDescription.length,
+        model: 'gemini-2.0-flash'
+      });
+
+      logger.info('Full prompt being sent to Gemini:', {
+        systemPrompt: this.SYSTEM_PROMPT,
+        cvText,
+        jobDescription,
+        fullPrompt
+      });
+
+      const result = await this.model.generateContent(fullPrompt);
       const text = result.response.text();
       logger.debug('Raw Gemini response received', { responseLength: text.length });
 

@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, AlertCircle, X, Sparkles, Zap, Bot, Cpu, Target, TrendingUp, FileText, Key, Copy, Check, Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Lock, AlertCircle, X, Sparkles, Zap, Bot, Cpu, Target, TrendingUp, FileText, Key, Copy, Check, Upload, Search } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { geminiService } from '@/services/ai/geminiService';
 import { cvTrackingService } from '@/services/cv/cvTrackingService';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,6 +12,8 @@ import { FileUpload } from '@/components/ui/FileUpload';
 import { pdfService } from '@/services/pdf/pdfService';
 import { pdfStorageService } from '@/services/storage/pdfStorageService';
 import { createLogger } from '@/services/logger/logger';
+import { vacancyService } from '@/services/supabase/vacancyService';
+import { ListingType } from '@/types/listing';
 
 const logger = createLogger({ module: 'OptimiseCV' });
 
@@ -73,9 +75,15 @@ export const errorMessages = {
 
 export const OptimiseCV = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAuthenticated, isLoading, userData } = useAuth();
   const [cvText, setCvText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [selectedApprenticeship, setSelectedApprenticeship] = useState<ListingType | null>(null);
+  const [apprenticeships, setApprenticeships] = useState<ListingType[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoadingApprenticeships, setIsLoadingApprenticeships] = useState(false);
   const [warning, setWarning] = useState<WarningState>({
     show: false,
     message: ''
@@ -94,6 +102,12 @@ export const OptimiseCV = () => {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isPdfProcessing, setIsPdfProcessing] = useState(false);
   const [pdfError, setPdfError] = useState<string | undefined>(undefined);
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const ITEMS_PER_PAGE = 10; // Preload more items at once for smoother experience
+  const VISIBLE_ITEMS = 3; // Only show 3 items in the UI
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Track CV Optimisation page view
@@ -116,6 +130,133 @@ export const OptimiseCV = () => {
     }
   }, [isLoading, isAuthenticated, router]);
 
+  useEffect(() => {
+    const loadApprenticeships = async () => {
+      try {
+        setIsLoadingApprenticeships(true);
+        const { vacancies, total } = await vacancyService.getVacancies({
+          page,
+          pageSize: ITEMS_PER_PAGE,
+          filters: {
+            search: searchQuery || undefined
+          }
+        });
+
+        if (page === 1) {
+          setApprenticeships(vacancies || []);
+        } else {
+          setApprenticeships(prev => [...prev, ...(vacancies || [])]);
+        }
+
+        setHasMore((vacancies || []).length === ITEMS_PER_PAGE);
+      } catch (error) {
+        console.error('Failed to load apprenticeships:', error);
+        showWarning('Failed to load apprenticeships. Please try again.');
+      } finally {
+        setIsLoadingApprenticeships(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      setPage(1);
+      loadApprenticeships();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  // Load more when scrolling
+  useEffect(() => {
+    if (page > 1) {
+      const loadMore = async () => {
+        try {
+          setIsLoadingApprenticeships(true);
+          const { vacancies } = await vacancyService.getVacancies({
+            page,
+            pageSize: ITEMS_PER_PAGE,
+            filters: {
+              search: searchQuery || undefined
+            }
+          });
+
+          setApprenticeships(prev => [...prev, ...(vacancies || [])]);
+          setHasMore((vacancies || []).length === ITEMS_PER_PAGE);
+        } catch (error) {
+          console.error('Failed to load more apprenticeships:', error);
+        } finally {
+          setIsLoadingApprenticeships(false);
+        }
+      };
+
+      loadMore();
+    }
+  }, [page]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingApprenticeships) {
+          setPage(prev => prev + 1);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    const currentRef = listRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasMore, isLoadingApprenticeships]);
+
+  useEffect(() => {
+    // If apprenticeship ID is in URL, select it
+    const apprenticeshipId = searchParams?.get('apprenticeshipId');
+    if (apprenticeshipId) {
+      const apprenticeship = apprenticeships.find(a => a.id === apprenticeshipId);
+      if (apprenticeship) {
+        setSelectedApprenticeship(apprenticeship);
+        const formattedDescription = formatJobDescription(apprenticeship);
+        setJobDescription(formattedDescription);
+      }
+    }
+  }, [searchParams, apprenticeships]);
+
+  const formatJobDescription = (apprenticeship: ListingType): string => {
+    const sections = [
+      `Role: ${apprenticeship.title}`,
+      `Company: ${apprenticeship.employerName}`,
+      apprenticeship.description && `Overview:\n${apprenticeship.description}`,
+      apprenticeship.fullDescription && `Detailed Requirements:\n${apprenticeship.fullDescription}`,
+      apprenticeship.skills && apprenticeship.skills.length > 0 && `Required Skills:\n- ${apprenticeship.skills.join('\n- ')}`,
+      apprenticeship.qualifications && apprenticeship.qualifications.length > 0 && `Required Qualifications:\n- ${apprenticeship.qualifications.map(qual => 
+        typeof qual === 'string' ? qual : qual.subject || qual.name
+      ).join('\n- ')}`,
+      apprenticeship.wage && `Salary: ${apprenticeship.wage.wageType === 'CompetitiveSalary' 
+        ? 'Competitive Salary' 
+        : apprenticeship.wage.wageAdditionalInformation || `${apprenticeship.wage.wageType} (${apprenticeship.wage.wageUnit})`}`,
+      apprenticeship.hoursPerWeek && `Hours: ${apprenticeship.hoursPerWeek} hours per week`,
+      apprenticeship.workingWeekDescription && `Working Pattern: ${apprenticeship.workingWeekDescription}`,
+      apprenticeship.expectedDuration && `Duration: ${apprenticeship.expectedDuration}`,
+      apprenticeship.course && `Course Details: Level ${apprenticeship.course.level} - ${apprenticeship.course.title} (${apprenticeship.course.route})`
+    ].filter(Boolean);
+
+    return sections.join('\n\n');
+  };
+
+  useEffect(() => {
+    if (selectedApprenticeship && !isManualMode) {
+      const formattedDescription = formatJobDescription(selectedApprenticeship);
+      setJobDescription(formattedDescription);
+    }
+  }, [selectedApprenticeship, isManualMode]);
+
   const showWarning = (message: string) => {
     setWarning({
       show: true,
@@ -133,7 +274,12 @@ export const OptimiseCV = () => {
       return false;
     }
 
-    if (jobDescription.length < MIN_JOB_DESC_LENGTH) {
+    if (!isManualMode && !selectedApprenticeship) {
+      showWarning('Please select an apprenticeship or switch to manual mode to enter a job description.');
+      return false;
+    }
+
+    if (isManualMode && jobDescription.length < MIN_JOB_DESC_LENGTH) {
       showWarning('Please paste the job description. This helps us tailor your CV to the role.');
       return false;
     }
@@ -386,32 +532,90 @@ export const OptimiseCV = () => {
 
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
               <div className="flex items-center space-x-2 mb-2">
-                <Cpu className="w-4 h-4 text-orange-500" />
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {pdfFile ? 'Extracted CV Text' : 'Paste Your CV Text'}
-                </label>
-              </div>
-              <textarea
-                value={cvText}
-                onChange={(e) => setCvText(e.target.value)}
-                className="w-full h-48 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm"
-                placeholder={pdfFile ? "Text extracted from your PDF..." : "Copy and paste your CV content here..."}
-              />
-            </div>
-
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-orange-500/20">
-              <div className="flex items-center space-x-2 mb-2">
                 <Zap className="w-4 h-4 text-orange-500" />
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Job Description
                 </label>
               </div>
-              <textarea
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                className="w-full h-32 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm"
-                placeholder="Paste the job description here..."
-              />
+              <div className="flex items-center space-x-2 mb-4">
+                <button
+                  onClick={() => setIsManualMode(false)}
+                  className={`px-4 py-2 text-sm font-medium ${isManualMode ? 'text-gray-500 dark:text-gray-400' : 'text-orange-500 dark:text-orange-400'}`}
+                >
+                  Select Apprenticeship
+                </button>
+                <button
+                  onClick={() => setIsManualMode(true)}
+                  className={`px-4 py-2 text-sm font-medium ${isManualMode ? 'text-orange-500 dark:text-orange-400' : 'text-gray-500 dark:text-gray-400'}`}
+                >
+                  Enter Manually
+                </button>
+              </div>
+              {!isManualMode ? (
+                <div className="flex flex-col space-y-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="search"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                      placeholder="Search for apprenticeships..."
+                    />
+                  </div>
+                  
+                  <div 
+                    className="overflow-y-auto space-y-2 custom-scrollbar"
+                    style={{ 
+                      maxHeight: `${VISIBLE_ITEMS * 84}px`, // Fixed height for 3 items (each item is approximately 84px high)
+                      position: 'relative'
+                    }}
+                  >
+                    {apprenticeships.map((apprenticeship) => (
+                      <button
+                        key={apprenticeship.id}
+                        onClick={() => setSelectedApprenticeship(apprenticeship)}
+                        className={`w-full p-4 rounded-lg border ${
+                          selectedApprenticeship?.id === apprenticeship.id
+                            ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+                        } hover:border-orange-500 transition-colors duration-200 text-left group`}
+                      >
+                        <div className="flex flex-col space-y-1">
+                          <span className="font-medium text-gray-900 dark:text-white group-hover:text-orange-500">
+                            {apprenticeship.title}
+                          </span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            {apprenticeship.employerName}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+
+                    {/* Loading indicator and scroll sentinel */}
+                    <div ref={listRef} className="h-4">
+                      {isLoadingApprenticeships && (
+                        <div className="flex items-center justify-center py-4">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {apprenticeships.length === 0 && !isLoadingApprenticeships && (
+                    <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                      No apprenticeships found
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <textarea
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  className="w-full h-32 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm"
+                  placeholder="Paste the job description here..."
+                />
+              )}
             </div>
 
             <button
@@ -681,7 +885,7 @@ export const OptimiseCV = () => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Hold Up!
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mt-2">
+                  <p className="text-gray-600 dark:text-gray-400 mt-2">
                     {warning.message}
                   </p>
                 </div>
