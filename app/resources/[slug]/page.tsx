@@ -188,15 +188,16 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       <article className="relative">
         {/* Hero Section */}
         {article.image && (
-          <div className="relative h-[60vh] w-full">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900/90 z-10" />
-            <Image
-              src={article.image}
-              alt={article.title}
-              fill
-              className="object-cover"
-              priority
-            />
+  <div className="relative h-[60vh] w-full overflow-hidden">  {/* Add overflow-hidden */}
+    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900/90 z-10" />
+    <Image
+      src={article.image}
+      alt={article.title}
+      fill
+      className="object-cover blur-md"
+      priority
+    />
+
             <div className="absolute bottom-0 left-0 right-0 z-20 p-8">
               <div className="max-w-4xl mx-auto">
                 <div className="flex flex-wrap items-center gap-4 mb-4">

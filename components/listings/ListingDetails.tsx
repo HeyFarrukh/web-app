@@ -331,69 +331,51 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
           {listing.qualifications && listing.qualifications.length > 0 && (
             <section className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">Qualifications Required</h2>
-              <div className="space-y-4">
-                {listing.qualifications.map((qualification, index) => {
-                  if (typeof qualification === 'string') {
-                    return (
-                      <div key={index} className="flex items-start">
-                        <Check className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                        <div 
-                          dangerouslySetInnerHTML={{ 
-                            __html: sanitizeHTML(qualification) 
-                          }} 
-                        />
-                      </div>
-                    );
-                  }
+  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">Qualifications</h2>
+  <div className="space-y-4">
+    {listing.qualifications.map((qualObj, index) => {
+        const isEssential = qualObj.weighting === 'Essential';
+        const isDesirable = qualObj.weighting === 'Desired';
 
-                  let qualObj = qualification;
-                  if (typeof qualification === 'string' && qualification.startsWith('{')) {
-                    try {
-                      qualObj = JSON.parse(qualification);
-                    } catch (e) {
-                      qualObj = { text: qualification };
-                    }
-                  }
-
-                  return (
-                    <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-grow">
-                          <div className="flex items-center">
-                            <span className="font-medium text-gray-800 dark:text-gray-100">
-                              {qualObj.subject || qualObj.name || ''}
-                            </span>
-                            {qualObj.weighting === 'Essential' && (
-                              <span className="ml-2 px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-full">
-                                Required
-                              </span>
-                            )}
-                            {qualObj.weighting === 'Desirable' && (
-                              <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
-                                Preferred
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                            {qualObj.qualificationType && (
-                              <span className="inline-block mr-2">
-                                {qualObj.qualificationType}
-                              </span>
-                            )}
-                            {qualObj.grade && (
-                              <span className="inline-block">
-                                Grade: {qualObj.grade}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+        return (
+          <div key={index} className={`flex items-start ${isEssential ? 'bg-red-50 dark:bg-red-700/50 rounded-lg p-3' : (isDesirable ? 'bg-green-50 dark:bg-green-700/50 rounded-lg p-3' : 'bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3')}`}>
+            {isEssential && <Check className="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />}
+            {isDesirable && <Check className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />}
+            {!isEssential && !isDesirable && <Check className="w-5 h-5 text-gray-500 mr-2 flex-shrink-0 mt-0.5" />}
+            <div className="flex-grow">
+              <div className="flex items-center">
+                <span className="font-medium text-gray-800 dark:text-gray-100">
+                  {qualObj.text || qualObj.subject || qualObj.name || ''}
+                </span>
+                {isEssential && (
+                  <span className="ml-2 px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-full">
+                    Required
+                  </span>
+                )}
+                {isDesirable && (
+                  <span className="ml-2 px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full">
+                    Preferred
+                  </span>
+                )}
               </div>
-            </section>
+              <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {qualObj.qualificationType && (
+                  <span className="inline-block mr-2">
+                    {qualObj.qualificationType}
+                  </span>
+                )}
+                {qualObj.grade && (
+                  <span className="inline-block">
+                    Grade: {qualObj.grade}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+  </div>
+</section>
           )}
         </div>
       ),
@@ -446,7 +428,11 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                   )}
                   {isValidString(listing.employerWebsiteUrl) && (
                     <a
-                      href={listing.employerWebsiteUrl}
+                      href={listing.employerWebsiteUrl!.startsWith('http://') || 
+                        listing.employerWebsiteUrl!.startsWith('https://')
+                        ? listing.employerWebsiteUrl!
+                        : `https://${listing.employerWebsiteUrl!}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center space-x-2 text-orange-500 hover:text-orange-600"
