@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   // Check for old ID-based apprenticeship URLs
-  const apprenticeshipIdPattern = /^\/apprenticeships\/(\d+)$/;
+  const apprenticeshipIdPattern = /^\/apprenticeships\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
   const match = request.nextUrl.pathname.match(apprenticeshipIdPattern);
   
   if (match) {
