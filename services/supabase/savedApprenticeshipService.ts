@@ -6,20 +6,20 @@ import { Analytics } from '@/services/analytics/analytics';
 interface SavedApprenticeship {
   id: string;
   user_id: string;
-  vacancy_id: string;
+  vacancy_id: string; // This is now the slug, but keeping name for DB compatibility
   created_at: string;
 }
 
 class SavedApprenticeshipService {
   private readonly TABLE_NAME = 'saved_apprenticeships';
 
-  async saveApprenticeship(userId: string, vacancyId: string): Promise<boolean> {
+  async saveApprenticeship(userId: string, vacancySlug: string): Promise<boolean> {
     try {
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .upsert({
           user_id: userId,
-          vacancy_id: vacancyId,
+          vacancy_id: vacancySlug, // Using slug
           created_at: new Date().toISOString()
         }, {
           onConflict: 'user_id,vacancy_id',
@@ -32,7 +32,7 @@ class SavedApprenticeshipService {
         throw error;
       }
 
-      Analytics.event('user_action', 'apprenticeship_saved', vacancyId);
+      Analytics.event('user_action', 'apprenticeship_saved', vacancySlug);
       return true;
     } catch (error) {
       console.error('[SavedApprenticeshipService] Error saving apprenticeship:', error);
@@ -40,13 +40,13 @@ class SavedApprenticeshipService {
     }
   }
 
-  async unsaveApprenticeship(userId: string, vacancyId: string): Promise<boolean> {
+  async unsaveApprenticeship(userId: string, vacancySlug: string): Promise<boolean> {
     try {
       const { error } = await supabase
         .from(this.TABLE_NAME)
         .delete()
         .eq('user_id', userId)
-        .eq('vacancy_id', vacancyId);
+        .eq('vacancy_id', vacancySlug);
 
       if (error) {
         console.error('[SavedApprenticeshipService] Error unsaving apprenticeship:', error);
@@ -54,7 +54,7 @@ class SavedApprenticeshipService {
         throw error;
       }
 
-      Analytics.event('user_action', 'apprenticeship_unsaved', vacancyId);
+      Analytics.event('user_action', 'apprenticeship_unsaved', vacancySlug);
       return true;
     } catch (error) {
       console.error('[SavedApprenticeshipService] Error unsaving apprenticeship:', error);
@@ -62,13 +62,13 @@ class SavedApprenticeshipService {
     }
   }
 
-  async isApprenticeshipSaved(userId: string, vacancyId: string): Promise<boolean> {
+  async isApprenticeshipSaved(userId: string, vacancySlug: string): Promise<boolean> {
     try {
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .select('*')
         .eq('user_id', userId)
-        .eq('vacancy_id', vacancyId)
+        .eq('vacancy_id', vacancySlug)
         .single();
 
       if (error && error.code !== 'PGRST116') { // PGRST116 is the error code for "no rows returned"
@@ -101,11 +101,11 @@ class SavedApprenticeshipService {
       }
 
       // Get the vacancy details for each saved apprenticeship
-      const vacancyIds = data.map(item => item.vacancy_id);
+      const vacancySlugs = data.map(item => item.vacancy_id);
       const vacancies: ListingType[] = [];
 
-      for (const id of vacancyIds) {
-        const vacancy = await vacancyService.getVacancyById(id);
+      for (const slug of vacancySlugs) {
+        const vacancy = await vacancyService.getVacancyBySlug(slug);
         if (vacancy) {
           vacancies.push(vacancy);
         }
