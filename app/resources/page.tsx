@@ -1,44 +1,52 @@
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { getAllArticlesMetadata } from '@/lib/articles';
-import { Metadata } from 'next';
-import { Star, Clock, ChevronRight, Search } from 'lucide-react';
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { getAllArticlesMetadata } from "@/lib/articles";
+import { Metadata } from "next";
+import { Star, Clock, ChevronRight, Search } from "lucide-react";
 
 // This makes the page static at build time for optimal performance and SEO
-export const dynamic = 'force-static';
+export const dynamic = "force-static";
 export const revalidate = 3600; // Revalidate every hour
 
 // Generate metadata for the resources page
 export const metadata: Metadata = {
-  title: 'Apprenticeship Resources: Guides & Career Advice',
-  description: 'Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.',
-  keywords: ['apprenticeship', 'resources', 'guides', 'career advice', 'skills development'],
+  title: "Apprenticeship Resources: Guides & Career Advice",
+  description:
+    "Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.",
+  keywords: [
+    "apprenticeship",
+    "resources",
+    "guides",
+    "career advice",
+    "skills development",
+  ],
   alternates: {
-    canonical: 'https://apprenticewatch.com/resources'
+    canonical: "https://apprenticewatch.com/resources",
   },
   openGraph: {
-    title: 'Apprenticeship Resources: Guides & Career Advice | ApprenticeWatch',
-    description: 'Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.',
-    type: 'website',
-    url: 'https://apprenticewatch.com/resources',
-    images: ['/media/meta/resource-hub.png'],
+    title: "Apprenticeship Resources: Guides & Career Advice | ApprenticeWatch",
+    description:
+      "Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.",
+    type: "website",
+    url: "https://apprenticewatch.com/resources",
+    images: ["/media/meta/resource-hub.png"],
   },
   twitter: {
-    title: 'Apprenticeship Resources: Guides & Career Advice | ApprenticeWatch',
-    description: 'Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.',
-    images: ['/media/meta/resource-hub.png'],
-  }
+    title: "Apprenticeship Resources: Guides & Career Advice | ApprenticeWatch",
+    description:
+      "Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.",
+    images: ["/media/meta/resource-hub.png"],
+  },
 };
 
-
 // Article card component to avoid duplication
-const ArticleCard = ({ article }: { article: ReturnType<typeof getAllArticlesMetadata>[0] }) => (
-  <Link 
-    key={article.id} 
-    href={`/resources/${article.slug}`}
-    className="group"
-  >
+const ArticleCard = ({
+  article,
+}: {
+  article: ReturnType<typeof getAllArticlesMetadata>[0];
+}) => (
+  <Link key={article.id} href={`/resources/${article.slug}`} className="group">
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg overflow-hidden transition-all duration-300 border border-gray-100 dark:border-gray-700">
       {article.image && (
         <div className="relative h-48 w-full">
@@ -62,7 +70,7 @@ const ArticleCard = ({ article }: { article: ReturnType<typeof getAllArticlesMet
           </span>
           <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full">
             <Clock className="w-3.5 h-3.5 mr-1" />
-            {article.readingTime || '5 min read'}
+            {article.readingTime || "5 min read"}
           </span>
         </div>
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-orange-500 transition-colors line-clamp-2">
@@ -87,23 +95,23 @@ const ArticleCard = ({ article }: { article: ReturnType<typeof getAllArticlesMet
 
 // Company logos for credibility section
 const partnerLogos = [
-  { 
-    name: 'Accenture', 
-    url: '/assets/logos/accenture.svg',
-    width: 120
+  {
+    name: "Accenture",
+    url: "/assets/logos/accenture.svg",
+    width: 120,
   },
-  { 
-    name: 'Digital Catapult', 
-    url: '/assets/logos/Digital_Catapult.svg',
-    width: 160
+  {
+    name: "Digital Catapult",
+    url: "/assets/logos/Digital_Catapult.svg",
+    width: 160,
   },
-  { 
-    name: 'IBM', 
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png',
-    width: 100
+  {
+    name: "IBM",
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png",
+    width: 100,
   },
-  // { 
-  //   name: 'Ada', 
+  // {
+  //   name: 'Ada',
   //   url: '/assets/logos/ada.svg',
   //   width: 120
   // }
@@ -111,19 +119,24 @@ const partnerLogos = [
 
 export default function ResourcesPage() {
   const allArticles = getAllArticlesMetadata();
-  
+
   // Separate featured and non-featured articles
-  const featuredArticles = allArticles.filter(article => article.featured);
-  const regularArticles = allArticles.filter(article => !article.featured);
+  const featuredArticles = allArticles.filter((article) => article.featured);
+  const regularArticles = allArticles.filter((article) => !article.featured);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
       <section className="relative px-4 py-24 text-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">Resources Hub</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">Discover expert guides and insights to excel in your apprenticeship journey</p>
-          
+          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            Resources Hub
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+            Discover expert guides and insights to excel in your apprenticeship
+            journey
+          </p>
+
           {/* Search Bar DO NOT REMOVE, WILL BE IMPLEMENTED LATER WHEN MORE ARTICLES ARE ADDED */}
           {/* <div className="relative max-w-2xl mx-auto">
             <div className="relative">
@@ -142,22 +155,20 @@ export default function ResourcesPage() {
       <section className="bg-gray-50 dark:bg-gray-900 py-8 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4">
           <p className="text-center text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">
-             Resources developed in collaboration with {/*teachers,*/} recruiters and apprentices at 
+            Resources developed in collaboration with {/*teachers,*/} recruiters
+            and apprentices at
           </p>
           <div className="flex justify-center items-center gap-12 flex-wrap">
             {partnerLogos.map((logo) => (
-              <div
-                key={logo.name}
-                className="flex items-center justify-center"
-              >
+              <div key={logo.name} className="flex items-center justify-center">
                 <img
                   src={logo.url}
                   alt={`${logo.name} logo`}
                   style={{ width: logo.width }}
                   className={`h-12 object-contain transition-all duration-300 ${
-                    logo.name === 'Digital Catapult' 
-                      ? 'brightness-0' 
-                      : 'grayscale'
+                    logo.name === "Digital Catapult"
+                      ? "brightness-0"
+                      : "grayscale"
                   } hover:grayscale-0 dark:invert`}
                 />
               </div>
@@ -173,11 +184,17 @@ export default function ResourcesPage() {
           <div className="mb-16">
             <div className="flex items-center mb-8">
               <Star className="w-6 h-6 text-orange-500 mr-2" />
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Featured Resources</h2>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Featured Resources
+              </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
+                <ArticleCard
+                  key={article.id}
+                  article={article}
+                  aria-label={`Read more about ${article.title}`}
+                />
               ))}
             </div>
           </div>
@@ -185,11 +202,15 @@ export default function ResourcesPage() {
 
         {/* Latest Articles Section */}
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Latest Resources</h2>
-          
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+            Latest Resources
+          </h2>
+
           {regularArticles.length === 0 ? (
             <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-              <p className="text-gray-600 dark:text-gray-400">No articles found. Check back soon for new content!</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                No articles found. Check back soon for new content!
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

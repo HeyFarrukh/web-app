@@ -1,21 +1,37 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, AlertCircle, X, Sparkles, Zap, Bot, Cpu, Target, TrendingUp, FileText, Key, Copy, Check, Upload, Search } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { geminiService } from '@/services/ai/geminiService';
-import { cvTrackingService } from '@/services/cv/cvTrackingService';
-import { useAuth } from '@/hooks/useAuth';
-import { Analytics } from '@/services/analytics/analytics';
-import { FileUpload } from '@/components/ui/FileUpload';
-import { pdfService } from '@/services/pdf/pdfService';
-import { pdfStorageService } from '@/services/storage/pdfStorageService';
-import { createLogger } from '@/services/logger/logger';
-import { vacancyService } from '@/services/supabase/vacancyService';
-import { ListingType } from '@/types/listing';
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Lock,
+  AlertCircle,
+  X,
+  Sparkles,
+  Zap,
+  Bot,
+  Cpu,
+  Target,
+  TrendingUp,
+  FileText,
+  Key,
+  Copy,
+  Check,
+  Upload,
+  Search,
+} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { geminiService } from "@/services/ai/geminiService";
+import { cvTrackingService } from "@/services/cv/cvTrackingService";
+import { useAuth } from "@/hooks/useAuth";
+import { Analytics } from "@/services/analytics/analytics";
+import { FileUpload } from "@/components/ui/FileUpload";
+import { pdfService } from "@/services/pdf/pdfService";
+import { pdfStorageService } from "@/services/storage/pdfStorageService";
+import { createLogger } from "@/services/logger/logger";
+import { vacancyService } from "@/services/supabase/vacancyService";
+import { ListingType } from "@/types/listing";
 
-const logger = createLogger({ module: 'OptimiseCV' });
+const logger = createLogger({ module: "OptimiseCV" });
 
 interface ScoreCategory {
   name: string;
@@ -57,36 +73,43 @@ interface WarningState {
 
 // Utility functions
 export const formatFileSize = (bytes: number): string => {
-  if (bytes < 1024) return bytes + ' bytes';
-  else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-  else return (bytes / 1048576).toFixed(1) + ' MB';
+  if (bytes < 1024) return bytes + " bytes";
+  else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+  else return (bytes / 1048576).toFixed(1) + " MB";
 };
 
 // Define error messages in one place
 export const errorMessages = {
-  fileTooLarge: `File size exceeds ${formatFileSize(MAX_FILE_SIZE)} limit. Please upload a smaller PDF file. 📄`,
-  tooManyFiles: 'Please upload only one PDF file at a time. 📄',
-  fileInvalidType: 'Please upload a PDF file. Other file types are not supported. 📄',
-  processingError: 'Failed to process PDF. Please try again or paste your CV text manually. 📄',
-  uploadError: 'Failed to upload PDF. Please try again. 📄',
-  insufficientText: 'The extracted text seems too short. Please ensure your PDF contains readable text or try pasting your CV manually. 📄',
-  authError: 'Please sign in to upload and process your CV. 📄'
+  fileTooLarge: `File size exceeds ${formatFileSize(
+    MAX_FILE_SIZE
+  )} limit. Please upload a smaller PDF file. 📄`,
+  tooManyFiles: "Please upload only one PDF file at a time. 📄",
+  fileInvalidType:
+    "Please upload a PDF file. Other file types are not supported. 📄",
+  processingError:
+    "Failed to process PDF. Please try again or paste your CV text manually. 📄",
+  uploadError: "Failed to upload PDF. Please try again. 📄",
+  insufficientText:
+    "The extracted text seems too short. Please ensure your PDF contains readable text or try pasting your CV manually. 📄",
+  authError: "Please sign in to upload and process your CV. 📄",
 };
 
 export const OptimiseCV = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading, userData } = useAuth();
-  const [cvText, setCvText] = useState('');
-  const [jobDescription, setJobDescription] = useState('');
+  const [cvText, setCvText] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
   const [isManualMode, setIsManualMode] = useState(false);
-  const [selectedApprenticeship, setSelectedApprenticeship] = useState<ListingType | null>(null);
+  const [selectedApprenticeship, setSelectedApprenticeship] =
+    useState<ListingType | null>(null);
   const [apprenticeships, setApprenticeships] = useState<ListingType[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isLoadingApprenticeships, setIsLoadingApprenticeships] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoadingApprenticeships, setIsLoadingApprenticeships] =
+    useState(false);
   const [warning, setWarning] = useState<WarningState>({
     show: false,
-    message: ''
+    message: "",
   });
   const [score, setScore] = useState<number | null>(null);
   const [scoreCategories, setScoreCategories] = useState<ScoreCategory[]>([]);
@@ -111,14 +134,14 @@ export const OptimiseCV = () => {
 
   useEffect(() => {
     // Track CV Optimisation page view
-    Analytics.event('page_view', 'optimise_cv_page');
+    Analytics.event("page_view", "optimise_cv_page");
   }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isAnalyzing) {
       interval = setInterval(() => {
-        setLoadingMessageIndex(prev => (prev + 1) % LoadingMessages.length);
+        setLoadingMessageIndex((prev) => (prev + 1) % LoadingMessages.length);
       }, 2000);
     }
     return () => clearInterval(interval);
@@ -126,7 +149,7 @@ export const OptimiseCV = () => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/signin');
+      router.push("/signin");
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -138,20 +161,20 @@ export const OptimiseCV = () => {
           page,
           pageSize: ITEMS_PER_PAGE,
           filters: {
-            search: searchQuery || undefined
-          }
+            search: searchQuery || undefined,
+          },
         });
 
         if (page === 1) {
           setApprenticeships(vacancies || []);
         } else {
-          setApprenticeships(prev => [...prev, ...(vacancies || [])]);
+          setApprenticeships((prev) => [...prev, ...(vacancies || [])]);
         }
 
         setHasMore((vacancies || []).length === ITEMS_PER_PAGE);
       } catch (error) {
-        console.error('Failed to load apprenticeships:', error);
-        showWarning('Failed to load apprenticeships. Please try again.');
+        console.error("Failed to load apprenticeships:", error);
+        showWarning("Failed to load apprenticeships. Please try again.");
       } finally {
         setIsLoadingApprenticeships(false);
       }
@@ -175,14 +198,14 @@ export const OptimiseCV = () => {
             page,
             pageSize: ITEMS_PER_PAGE,
             filters: {
-              search: searchQuery || undefined
-            }
+              search: searchQuery || undefined,
+            },
           });
 
-          setApprenticeships(prev => [...prev, ...(vacancies || [])]);
+          setApprenticeships((prev) => [...prev, ...(vacancies || [])]);
           setHasMore((vacancies || []).length === ITEMS_PER_PAGE);
         } catch (error) {
-          console.error('Failed to load more apprenticeships:', error);
+          console.error("Failed to load more apprenticeships:", error);
         } finally {
           setIsLoadingApprenticeships(false);
         }
@@ -197,7 +220,7 @@ export const OptimiseCV = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoadingApprenticeships) {
-          setPage(prev => prev + 1);
+          setPage((prev) => prev + 1);
         }
       },
       { threshold: 0.5 }
@@ -217,9 +240,11 @@ export const OptimiseCV = () => {
 
   useEffect(() => {
     // If apprenticeship ID is in URL, select it
-    const apprenticeshipId = searchParams?.get('apprenticeshipId');
+    const apprenticeshipId = searchParams?.get("apprenticeshipId");
     if (apprenticeshipId) {
-      const apprenticeship = apprenticeships.find(a => a.id === apprenticeshipId);
+      const apprenticeship = apprenticeships.find(
+        (a) => a.id === apprenticeshipId
+      );
       if (apprenticeship) {
         setSelectedApprenticeship(apprenticeship);
         const formattedDescription = formatJobDescription(apprenticeship);
@@ -233,21 +258,36 @@ export const OptimiseCV = () => {
       `Role: ${apprenticeship.title}`,
       `Company: ${apprenticeship.employerName}`,
       apprenticeship.description && `Overview:\n${apprenticeship.description}`,
-      apprenticeship.fullDescription && `Detailed Requirements:\n${apprenticeship.fullDescription}`,
-      apprenticeship.skills && apprenticeship.skills.length > 0 && `Required Skills:\n- ${apprenticeship.skills.join('\n- ')}`,
-      apprenticeship.qualifications && apprenticeship.qualifications.length > 0 && `Required Qualifications:\n- ${apprenticeship.qualifications.map(qual => 
-        typeof qual === 'string' ? qual : qual.subject || qual.name
-      ).join('\n- ')}`,
-      apprenticeship.wage && `Salary: ${apprenticeship.wage.wageType === 'CompetitiveSalary' 
-        ? 'Competitive Salary' 
-        : apprenticeship.wage.wageAdditionalInformation || `${apprenticeship.wage.wageType} (${apprenticeship.wage.wageUnit})`}`,
-      apprenticeship.hoursPerWeek && `Hours: ${apprenticeship.hoursPerWeek} hours per week`,
-      apprenticeship.workingWeekDescription && `Working Pattern: ${apprenticeship.workingWeekDescription}`,
-      apprenticeship.expectedDuration && `Duration: ${apprenticeship.expectedDuration}`,
-      apprenticeship.course && `Course Details: Level ${apprenticeship.course.level} - ${apprenticeship.course.title} (${apprenticeship.course.route})`
+      apprenticeship.fullDescription &&
+        `Detailed Requirements:\n${apprenticeship.fullDescription}`,
+      apprenticeship.skills &&
+        apprenticeship.skills.length > 0 &&
+        `Required Skills:\n- ${apprenticeship.skills.join("\n- ")}`,
+      apprenticeship.qualifications &&
+        apprenticeship.qualifications.length > 0 &&
+        `Required Qualifications:\n- ${apprenticeship.qualifications
+          .map((qual) =>
+            typeof qual === "string" ? qual : qual.subject || qual.name
+          )
+          .join("\n- ")}`,
+      apprenticeship.wage &&
+        `Salary: ${
+          apprenticeship.wage.wageType === "CompetitiveSalary"
+            ? "Competitive Salary"
+            : apprenticeship.wage.wageAdditionalInformation ||
+              `${apprenticeship.wage.wageType} (${apprenticeship.wage.wageUnit})`
+        }`,
+      apprenticeship.hoursPerWeek &&
+        `Hours: ${apprenticeship.hoursPerWeek} hours per week`,
+      apprenticeship.workingWeekDescription &&
+        `Working Pattern: ${apprenticeship.workingWeekDescription}`,
+      apprenticeship.expectedDuration &&
+        `Duration: ${apprenticeship.expectedDuration}`,
+      apprenticeship.course &&
+        `Course Details: Level ${apprenticeship.course.level} - ${apprenticeship.course.title} (${apprenticeship.course.route})`,
     ].filter(Boolean);
 
-    return sections.join('\n\n');
+    return sections.join("\n\n");
   };
 
   useEffect(() => {
@@ -260,27 +300,33 @@ export const OptimiseCV = () => {
   const showWarning = (message: string) => {
     setWarning({
       show: true,
-      message
+      message,
     });
     // Increased timeout to give users more time to read the message
     setTimeout(() => {
-      setWarning({ show: false, message: '' });
+      setWarning({ show: false, message: "" });
     }, 7000); // 7 seconds instead of 5
   };
 
   const validateInput = () => {
     if (cvText.length < MIN_CV_LENGTH) {
-      showWarning('Please paste your complete CV. The content seems too short to be a valid CV.');
+      showWarning(
+        "Please paste your complete CV. The content seems too short to be a valid CV."
+      );
       return false;
     }
 
     if (!isManualMode && !selectedApprenticeship) {
-      showWarning('Please select an apprenticeship or switch to manual mode to enter a job description.');
+      showWarning(
+        "Please select an apprenticeship or switch to manual mode to enter a job description."
+      );
       return false;
     }
 
     if (isManualMode && jobDescription.length < MIN_JOB_DESC_LENGTH) {
-      showWarning('Please paste the job description. This helps us tailor your CV to the role.');
+      showWarning(
+        "Please paste the job description. This helps us tailor your CV to the role."
+      );
       return false;
     }
 
@@ -294,7 +340,9 @@ export const OptimiseCV = () => {
     const isDuplicateJobDesc = jobDescription === lastAnalysis.jobDesc;
 
     if (isDuplicateCV && isDuplicateJobDesc) {
-      showWarning("You've already analysed this exact CV and job description. Make some changes before analysing again.");
+      showWarning(
+        "You've already analysed this exact CV and job description. Make some changes before analysing again."
+      );
       return true;
     }
 
@@ -306,8 +354,12 @@ export const OptimiseCV = () => {
 
     const timeSinceLastAnalysis = Date.now() - lastAnalysis.timestamp;
     if (timeSinceLastAnalysis < ANALYSIS_COOLDOWN) {
-      const remainingTime = Math.ceil((ANALYSIS_COOLDOWN - timeSinceLastAnalysis) / 1000);
-      showWarning(`Thanks for waiting ${remainingTime} seconds! You're a legend for being patient, and it helps us keep CV optimisations free! 🫶🚀`);        
+      const remainingTime = Math.ceil(
+        (ANALYSIS_COOLDOWN - timeSinceLastAnalysis) / 1000
+      );
+      showWarning(
+        `Thanks for waiting ${remainingTime} seconds! You're a legend for being patient, and it helps us keep CV optimisations free! 🫶🚀`
+      );
       return true;
     }
 
@@ -316,18 +368,18 @@ export const OptimiseCV = () => {
 
   const handleOptimise = async () => {
     if (!isAuthenticated) {
-      Analytics.event('cv_optimization', 'auth_required');
-      router.push('/signin');
+      Analytics.event("cv_optimization", "auth_required");
+      router.push("/signin");
       return;
     }
 
     if (!validateInput()) {
-      Analytics.event('cv_optimization', 'validation_error');
+      Analytics.event("cv_optimization", "validation_error");
       return;
     }
 
     if (checkDuplicateAnalysis() || checkCooldown()) {
-      Analytics.event('cv_optimization', 'rate_limit');
+      Analytics.event("cv_optimization", "rate_limit");
       return;
     }
 
@@ -335,10 +387,10 @@ export const OptimiseCV = () => {
 
     try {
       setIsAnalyzing(true);
-      Analytics.event('cv_optimization', 'start_analysis');
+      Analytics.event("cv_optimization", "start_analysis");
 
       const analysis = await geminiService.analyzeCV(cvText, jobDescription);
-      
+
       if (userData?.id && userData?.email) {
         await cvTrackingService.recordOptimisation(
           userData.id,
@@ -348,34 +400,41 @@ export const OptimiseCV = () => {
           {
             tokenCount: cvText.split(/\s+/).length,
             processingTime: Date.now() - startTime,
-            apiVersion: 'gemini-2.0-flash'
+            apiVersion: "gemini-2.0-flash",
           },
           userData.email
         );
 
-        Analytics.event('cv_optimization', 'complete', `Score: ${analysis.overallScore}`);
+        Analytics.event(
+          "cv_optimization",
+          "complete",
+          `Score: ${analysis.overallScore}`
+        );
       }
 
       setScore(analysis.overallScore);
-      setScoreCategories(analysis.categories.map(cat => ({
-        ...cat,
-        icon: getIconForCategory(cat.name)
-      })));
+      setScoreCategories(
+        analysis.categories.map((cat) => ({
+          ...cat,
+          icon: getIconForCategory(cat.name),
+        }))
+      );
 
       const validImprovements = analysis.improvements.filter(
-        imp => (imp.suggestions?.length > 0 || imp.optimisedContent)
+        (imp) => imp.suggestions?.length > 0 || imp.optimisedContent
       );
       setImprovements(validImprovements);
 
       setLastAnalysis({
         cv: cvText,
         jobDesc: jobDescription,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
-      
     } catch (error) {
-      logger.error('Analysis failed:', error);
-      showWarning('Sorry, something went wrong while analysing your CV. Please try again.');
+      logger.error("Analysis failed:", error);
+      showWarning(
+        "Sorry, something went wrong while analysing your CV. Please try again."
+      );
     } finally {
       setIsAnalyzing(false);
     }
@@ -384,24 +443,24 @@ export const OptimiseCV = () => {
   const handleCopyContent = async (sectionId: string, content: string) => {
     try {
       await navigator.clipboard.writeText(content);
-      setCopyStates(prev => ({ ...prev, [sectionId]: true }));
+      setCopyStates((prev) => ({ ...prev, [sectionId]: true }));
       setTimeout(() => {
-        setCopyStates(prev => ({ ...prev, [sectionId]: false }));
+        setCopyStates((prev) => ({ ...prev, [sectionId]: false }));
       }, 2000);
     } catch (err) {
-      logger.error('Failed to copy:', err);
+      logger.error("Failed to copy:", err);
     }
   };
 
   const getIconForCategory = (name: string) => {
     switch (name.toLowerCase()) {
-      case 'relevance':
+      case "relevance":
         return Target;
-      case 'impact':
+      case "impact":
         return TrendingUp;
-      case 'clarity':
+      case "clarity":
         return FileText;
-      case 'keywords':
+      case "keywords":
         return Key;
       default:
         return Sparkles;
@@ -426,53 +485,72 @@ export const OptimiseCV = () => {
       setPdfFile(file);
       setPdfError(undefined);
       setIsPdfProcessing(true);
-      
+
       // Ensure user is authenticated
       if (!userData?.id) {
         setPdfError(errorMessages.authError);
-        Analytics.event('cv_optimization', 'pdf_upload_error', 'auth_required');
+        Analytics.event("cv_optimization", "pdf_upload_error", "auth_required");
         return;
       }
 
       try {
         // Track PDF upload start
-        Analytics.event('cv_optimization', 'pdf_upload_start');
-        
+        Analytics.event("cv_optimization", "pdf_upload_start");
+
         // Upload to Supabase storage
-        const { path, error: uploadError } = await pdfStorageService.uploadPdf(file, userData.id);
-        
+        const { path, error: uploadError } = await pdfStorageService.uploadPdf(
+          file,
+          userData.id
+        );
+
         if (uploadError) {
-          logger.error('PDF upload error:', uploadError);
+          logger.error("PDF upload error:", uploadError);
           setPdfError(errorMessages.uploadError);
-          Analytics.event('cv_optimization', 'pdf_upload_error', 'storage_failed');
+          Analytics.event(
+            "cv_optimization",
+            "pdf_upload_error",
+            "storage_failed"
+          );
           return;
         }
-        
+
         try {
           // Extract text from PDF
           const extractedText = await pdfService.smartExtractTextFromPDF(file);
-          
+
           if (extractedText.length < MIN_CV_LENGTH) {
             setPdfError(errorMessages.insufficientText);
-            Analytics.event('cv_optimization', 'pdf_extraction_error', 'insufficient_text');
+            Analytics.event(
+              "cv_optimization",
+              "pdf_extraction_error",
+              "insufficient_text"
+            );
           } else {
             setCvText(extractedText);
-            Analytics.event('cv_optimization', 'pdf_extraction_success');
+            Analytics.event("cv_optimization", "pdf_extraction_success");
           }
         } catch (extractError) {
-          logger.error('PDF extraction error:', extractError);
+          logger.error("PDF extraction error:", extractError);
           setPdfError(errorMessages.processingError);
-          Analytics.event('cv_optimization', 'pdf_extraction_error', 'extraction_failed');
+          Analytics.event(
+            "cv_optimization",
+            "pdf_extraction_error",
+            "extraction_failed"
+          );
         }
       } catch (uploadError) {
-        logger.error('PDF upload error:', uploadError);
+        logger.error("PDF upload error:", uploadError);
         setPdfError(errorMessages.uploadError);
-        Analytics.event('cv_optimization', 'pdf_upload_error', 'upload_failed');
+        Analytics.event("cv_optimization", "pdf_upload_error", "upload_failed");
       }
     } catch (error) {
-      logger.error('PDF processing error:', error);
+      logger.error("PDF processing error:", error);
       setPdfError(errorMessages.processingError);
-      Analytics.event('cv_optimization', 'pdf_processing_error', 'unknown_error');
+      Analytics.event(
+        "cv_optimization",
+        "pdf_processing_error",
+        "unknown_error"
+      );
     } finally {
       setIsPdfProcessing(false);
     }
@@ -509,7 +587,8 @@ export const OptimiseCV = () => {
             AI CV <span className="text-orange-500">Optimisation ᵇᵉᵗᵃ</span>
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Let our AI analyse and enhance your CV for better apprenticeship opportunities
+            Let our AI analyse and enhance your CV for better apprenticeship
+            opportunities
           </p>
         </motion.div>
 
@@ -540,13 +619,21 @@ export const OptimiseCV = () => {
               <div className="flex items-center space-x-2 mb-4">
                 <button
                   onClick={() => setIsManualMode(false)}
-                  className={`px-4 py-2 text-sm font-medium ${isManualMode ? 'text-gray-500 dark:text-gray-400' : 'text-orange-500 dark:text-orange-400'}`}
+                  className={`px-4 py-2 text-sm font-medium ${
+                    isManualMode
+                      ? "text-gray-500 dark:text-gray-400"
+                      : "text-orange-500 dark:text-orange-400"
+                  }`}
                 >
                   Select Apprenticeship
                 </button>
                 <button
                   onClick={() => setIsManualMode(true)}
-                  className={`px-4 py-2 text-sm font-medium ${isManualMode ? 'text-orange-500 dark:text-orange-400' : 'text-gray-500 dark:text-gray-400'}`}
+                  className={`px-4 py-2 text-sm font-medium ${
+                    isManualMode
+                      ? "text-orange-500 dark:text-orange-400"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
                 >
                   Enter Manually
                 </button>
@@ -563,22 +650,24 @@ export const OptimiseCV = () => {
                       placeholder="Search for apprenticeships..."
                     />
                   </div>
-                  
-                  <div 
+
+                  <div
                     className="overflow-y-auto space-y-2 custom-scrollbar"
-                    style={{ 
+                    style={{
                       maxHeight: `${VISIBLE_ITEMS * 84}px`, // Fixed height for 3 items (each item is approximately 84px high)
-                      position: 'relative'
+                      position: "relative",
                     }}
                   >
                     {apprenticeships.map((apprenticeship) => (
                       <button
                         key={apprenticeship.id}
-                        onClick={() => setSelectedApprenticeship(apprenticeship)}
+                        onClick={() =>
+                          setSelectedApprenticeship(apprenticeship)
+                        }
                         className={`w-full p-4 rounded-lg border ${
                           selectedApprenticeship?.id === apprenticeship.id
-                            ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+                            ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
+                            : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
                         } hover:border-orange-500 transition-colors duration-200 text-left group`}
                       >
                         <div className="flex flex-col space-y-1">
@@ -602,11 +691,12 @@ export const OptimiseCV = () => {
                     </div>
                   </div>
 
-                  {apprenticeships.length === 0 && !isLoadingApprenticeships && (
-                    <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                      No apprenticeships found
-                    </div>
-                  )}
+                  {apprenticeships.length === 0 &&
+                    !isLoadingApprenticeships && (
+                      <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                        No apprenticeships found
+                      </div>
+                    )}
                 </div>
               ) : (
                 <textarea
@@ -624,7 +714,9 @@ export const OptimiseCV = () => {
               className="w-full py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               <Sparkles className="w-5 h-5" />
-              <span>{isAnalyzing ? 'AI is Analysing...' : 'Optimise with AI'}</span>
+              <span>
+                {isAnalyzing ? "AI is Analysing..." : "Optimise with AI"}
+              </span>
             </button>
           </motion.div>
 
@@ -641,7 +733,7 @@ export const OptimiseCV = () => {
                     <div className="absolute inset-0 rounded-full border-4 border-orange-500 animate-spin" />
                     <Bot className="absolute inset-0 m-auto w-10 h-10 text-orange-500" />
                   </div>
-                  <motion.p 
+                  <motion.p
                     key={loadingMessageIndex}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -655,7 +747,7 @@ export const OptimiseCV = () => {
             ) : score !== null ? (
               <>
                 <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-orange-500/20">
-                  <div className="text-center mb-8">
+                  <div className="text-center mb-8" aria-label={`CV score`}>
                     <motion.div
                       className="relative w-48 h-48 mx-auto"
                       initial={{ scale: 0 }}
@@ -664,7 +756,13 @@ export const OptimiseCV = () => {
                     >
                       <svg className="w-full h-full" viewBox="0 0 100 100">
                         <defs>
-                          <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <linearGradient
+                            id="scoreGradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="0%"
+                          >
                             <stop offset="0%" stopColor="#f97316" />
                             <stop offset="100%" stopColor="#fb923c" />
                           </linearGradient>
@@ -702,7 +800,9 @@ export const OptimiseCV = () => {
                           <div className="text-4xl font-bold text-gray-900 dark:text-white">
                             {score}
                           </div>
-                          <div className="text-sm text-orange-500 font-medium">Overall Score</div>
+                          <div className="text-sm text-orange-500 font-medium">
+                            Overall Score
+                          </div>
                         </div>
                       </motion.div>
                     </motion.div>
@@ -729,7 +829,10 @@ export const OptimiseCV = () => {
                               className="h-full bg-orange-500"
                               initial={{ width: 0 }}
                               animate={{ width: `${category.score}%` }}
-                              transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
+                              transition={{
+                                duration: 1,
+                                delay: 0.5 + index * 0.1,
+                              }}
                             />
                           </div>
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
@@ -766,18 +869,24 @@ export const OptimiseCV = () => {
                             <span>{improvement.section}</span>
                           </h4>
                           <div className="flex items-center space-x-3">
-                            <span className={`text-sm font-medium ${getImpactColor(improvement.impact)}`}>
+                            <span
+                              className={`text-sm font-medium ${getImpactColor(
+                                improvement.impact
+                              )}`}
+                            >
                               {improvement.impact.toUpperCase()} IMPACT
                             </span>
                             <div className="flex items-center space-x-1">
                               <span className="text-sm font-medium text-gray-900 dark:text-white">
                                 {improvement.score}
                               </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">/100</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                /100
+                              </span>
                             </div>
                           </div>
                         </div>
-                        
+
                         {improvement.context && (
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                             {improvement.context}
@@ -806,7 +915,12 @@ export const OptimiseCV = () => {
                                 Optimised {improvement.section}
                               </h5>
                               <button
-                                onClick={() => handleCopyContent(improvement.section, improvement.optimisedContent!)}
+                                onClick={() =>
+                                  handleCopyContent(
+                                    improvement.section,
+                                    improvement.optimisedContent!
+                                  )
+                                }
                                 className="flex items-center space-x-1 text-orange-500 hover:text-orange-600 text-sm"
                               >
                                 {copyStates[improvement.section] ? (
@@ -853,13 +967,16 @@ export const OptimiseCV = () => {
         >
           <div className="max-w-3xl mx-auto px-6 py-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-sm text-gray-600 dark:text-gray-400">
             <p className="mb-2">
-              Our AI-powered CV optimisation is designed to provide valuable insights, but results may vary. We're always working to improve—if you spot anything that seems off, let us know at{' '}
-              <a 
-                href="mailto:feedback@apprenticewatch.com" 
+              Our AI-powered CV optimisation is designed to provide valuable
+              insights, but results may vary. We're always working to improve—if
+              you spot anything that seems off, let us know at{" "}
+              <a
+                href="mailto:feedback@apprenticewatch.com"
                 className="text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-500"
               >
                 feedback@apprenticewatch.com
-              </a>.
+              </a>
+              .
             </p>
           </div>
         </motion.div>
@@ -890,7 +1007,7 @@ export const OptimiseCV = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setWarning({ show: false, message: '' })}
+                  onClick={() => setWarning({ show: false, message: "" })}
                   className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                 >
                   <X className="w-5 h-5" />
@@ -898,7 +1015,7 @@ export const OptimiseCV = () => {
               </div>
               <div className="flex justify-end">
                 <button
-                  onClick={() => setWarning({ show: false, message: '' })}
+                  onClick={() => setWarning({ show: false, message: "" })}
                   className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
                 >
                   Got it
@@ -910,4 +1027,4 @@ export const OptimiseCV = () => {
       </AnimatePresence>
     </div>
   );
-}
+};
