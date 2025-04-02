@@ -67,7 +67,7 @@ export const UserProfile = () => {
               src={userData.picture}
               alt={userData.name || ""}
               className="w-11 h-11 rounded-full border-2 border-white dark:border-gray-800 relative z-10"
-              aria-label="Default user icon"
+              aria-label="User icon"
             />
           </div>
         ) : (

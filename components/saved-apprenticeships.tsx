@@ -1,15 +1,19 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { ListingCard } from '@/components/listings/ListingCard';
-import { ListingType } from '@/types/listing';
-import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
-import { useAuth } from '@/hooks/useAuth';
-import { useAuthProtection } from '@/hooks/useAuthProtection';
-import { Bookmark, Trash2 } from 'lucide-react';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { savedApprenticeshipEvents, APPRENTICESHIP_UNSAVED, ALL_APPRENTICESHIPS_REMOVED } from '@/services/events/savedApprenticeshipEvents';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ListingCard } from "@/components/listings/ListingCard";
+import { ListingType } from "@/types/listing";
+import { savedApprenticeshipService } from "@/services/supabase/savedApprenticeshipService";
+import { useAuth } from "@/hooks/useAuth";
+import { useAuthProtection } from "@/hooks/useAuthProtection";
+import { Bookmark, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import {
+  savedApprenticeshipEvents,
+  APPRENTICESHIP_UNSAVED,
+  ALL_APPRENTICESHIPS_REMOVED,
+} from "@/services/events/savedApprenticeshipEvents";
 
 export default function SavedApprenticeships() {
   const { userData, isLoading: authLoading } = useAuth();
@@ -18,14 +22,15 @@ export default function SavedApprenticeships() {
   const [loading, setLoading] = useState(true);
   const [showRemoveAllDialog, setShowRemoveAllDialog] = useState(false);
   const [showRemoveSingleDialog, setShowRemoveSingleDialog] = useState(false);
-  const [selectedVacancySlug, setSelectedVacancySlug] = useState<string>('');
+  const [selectedVacancySlug, setSelectedVacancySlug] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
     const fetchSavedApprenticeships = async () => {
       if (userData) {
         setLoading(true);
-        const listings = await savedApprenticeshipService.getSavedApprenticeships(userData.id);
+        const listings =
+          await savedApprenticeshipService.getSavedApprenticeships(userData.id);
         setSavedListings(listings);
         setLoading(false);
       }
@@ -38,21 +43,33 @@ export default function SavedApprenticeships() {
 
   const handleDeleteConfirm = async () => {
     if (!userData || !selectedVacancySlug) return;
-    
+
     try {
-      const success = await savedApprenticeshipService.unsaveApprenticeship(userData.id, selectedVacancySlug);
+      const success = await savedApprenticeshipService.unsaveApprenticeship(
+        userData.id,
+        selectedVacancySlug
+      );
       if (success) {
-        setSavedListings(prevListings => prevListings.filter(listing => listing.slug !== selectedVacancySlug));
+        setSavedListings((prevListings) =>
+          prevListings.filter((listing) => listing.slug !== selectedVacancySlug)
+        );
         setShowRemoveSingleDialog(false);
         // Emit event that this apprenticeship was unsaved
-        savedApprenticeshipEvents.emit(APPRENTICESHIP_UNSAVED, selectedVacancySlug);
+        savedApprenticeshipEvents.emit(
+          APPRENTICESHIP_UNSAVED,
+          selectedVacancySlug
+        );
       } else {
-        throw new Error('Failed to delete saved apprenticeship');
+        throw new Error("Failed to delete saved apprenticeship");
       }
     } catch (error) {
-      console.error('Error deleting saved apprenticeship:', error);
+      console.error("Error deleting saved apprenticeship:", error);
       // Show error to the user
-      alert(error instanceof Error ? error.message : 'Error deleting saved apprenticeship');
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Error deleting saved apprenticeship"
+      );
     }
   };
 
@@ -63,32 +80,38 @@ export default function SavedApprenticeships() {
 
   const handleDeleteAll = async () => {
     if (!userData) return;
-    
+
     try {
-      const success = await savedApprenticeshipService.removeAllSavedApprenticeships(userData.id);
+      const success =
+        await savedApprenticeshipService.removeAllSavedApprenticeships(
+          userData.id
+        );
       if (success) {
         // Store the slugs of all listings that were removed
-        const removedSlugs = savedListings.map(listing => listing.slug);
-        
+        const removedSlugs = savedListings.map((listing) => listing.slug);
+
         // Clear the listings
         setSavedListings([]);
         setShowRemoveAllDialog(false);
-        
+
         // Emit events for each removed listing
-        removedSlugs.forEach(slug => {
+        removedSlugs.forEach((slug) => {
           savedApprenticeshipEvents.emit(APPRENTICESHIP_UNSAVED, slug);
         });
-        
+
         // Also emit the 'all removed' event
-        savedApprenticeshipEvents.emit(ALL_APPRENTICESHIPS_REMOVED, '');
-      }
-      else {
-        throw new Error('Failed to remove all saved apprenticeships');
+        savedApprenticeshipEvents.emit(ALL_APPRENTICESHIPS_REMOVED, "");
+      } else {
+        throw new Error("Failed to remove all saved apprenticeships");
       }
     } catch (error) {
-      console.error('Error removing all saved apprenticeships:', error);
+      console.error("Error removing all saved apprenticeships:", error);
       // Show error to the user
-      alert(error instanceof Error ? error.message : 'Error removing all saved apprenticeships');
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Error removing all saved apprenticeships"
+      );
     }
   };
 
@@ -124,8 +147,9 @@ export default function SavedApprenticeships() {
               Save apprenticeships you're interested in to view them later.
             </p>
             <button
-              onClick={() => router.push('/apprenticeships')}
+              onClick={() => router.push("/apprenticeships")}
               className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+              aria-label="Browse apprenticeships"
             >
               Browse Apprenticeships
             </button>
@@ -144,16 +168,16 @@ export default function SavedApprenticeships() {
             <div className="space-y-6">
               {savedListings.map((listing) => (
                 <div key={listing.slug} className="relative">
-                  <button 
+                  <button
                     onClick={() => promptDeleteSingle(listing.slug)}
                     className="absolute top-4 right-4 z-10 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
                     aria-label="Delete saved apprenticeship"
                   >
                     <Trash2 className="w-5 h-5 text-red-500" />
                   </button>
-                  <ListingCard 
-                    listing={listing} 
-                    hideSaveButton={true} 
+                  <ListingCard
+                    listing={listing}
+                    hideSaveButton={true}
                     customLinkUrl={`/apprenticeships/${listing.slug}?fromPage=saved&scrollToId=${listing.slug}&fromSaved=true`}
                   />
                 </div>
@@ -163,7 +187,7 @@ export default function SavedApprenticeships() {
         )}
 
         {/* Remove All Confirmation Dialog */}
-        <ConfirmDialog 
+        <ConfirmDialog
           isOpen={showRemoveAllDialog}
           title="Remove All Saved Apprenticeships"
           message="Are you sure you want to remove all saved apprenticeships? This action cannot be undone."
@@ -175,7 +199,7 @@ export default function SavedApprenticeships() {
         />
 
         {/* Remove Single Confirmation Dialog */}
-        <ConfirmDialog 
+        <ConfirmDialog
           isOpen={showRemoveSingleDialog}
           title="Remove Saved Apprenticeship"
           message="Are you sure you want to remove this apprenticeship from your saved list?"
