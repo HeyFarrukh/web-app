@@ -3,8 +3,8 @@ import { vacancyService } from '@/services/supabase/vacancyService'
 import { getAllArticlesMetadata } from '@/lib/articles'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fetch all active vacancies
-  const { vacancies } = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} });
+  // Fetch all active vacancies without pagination
+  const vacancies = await vacancyService.getAllActiveVacanciesForSitemap();
 
   // Get all articles metadata
   const articles = getAllArticlesMetadata();
@@ -84,7 +84,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'weekly',
     priority: 0.8,
   }));
-
 
   // Return URLs in order: base URLs, article URLs, then vacancy URLs
   return [...baseUrls, ...articleUrls, ...vacancyUrls];

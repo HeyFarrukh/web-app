@@ -6,7 +6,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { companies } from '@/components/listings/companyData';
 
-export const dynamicParams = false;
+export const dynamicParams = true;
 export const revalidate = 0;
 
 export async function generateStaticParams() {

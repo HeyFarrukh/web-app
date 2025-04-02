@@ -305,6 +305,30 @@ class VacancyService {
     await this.revalidateCache(`/apprenticeships`);
   }
 
+  async getAllActiveVacanciesForSitemap() {
+    try {
+      const now = new Date().toISOString();
+      
+      // Get all active vacancies without pagination
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('*')
+        .eq('is_active', true)
+        .gt('closing_date', now)
+        .order('posted_date', { ascending: false });
+
+      if (error) {
+        console.error("[VacancyService] Supabase query error:", error);
+        throw error;
+      }
+
+      return data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [];
+    } catch (error: any) {
+      console.error("Error in getAllActiveVacanciesForSitemap:", error);
+      throw error;
+    }
+  }
+
   private async revalidateCache(path: string) {
     if (!this.REVALIDATION_SECRET) {
         console.error("REVALIDATION_SECRET_TOKEN is not set.");
