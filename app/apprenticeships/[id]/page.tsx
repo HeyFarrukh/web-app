@@ -4,6 +4,7 @@ import { ListingType } from '@/types/listing';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { companies } from '@/components/listings/companyData';
 
 export const dynamicParams = false;
 export const revalidate = 0;
@@ -22,18 +23,60 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     notFound();
   }
 
+  const getLogoUrl = (employerName: string) => {
+    const normalizedEmployerName = employerName.toLowerCase();
+    const company = companies.find((company) =>
+      company.name.toLowerCase() === normalizedEmployerName
+    );
+
+    if (company && company.domain) {
+      return `https://img.logo.dev/${company.domain}?token=${process.env.NEXT_PUBLIC_LOGODEV_KEY}`;
+    }
+
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(employerName)}&background=random`;
+  };
+
+  const formatWage = (wage: ListingType['wage']) => {
+    if (wage.wageType === 'Competitive Salary') {
+      return 'Competitive salary';
+    }
+    return `${wage.wageAdditionalInformation || wage.wageType} ${wage.wageUnit}`;
+  };
+
   return {
-    title: `${listing.title} at ${listing.employerName} | ApprenticeWatch`,
-    description: `Apply for the ${listing.title} apprenticeship at ${listing.employerName}. Level ${listing.course.level} opportunity in ${listing.address.addressLine3}. Learn more and apply now on ApprenticeWatch.`,
+    title: `${listing.title} - Level ${listing.course.level} Apprenticeship at ${listing.employerName} | ApprenticeWatch`,
+    description: `Level ${listing.course.level} ${listing.course.route} apprenticeship: ${listing.title} at ${listing.employerName}. ${formatWage(listing.wage)}. ${listing.hoursPerWeek}h/week in ${listing.address.addressLine3}. Start date: ${new Date(listing.startDate).toLocaleDateString()}. Apply now!`,
+    keywords: [
+      'apprenticeship',
+      listing.course.route.toLowerCase(),
+      `level ${listing.course.level}`,
+      listing.title.toLowerCase(),
+      listing.employerName.toLowerCase(),
+      listing.address.addressLine3 ? listing.address.addressLine3.toLowerCase() : '',
+      'career',
+      'job',
+      'training'
+    ].filter((keyword): keyword is string => keyword !== ''),
     openGraph: {
-      title: `${listing.title} at ${listing.employerName}`,
+      title: `${listing.title} - Level ${listing.course.level} ${listing.course.route} Apprenticeship`,
       description: `Apply for the ${listing.title} apprenticeship at ${listing.employerName}. Level ${listing.course.level} opportunity in ${listing.address.addressLine3}.`,
       type: 'website',
+      url: `https://apprenticewatch.com/apprenticeships/${listing.id}`,
+      images: [{
+        url: getLogoUrl(listing.employerName),
+        alt: `${listing.employerName} logo`,
+        width: 400,
+        height: 400
+      }]
     },
     twitter: {
       card: 'summary_large_image',
       title: `${listing.title} at ${listing.employerName}`,
-      description: `Level ${listing.course.level} apprenticeship opportunity in ${listing.address.addressLine3}. Apply now on ApprenticeWatch.`,
+      description: `Level ${listing.course.level} ${listing.course.route} apprenticeship in ${listing.address.addressLine3}. ${formatWage(listing.wage)}. Apply now!`,
+      images: [getLogoUrl(listing.employerName)]
+    },
+    alternates: {
+      canonical: `https://apprenticewatch.com/apprenticeships/${listing.id}`
     }
   };
 }
