@@ -19,7 +19,7 @@ interface FilterParams {
   search: string;
   location: string;
   level: string;
-  course_route: string;
+  category: string;
 }
 
 export default function Listings() { 
@@ -36,12 +36,14 @@ export default function Listings() {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>(() => {
+    return searchParams?.get('view') === 'map' ? 'map' : 'list';
+  });
   const [filters, setFilters] = useState<FilterParams>({
     search: searchParams?.get('search') || '',
     location: searchParams?.get('location') || '',
     level: searchParams?.get('level') || '',
-    course_route: searchParams?.get('course_route') || ''
+    category: searchParams?.get('category') || ''
   });
   const [showMapAnimation, setShowMapAnimation] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
@@ -54,6 +56,14 @@ export default function Listings() {
       Analytics.event('ui_interaction', 'view_mode_change', mode);
     }
     setViewMode(mode);
+    
+    // Update URL with view mode
+    const queryString = createQueryString({
+      ...filters,
+      page: currentPage.toString(),
+      view: mode
+    });
+    router.push(`${pathname}?${queryString}`, { scroll: false });
     
     // If user switches to map view, don't show the animation anymore
     if (mode === 'map') {
@@ -86,15 +96,16 @@ export default function Listings() {
       if (newFilters.level) {
         Analytics.event('filter', 'level_filter', newFilters.level);
       }
-      // Track course route filter if present
-      if (newFilters.course_route) {
-        Analytics.event('filter', 'course_route_filter', newFilters.course_route);
+      // Track category filter if present
+      if (newFilters.category) {
+        Analytics.event('filter', 'category_filter', newFilters.category);
       }
     }
     
     const queryString = createQueryString({
       ...newFilters,
       page: '1',
+      view: viewMode
     });
     router.push(`${pathname}?${queryString}`, { scroll: false });
   };
@@ -183,7 +194,8 @@ export default function Listings() {
     setCurrentPage(newPage);
     const queryString = createQueryString({ 
       ...filters,
-      page: newPage.toString() 
+      page: newPage.toString(),
+      view: viewMode
     });
     router.push(`${pathname}?${queryString}`, { scroll: false });
     

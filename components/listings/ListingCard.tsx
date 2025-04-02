@@ -54,7 +54,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
     search: searchParams?.get('search'),
     location: searchParams?.get('location'),
     level: searchParams?.get('level'),
-    course_route: searchParams?.get('course_route')
+    category: searchParams?.get('category')
   };
 
   const createDetailUrl = () => {
@@ -65,7 +65,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
     if (filterParams.search) url.searchParams.set('search', filterParams.search);
     if (filterParams.location) url.searchParams.set('location', filterParams.location);
     if (filterParams.level) url.searchParams.set('level', filterParams.level);
-    if (filterParams.course_route) url.searchParams.set('course_route', filterParams.course_route);
+    if (filterParams.category) url.searchParams.set('category', filterParams.category);
     
     return url.pathname + url.search;
   };

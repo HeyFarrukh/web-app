@@ -10,6 +10,13 @@ import { vacancyService } from '@/services/supabase/vacancyService';
 
 const ITEMS_PER_PAGE = 10;
 
+interface FilterParams {
+  search: string;
+  location: string;
+  level: string;
+  category: string;
+}
+
 export const Listings = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -25,11 +32,11 @@ export const Listings = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterParams>({
     search: searchParams?.get('search') || '',
     location: searchParams?.get('location') || '',
     level: searchParams?.get('level') || '',
-    course_route: searchParams?.get('course_route') || ''
+    category: searchParams?.get('category') || ''
   });
 
   // Create a function to update URL and maintain state
@@ -90,7 +97,7 @@ export const Listings = () => {
     });
   };
 
-  const handleFilterChange = (newFilters: typeof filters) => {
+  const handleFilterChange = (newFilters: FilterParams) => {
     setCurrentPage(1); // Reset to page 1 when filters change
     setFilters(newFilters);
   };

@@ -75,6 +75,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const referringPage = searchParams?.get('fromPage') || '1';
   const scrollToId = searchParams?.get('scrollToId');
   const fromSavedPage = searchParams?.get('fromSaved') === 'true';
+  const isMapView = searchParams?.get('view') === 'map';
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -465,16 +466,19 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                 if (scrollToId) {
                   url.searchParams.set('scrollToId', scrollToId);
                 }
+                if (isMapView) {
+                  url.searchParams.set('view', 'map');
+                }
                 // Preserve all filter parameters
                 const search = searchParams?.get('search');
                 const location = searchParams?.get('location');
                 const level = searchParams?.get('level');
-                const course_route = searchParams?.get('course_route');
+                const category = searchParams?.get('category');
                 
                 if (search) url.searchParams.set('search', search);
                 if (location) url.searchParams.set('location', location);
                 if (level) url.searchParams.set('level', level);
-                if (course_route) url.searchParams.set('course_route', course_route);
+                if (category) url.searchParams.set('category', category);
                 
                 router.push(url.toString());
               }

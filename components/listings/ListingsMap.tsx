@@ -6,6 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { MapPin } from 'lucide-react';
 import { ListingType } from '@/types/listing';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface ListingsMapProps {
   listings: ListingType[];
@@ -15,7 +16,8 @@ export const ListingsMap: React.FC<ListingsMapProps> = ({ listings }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
-  
+  const searchParams = useSearchParams();
+
   // Filter out listings with invalid coordinates
   const validListings = listings.filter(listing => 
     listing.location && 
@@ -124,13 +126,32 @@ export const ListingsMap: React.FC<ListingsMapProps> = ({ listings }) => {
         // Format address
         const formattedAddress = `${listing.address.addressLine1}, ${listing.address.postcode}`;
         
+        // Create detail URL with all current parameters
+        const url = new URL(`/apprenticeships/${listing.id}`, window.location.origin);
+        const currentPage = searchParams?.get('page') || '1';
+        url.searchParams.set('fromPage', currentPage);
+        url.searchParams.set('scrollToId', listing.id.toString());
+        
+        // Preserve all filter parameters
+        const search = searchParams?.get('search');
+        const location = searchParams?.get('location');
+        const level = searchParams?.get('level');
+        const category = searchParams?.get('category');
+        const view = searchParams?.get('view');
+        
+        if (search) url.searchParams.set('search', search);
+        if (location) url.searchParams.set('location', location);
+        if (level) url.searchParams.set('level', level);
+        if (category) url.searchParams.set('category', category);
+        if (view) url.searchParams.set('view', view);
+        
         popupContent.innerHTML = `
           <div class="flex items-center space-x-1 mb-1">
             <span class="font-semibold text-sm">${listing.employerName}</span>
           </div>
           <p class="text-xs mb-2 font-medium">${listing.title}</p>
           <p class="text-xs text-gray-600 mb-2">${formattedAddress}</p>
-          <a href="/apprenticeships/${listing.id}" class="text-xs text-orange-500 hover:text-orange-600 font-medium">View Details</a>
+          <a href="${url.pathname + url.search}" class="text-xs text-orange-500 hover:text-orange-600 font-medium">View Details</a>
         `;
         
         // Create popup

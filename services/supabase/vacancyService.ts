@@ -123,7 +123,7 @@ class VacancyService {
       search?: string;
       location?: string;
       level?: string;
-      course_route?: string;
+      category?: string;
     };
   }) {
     try {
@@ -166,8 +166,8 @@ class VacancyService {
         }
       }
 
-      if (filters.course_route?.trim()) {
-        query = query.eq('course_route', filters.course_route.trim());
+      if (filters.category?.trim()) {
+        query = query.eq('course_route', filters.category.trim());
       }
 
       // Apply pagination and ordering using safe methods
@@ -272,27 +272,30 @@ class VacancyService {
     }
   }
 
-  async getAvailableCourseRoutes(): Promise<string[]> {
+  async getAvailableCategories(): Promise<string[]> {
     try {
       const { data, error } = await supabase
-        .from(this.TABLE_NAME)
+        .from('vacancies')
         .select('course_route')
+        .not('course_route', 'is', null)
         .eq('is_active', true)
         .gt('closing_date', new Date().toISOString());
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      // Sanitize and deduplicate course routes
-      const routes = Array.from(new Set(
-        data?.map(d => d.course_route)
-          .filter(route => route && typeof route === 'string' && route.trim() !== '')
-          .map(route => route.trim())
-      )) as string[];
+      const categories = Array.from(new Set(
+        data
+          .map(item => item.course_route)
+          .filter(category => category && typeof category === 'string' && category.trim() !== '')
+          .map(category => category.trim())
+      )).sort();
 
-      return routes.sort();
+      return categories;
     } catch (error) {
-      console.error('Error in getAvailableCourseRoutes:', error);
-      throw error;
+      console.error('Error fetching categories:', error);
+      return [];
     }
   }
 
@@ -389,7 +392,7 @@ class VacancyService {
     search?: string;
     location?: string;
     level?: string;
-    course_route?: string;
+    category?: string;
   } = {}, attempt = 0): Promise<ListingType[]> {
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 2000;
@@ -423,8 +426,8 @@ class VacancyService {
         }
       }
 
-      if (filters.course_route?.trim()) {
-        query = query.eq('course_route', filters.course_route.trim());
+      if (filters.category?.trim()) {
+        query = query.eq('course_route', filters.category.trim());
       }
 
       const { data, error } = await query;
