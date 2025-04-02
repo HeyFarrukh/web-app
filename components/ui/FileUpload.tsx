@@ -1,14 +1,17 @@
-'use client';
+"use client";
 
-import React, { useCallback, useState, useEffect } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { FileText, Upload, X, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Analytics } from '@/services/analytics/analytics';
-import { errorMessages, formatFileSize } from '@/components/optimise-cv/OptimiseCV';
-import { createLogger } from '@/services/logger/logger';
+import React, { useCallback, useState, useEffect } from "react";
+import { useDropzone } from "react-dropzone";
+import { FileText, Upload, X, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Analytics } from "@/services/analytics/analytics";
+import {
+  errorMessages,
+  formatFileSize,
+} from "@/components/optimise-cv/OptimiseCV";
+import { createLogger } from "@/services/logger/logger";
 
-const logger = createLogger({ module: 'FileUpload' });
+const logger = createLogger({ module: "FileUpload" });
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -24,12 +27,12 @@ interface FileUploadProps {
 export const FileUpload: React.FC<FileUploadProps> = ({
   onFileSelect,
   onFileRemove,
-  acceptedFileTypes = ['application/pdf'],
+  acceptedFileTypes = ["application/pdf"],
   maxFileSize = 5 * 1024 * 1024, // 5MB default
   selectedFile,
   isProcessing,
   error,
-  onError
+  onError,
 }) => {
   const [dragActive, setDragActive] = useState(false);
 
@@ -39,8 +42,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         const file = acceptedFiles[0];
         if (file.size > maxFileSize) {
           onError?.(errorMessages.fileTooLarge);
-          Analytics.event('cv_optimization', 'pdf_upload_error', 'file_size_exceeded');
-          logger.warn('File size exceeded:', { size: file.size, maxSize: maxFileSize });
+          Analytics.event(
+            "cv_optimization",
+            "pdf_upload_error",
+            "file_size_exceeded"
+          );
+          logger.warn("File size exceeded:", {
+            size: file.size,
+            maxSize: maxFileSize,
+          });
           return;
         }
         onFileSelect(file);
@@ -54,36 +64,52 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       if (rejections.length > 0) {
         const rejection = rejections[0];
         const error = rejection.errors[0];
-        
-        if (error?.code === 'file-too-large') {
+
+        if (error?.code === "file-too-large") {
           onError?.(errorMessages.fileTooLarge);
-          Analytics.event('cv_optimization', 'pdf_upload_error', 'file_size_exceeded');
-          logger.warn('File size exceeded:', { size: rejection.file?.size, maxSize: maxFileSize });
-        } else if (error?.code === 'too-many-files') {
+          Analytics.event(
+            "cv_optimization",
+            "pdf_upload_error",
+            "file_size_exceeded"
+          );
+          logger.warn("File size exceeded:", {
+            size: rejection.file?.size,
+            maxSize: maxFileSize,
+          });
+        } else if (error?.code === "too-many-files") {
           onError?.(errorMessages.tooManyFiles);
-          Analytics.event('cv_optimization', 'pdf_upload_error', 'too_many_files');
-          logger.warn('Too many files uploaded');
-        } else if (error?.code === 'file-invalid-type') {
+          Analytics.event(
+            "cv_optimization",
+            "pdf_upload_error",
+            "too_many_files"
+          );
+          logger.warn("Too many files uploaded");
+        } else if (error?.code === "file-invalid-type") {
           onError?.(errorMessages.fileInvalidType);
-          Analytics.event('cv_optimization', 'pdf_upload_error', 'invalid_file_type');
-          logger.warn('Invalid file type:', { type: rejection.file?.type });
+          Analytics.event(
+            "cv_optimization",
+            "pdf_upload_error",
+            "invalid_file_type"
+          );
+          logger.warn("Invalid file type:", { type: rejection.file?.type });
         }
       }
     },
     [maxFileSize, onError]
   );
 
-  const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
-    onDrop,
-    onDropRejected,
-    accept: acceptedFileTypes.reduce((acc, type) => {
-      acc[type] = [];
-      return acc;
-    }, {} as Record<string, string[]>),
-    maxSize: maxFileSize,
-    multiple: false,
-    disabled: !!selectedFile || isProcessing
-  });
+  const { getRootProps, getInputProps, isDragActive, fileRejections } =
+    useDropzone({
+      onDrop,
+      onDropRejected,
+      accept: acceptedFileTypes.reduce((acc, type) => {
+        acc[type] = [];
+        return acc;
+      }, {} as Record<string, string[]>),
+      maxSize: maxFileSize,
+      multiple: false,
+      disabled: !!selectedFile || isProcessing,
+    });
 
   useEffect(() => {
     setDragActive(isDragActive);
@@ -96,16 +122,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           {...getRootProps()}
           className={`relative border-2 border-dashed rounded-lg p-4 text-center transition-all duration-200 ${
             dragActive
-              ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-              : 'border-gray-300 dark:border-gray-600 hover:border-orange-400 dark:hover:border-orange-500/50'
+              ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20"
+              : "border-gray-300 dark:border-gray-600 hover:border-orange-400 dark:hover:border-orange-500/50"
           }`}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent rounded-lg" />
-          <input {...getInputProps()} />
+          <input {...getInputProps()} aria-label="Upload CV" />
           <div className="relative py-6">
             <Upload
               className={`w-10 h-10 mx-auto mb-2 ${
-                dragActive ? 'text-orange-500' : 'text-gray-400 dark:text-gray-500'
+                dragActive
+                  ? "text-orange-500"
+                  : "text-gray-400 dark:text-gray-500"
               }`}
             />
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
