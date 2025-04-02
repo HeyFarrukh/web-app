@@ -123,6 +123,7 @@ class VacancyService {
       search?: string;
       location?: string;
       level?: string;
+      course_route?: string;
     };
   }) {
     try {
@@ -163,6 +164,10 @@ class VacancyService {
         if (!isNaN(levelNumber) && levelNumber > 0) {
           query = query.eq('course_level', levelNumber);
         }
+      }
+
+      if (filters.course_route?.trim()) {
+        query = query.eq('course_route', filters.course_route.trim());
       }
 
       // Apply pagination and ordering using safe methods
@@ -267,6 +272,30 @@ class VacancyService {
     }
   }
 
+  async getAvailableCourseRoutes(): Promise<string[]> {
+    try {
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('course_route')
+        .eq('is_active', true)
+        .gt('closing_date', new Date().toISOString());
+
+      if (error) throw error;
+
+      // Sanitize and deduplicate course routes
+      const routes = Array.from(new Set(
+        data?.map(d => d.course_route)
+          .filter(route => route && typeof route === 'string' && route.trim() !== '')
+          .map(route => route.trim())
+      )) as string[];
+
+      return routes.sort();
+    } catch (error) {
+      console.error('Error in getAvailableCourseRoutes:', error);
+      throw error;
+    }
+  }
+
   async addVacancy(newVacancyData: any) {
     const { data, error } = await supabase.from(this.TABLE_NAME).insert([newVacancyData]).select();
     if (error) {
@@ -360,6 +389,7 @@ class VacancyService {
     search?: string;
     location?: string;
     level?: string;
+    course_route?: string;
   } = {}, attempt = 0): Promise<ListingType[]> {
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 2000;
@@ -391,6 +421,10 @@ class VacancyService {
         if (!isNaN(levelNumber) && levelNumber > 0) {
           query = query.eq('course_level', levelNumber);
         }
+      }
+
+      if (filters.course_route?.trim()) {
+        query = query.eq('course_route', filters.course_route.trim());
       }
 
       const { data, error } = await query;

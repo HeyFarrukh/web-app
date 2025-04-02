@@ -465,6 +465,17 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                 if (scrollToId) {
                   url.searchParams.set('scrollToId', scrollToId);
                 }
+                // Preserve all filter parameters
+                const search = searchParams?.get('search');
+                const location = searchParams?.get('location');
+                const level = searchParams?.get('level');
+                const course_route = searchParams?.get('course_route');
+                
+                if (search) url.searchParams.set('search', search);
+                if (location) url.searchParams.set('location', location);
+                if (level) url.searchParams.set('level', level);
+                if (course_route) url.searchParams.set('course_route', course_route);
+                
                 router.push(url.toString());
               }
             }}

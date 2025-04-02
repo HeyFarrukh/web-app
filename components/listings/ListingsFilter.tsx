@@ -7,8 +7,8 @@ import { Analytics } from '@/services/analytics/analytics';
 import { debounce } from '@/utils/debounce';
 
 interface ListingsFilterProps {
-  onFilterChange: (filters: { search: string; location: string; level: string }) => void;
-  initialFilters: { search: string; location: string; level: string };
+  onFilterChange: (filters: { search: string; location: string; level: string; course_route: string }) => void;
+  initialFilters: { search: string; location: string; level: string; course_route: string };
 }
 
 export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, initialFilters }) => {
@@ -16,6 +16,7 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
   const [searchInputValue, setSearchInputValue] = useState(initialFilters.search);
   const [locations, setLocations] = useState<string[]>([]);
   const [levels, setLevels] = useState<number[]>([]);
+  const [courseRoutes, setCourseRoutes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Create a debounced version of the filter change function for search
@@ -39,12 +40,14 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
     const loadFilterOptions = async () => {
       try {
         setLoading(true);
-        const [availableLocations, availableLevels] = await Promise.all([
+        const [availableLocations, availableLevels, availableCourseRoutes] = await Promise.all([
           vacancyService.getAvailableLocations(),
-          vacancyService.getAvailableLevels()
+          vacancyService.getAvailableLevels(),
+          vacancyService.getAvailableCourseRoutes()
         ]);
         setLocations(availableLocations);
         setLevels(availableLevels);
+        setCourseRoutes(availableCourseRoutes);
       } catch (error) {
         console.error('Error loading filter options:', error);
       } finally {
@@ -72,6 +75,8 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
             Analytics.event('filter_detail', 'location_selected', value);
           } else if (field === 'level') {
             Analytics.event('filter_detail', 'level_selected', value);
+          } else if (field === 'course_route') {
+            Analytics.event('filter_detail', 'course_route_selected', value);
           }
         } else {
           // Track when filters are cleared
@@ -147,6 +152,24 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
               <option key={level} value={level.toString()}>
                 Level {level}
               </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="course_route" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Category
+          </label>
+          <select
+            id="course_route"
+            value={filters.course_route}
+            onChange={(e) => handleFilterChange('course_route', e.target.value)}
+            disabled={loading}
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          >
+            <option value="">All Categories</option>
+            {courseRoutes.map(route => (
+              <option key={route} value={route}>{route}</option>
             ))}
           </select>
         </div>

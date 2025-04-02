@@ -28,7 +28,8 @@ export const Listings = () => {
   const [filters, setFilters] = useState({
     search: searchParams?.get('search') || '',
     location: searchParams?.get('location') || '',
-    level: searchParams?.get('level') || ''
+    level: searchParams?.get('level') || '',
+    course_route: searchParams?.get('course_route') || ''
   });
 
   // Create a function to update URL and maintain state

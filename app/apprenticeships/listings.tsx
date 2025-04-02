@@ -19,6 +19,7 @@ interface FilterParams {
   search: string;
   location: string;
   level: string;
+  course_route: string;
 }
 
 export default function Listings() { 
@@ -39,7 +40,8 @@ export default function Listings() {
   const [filters, setFilters] = useState<FilterParams>({
     search: searchParams?.get('search') || '',
     location: searchParams?.get('location') || '',
-    level: searchParams?.get('level') || ''
+    level: searchParams?.get('level') || '',
+    course_route: searchParams?.get('course_route') || ''
   });
   const [showMapAnimation, setShowMapAnimation] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
@@ -83,6 +85,10 @@ export default function Listings() {
       // Track level filter if present
       if (newFilters.level) {
         Analytics.event('filter', 'level_filter', newFilters.level);
+      }
+      // Track course route filter if present
+      if (newFilters.course_route) {
+        Analytics.event('filter', 'course_route_filter', newFilters.course_route);
       }
     }
     
@@ -175,7 +181,10 @@ export default function Listings() {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    const queryString = createQueryString({ page: newPage.toString() });
+    const queryString = createQueryString({ 
+      ...filters,
+      page: newPage.toString() 
+    });
     router.push(`${pathname}?${queryString}`, { scroll: false });
     
     // Scroll to the top of the page with smooth scrolling
