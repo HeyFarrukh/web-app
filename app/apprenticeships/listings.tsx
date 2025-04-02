@@ -19,6 +19,7 @@ interface FilterParams {
   search: string;
   location: string;
   level: string;
+  category: string;
 }
 
 export default function Listings() { 
@@ -35,11 +36,14 @@ export default function Listings() {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>(() => {
+    return searchParams?.get('view') === 'map' ? 'map' : 'list';
+  });
   const [filters, setFilters] = useState<FilterParams>({
     search: searchParams?.get('search') || '',
     location: searchParams?.get('location') || '',
-    level: searchParams?.get('level') || ''
+    level: searchParams?.get('level') || '',
+    category: searchParams?.get('category') || ''
   });
   const [showMapAnimation, setShowMapAnimation] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
@@ -52,6 +56,14 @@ export default function Listings() {
       Analytics.event('ui_interaction', 'view_mode_change', mode);
     }
     setViewMode(mode);
+    
+    // Update URL with view mode
+    const queryString = createQueryString({
+      ...filters,
+      page: currentPage.toString(),
+      view: mode
+    });
+    router.push(`${pathname}?${queryString}`, { scroll: false });
     
     // If user switches to map view, don't show the animation anymore
     if (mode === 'map') {
@@ -84,11 +96,16 @@ export default function Listings() {
       if (newFilters.level) {
         Analytics.event('filter', 'level_filter', newFilters.level);
       }
+      // Track category filter if present
+      if (newFilters.category) {
+        Analytics.event('filter', 'category_filter', newFilters.category);
+      }
     }
     
     const queryString = createQueryString({
       ...newFilters,
       page: '1',
+      view: viewMode
     });
     router.push(`${pathname}?${queryString}`, { scroll: false });
   };
@@ -175,7 +192,11 @@ export default function Listings() {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    const queryString = createQueryString({ page: newPage.toString() });
+    const queryString = createQueryString({ 
+      ...filters,
+      page: newPage.toString(),
+      view: viewMode
+    });
     router.push(`${pathname}?${queryString}`, { scroll: false });
     
     // Scroll to the top of the page with smooth scrolling
@@ -270,11 +291,12 @@ export default function Listings() {
                     </div>
                   )}
                 </div>
-                {totalPages > 1 && (
+                {totalItems > ITEMS_PER_PAGE && (
                   <div className="mt-8">
                     <Pagination
                       currentPage={currentPage}
-                      totalPages={totalPages}
+                      totalItems={totalItems}
+                      itemsPerPage={ITEMS_PER_PAGE}
                       onPageChange={handlePageChange}
                     />
                   </div>
