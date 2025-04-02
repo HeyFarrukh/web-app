@@ -73,10 +73,15 @@ const contactInfo: ContactInfo[] = [
 
 // Brand component for the logo and company info
 const BrandSection = () => (
-  <div
-    className="flex flex-col items-center lg:items-start text-center lg:text-left mb-12 lg:mb-0"
-    aria-label="Navigate to the ApprenticeWatch homepage"
-  >
+  <div className="flex flex-col items-center lg:items-start text-center lg:text-left mb-12 lg:mb-0">
+    <Link 
+      href="/" 
+      className="inline-block mb-6"
+      aria-label="Navigate to the ApprenticeWatch homepage"
+    >
+      {/* ...other Link content */}
+    </Link>
+  </div>
     <Link href="/" className="inline-block mb-6">
       <span className="text-3xl font-extrabold">
         <span className="text-white">APPRENTICE</span>
