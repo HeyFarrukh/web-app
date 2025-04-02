@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation';
 import { companies } from '@/components/listings/companyData';
 
 export const dynamicParams = true;
-export const revalidate = 0;
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const { vacancies } = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} });
