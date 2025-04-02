@@ -10,7 +10,8 @@ export const dynamicParams = true;
 export const revalidate = 0;
 
 export async function generateStaticParams() {
-  const { vacancies } = await vacancyService.getVacancies({ page: 1, pageSize: 1000, filters: {} });
+  // Use getAllActiveVacanciesForSitemap since it handles pagination properly
+  const vacancies = await vacancyService.getAllActiveVacanciesForSitemap();
   return vacancies.map((vacancy) => ({
     id: vacancy.id.toString(),
   }));
