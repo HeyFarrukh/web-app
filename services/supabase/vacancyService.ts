@@ -333,21 +333,36 @@ class VacancyService {
   async getAllActiveVacanciesForSitemap() {
     try {
       const now = new Date().toISOString();
+      const pageSize = 1000; // Supabase's max limit per request
+      let startIndex = 0;
+      let allVacancies: SupabaseListing[] = [];
       
-      // Get all active vacancies without pagination
-      const { data, error } = await supabase
-        .from(this.TABLE_NAME)
-        .select('*')
-        .eq('is_active', true)
-        .gt('closing_date', now)
-        .order('posted_date', { ascending: false });
+      // Keep fetching until we get all vacancies
+      while (true) {
+        const { data, error } = await supabase
+          .from(this.TABLE_NAME)
+          .select('*')
+          .eq('is_active', true)
+          .gt('closing_date', now)
+          .order('posted_date', { ascending: false })
+          .range(startIndex, startIndex + pageSize - 1);
 
-      if (error) {
-        console.error("[VacancyService] Supabase query error:", error);
-        throw error;
+        if (error) {
+          console.error("[VacancyService] Supabase query error:", error);
+          throw error;
+        }
+
+        if (!data || data.length === 0) break; // No more results
+        
+        allVacancies = [...allVacancies, ...data];
+        if (data.length < pageSize) break; // Last page
+        
+        startIndex += pageSize;
       }
 
-      return data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [];
+      const vacancies = allVacancies.map(d => this.transformListing(d));
+      console.log(`[VacancyService] Found ${vacancies.length} active vacancies for sitemap`);
+      return vacancies;
     } catch (error: any) {
       console.error("Error in getAllActiveVacanciesForSitemap:", error);
       throw error;

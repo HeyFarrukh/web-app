@@ -5,9 +5,11 @@ import { getAllArticlesMetadata } from '@/lib/articles'
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all active vacancies without pagination
   const vacancies = await vacancyService.getAllActiveVacanciesForSitemap();
+  console.log(`Fetched ${vacancies.length} vacancies for sitemap.`); // Optional: log fetched count
 
   // Get all articles metadata
-  const articles = getAllArticlesMetadata();
+  const articlesMetadata = getAllArticlesMetadata();
+  console.log(`Fetched ${articlesMetadata.length} total article metadata entries.`); // Optional: log fetched count
 
   // Base sitemap entries
   const baseUrls: MetadataRoute.Sitemap = [
@@ -70,21 +72,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Generate sitemap URLs for each vacancy
   const vacancyUrls: MetadataRoute.Sitemap = vacancies.map((vacancy) => ({
     url: `https://apprenticewatch.com/apprenticeships/${vacancy.id}`,
-    lastModified: vacancy.postedDate, 
+    lastModified: vacancy.postedDate,
     changeFrequency: 'daily',
     priority: 0.8,
   }));
 
   // Generate sitemap URLs for each article
-  const articleUrls: MetadataRoute.Sitemap = articles
-  .filter(article => article.slug !== 'readme')   
-  .map((article) => ({
+  const articlesToInclude = articlesMetadata.filter(article => article.slug !== 'readme'); // Filter out 'readme' if it exists
+  const articleUrls: MetadataRoute.Sitemap = articlesToInclude.map((article) => ({
     url: `https://apprenticewatch.com/resources/${article.slug}`,
-    lastModified: new Date(article._rawDate), 
+    lastModified: new Date(article._rawDate),
     changeFrequency: 'weekly',
     priority: 0.8,
   }));
+  console.log(`Filtered down to ${articleUrls.length} articles for sitemap.`); // Optional: log filtered count
 
-  // Return URLs in order: base URLs, article URLs, then vacancy URLs
-  return [...baseUrls, ...articleUrls, ...vacancyUrls];
+  // --- Calculate and Log Total ---
+  const totalLinks = baseUrls.length + articleUrls.length + vacancyUrls.length;
+  console.log(`---> Total links generated for sitemap: ${totalLinks} <---`);
+  // -----------------------------
+
+  // Combine all URLs
+  const allUrls = [...baseUrls, ...articleUrls, ...vacancyUrls];
+
+  // Return the combined sitemap array
+  return allUrls;
 }
