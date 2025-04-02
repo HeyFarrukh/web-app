@@ -85,13 +85,13 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
   useEffect(() => {
     const checkIfSaved = async () => {
-      if (userData && listing.id) {
+      if (userData && listing.slug) {
         const savedListings = await savedApprenticeshipService.getSavedApprenticeships(userData.id);
-        setIsSaved(savedListings.some(saved => saved.id === listing.id));
+        setIsSaved(savedListings.some(saved => saved.slug === listing.slug));
       }
     };
     checkIfSaved();
-  }, [userData, listing.id]);
+  }, [userData, listing.slug]);
 
   const handleApplyClick = () => {
     if (typeof window !== 'undefined') {
@@ -102,7 +102,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const handleSaveToggle = async () => {
     if (!isAuthenticated) {
       if (typeof window !== 'undefined') {
-        const returnPath = `/apprenticeships/${listing.id}`;
+        const returnPath = `/apprenticeships/${listing.slug}`;
         localStorage.setItem('postauth_redirect', returnPath);
         router.push('/signin');
       }
@@ -113,9 +113,9 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
     try {
       if (isSaved) {
-        await savedApprenticeshipService.unsaveApprenticeship(userData.id, listing.id);
+        await savedApprenticeshipService.unsaveApprenticeship(userData.id, listing.slug);
       } else {
-        await savedApprenticeshipService.saveApprenticeship(userData.id, listing.id);
+        await savedApprenticeshipService.saveApprenticeship(userData.id, listing.slug);
       }
       setIsSaved(!isSaved);
     } catch (error) {

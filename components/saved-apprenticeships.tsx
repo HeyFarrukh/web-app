@@ -18,7 +18,7 @@ export default function SavedApprenticeships() {
   const [loading, setLoading] = useState(true);
   const [showRemoveAllDialog, setShowRemoveAllDialog] = useState(false);
   const [showRemoveSingleDialog, setShowRemoveSingleDialog] = useState(false);
-  const [selectedVacancyId, setSelectedVacancyId] = useState<string>('');
+  const [selectedVacancySlug, setSelectedVacancySlug] = useState<string>('');
   const router = useRouter();
 
   useEffect(() => {
@@ -37,15 +37,15 @@ export default function SavedApprenticeships() {
   }, [isAuthenticated, userData, authLoading]);
 
   const handleDeleteConfirm = async () => {
-    if (!userData || !selectedVacancyId) return;
+    if (!userData || !selectedVacancySlug) return;
     
     try {
-      const success = await savedApprenticeshipService.unsaveApprenticeship(userData.id, selectedVacancyId);
+      const success = await savedApprenticeshipService.unsaveApprenticeship(userData.id, selectedVacancySlug);
       if (success) {
-        setSavedListings(prevListings => prevListings.filter(listing => listing.id !== selectedVacancyId));
+        setSavedListings(prevListings => prevListings.filter(listing => listing.slug !== selectedVacancySlug));
         setShowRemoveSingleDialog(false);
         // Emit event that this apprenticeship was unsaved
-        savedApprenticeshipEvents.emit(APPRENTICESHIP_UNSAVED, selectedVacancyId);
+        savedApprenticeshipEvents.emit(APPRENTICESHIP_UNSAVED, selectedVacancySlug);
       } else {
         throw new Error('Failed to delete saved apprenticeship');
       }
@@ -56,8 +56,8 @@ export default function SavedApprenticeships() {
     }
   };
 
-  const promptDeleteSingle = (vacancyId: string) => {
-    setSelectedVacancyId(vacancyId);
+  const promptDeleteSingle = (vacancySlug: string) => {
+    setSelectedVacancySlug(vacancySlug);
     setShowRemoveSingleDialog(true);
   };
 
@@ -67,16 +67,16 @@ export default function SavedApprenticeships() {
     try {
       const success = await savedApprenticeshipService.removeAllSavedApprenticeships(userData.id);
       if (success) {
-        // Store the IDs of all listings that were removed
-        const removedIds = savedListings.map(listing => listing.id);
+        // Store the slugs of all listings that were removed
+        const removedSlugs = savedListings.map(listing => listing.slug);
         
         // Clear the listings
         setSavedListings([]);
         setShowRemoveAllDialog(false);
         
         // Emit events for each removed listing
-        removedIds.forEach(id => {
-          savedApprenticeshipEvents.emit(APPRENTICESHIP_UNSAVED, id);
+        removedSlugs.forEach(slug => {
+          savedApprenticeshipEvents.emit(APPRENTICESHIP_UNSAVED, slug);
         });
         
         // Also emit the 'all removed' event
@@ -143,9 +143,9 @@ export default function SavedApprenticeships() {
             </div>
             <div className="space-y-6">
               {savedListings.map((listing) => (
-                <div key={listing.id} className="relative">
+                <div key={listing.slug} className="relative">
                   <button 
-                    onClick={() => promptDeleteSingle(listing.id)}
+                    onClick={() => promptDeleteSingle(listing.slug)}
                     className="absolute top-4 right-4 z-10 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
                     aria-label="Delete saved apprenticeship"
                   >
@@ -154,7 +154,7 @@ export default function SavedApprenticeships() {
                   <ListingCard 
                     listing={listing} 
                     hideSaveButton={true} 
-                    customLinkUrl={`/apprenticeships/${listing.id}?fromPage=saved&scrollToId=${listing.id}&fromSaved=true`}
+                    customLinkUrl={`/apprenticeships/${listing.slug}?fromPage=saved&scrollToId=${listing.slug}&fromSaved=true`}
                   />
                 </div>
               ))}

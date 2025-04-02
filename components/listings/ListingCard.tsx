@@ -58,7 +58,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
   };
 
   const createDetailUrl = () => {
-    const url = new URL(`/apprenticeships/${listing.id}`, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+    const url = new URL(`/apprenticeships/${listing.slug}`, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
     url.searchParams.set('fromPage', currentPage);
     url.searchParams.set('scrollToId', listing.id.toString());
     
@@ -94,7 +94,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, hideSaveButto
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {listing.title}
             </h3>
-            {!hideSaveButton && !expired && <SaveButton vacancyId={listing.id} />}
+            {!hideSaveButton && !expired && <SaveButton vacancyId={listing.slug} />}
           </div>
 
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-300">

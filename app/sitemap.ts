@@ -71,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Generate sitemap URLs for each vacancy
   const vacancyUrls: MetadataRoute.Sitemap = vacancies.map((vacancy) => ({
-    url: `https://apprenticewatch.com/apprenticeships/${vacancy.id}`,
+    url: `https://apprenticewatch.com/apprenticeships/${vacancy.slug}`,
     lastModified: vacancy.postedDate,
     changeFrequency: 'daily',
     priority: 0.8,
