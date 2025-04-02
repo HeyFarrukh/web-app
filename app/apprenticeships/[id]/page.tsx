@@ -52,11 +52,13 @@ export default async function ApprenticeshipDetail({ params }: { params: { id: s
     "description": listing.description,
     "datePosted": listing.postedDate,
     "validThrough": listing.closingDate || "2025-12-31",
-    "employmentType": "FULL TIME",
+    "employmentType": "APPRENTICESHIP",
+    "url": `https://apprenticewatch.com/apprenticeships/${listing.id}`,
     "hiringOrganization": {
       "@type": "Organization",
       "name": listing.employerName,
-      "sameAs": listing.employerWebsiteUrl || undefined
+      "sameAs": listing.employerWebsiteUrl || undefined,
+      "description": listing.employerDescription || undefined
     },
     "jobLocation": {
       "@type": "Place",
@@ -67,13 +69,26 @@ export default async function ApprenticeshipDetail({ params }: { params: { id: s
         "addressRegion": listing.address.addressLine3 || "Unknown Region",
         "postalCode": listing.address.postcode || "00000",
         "addressCountry": "UK"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": listing.location.latitude,
+        "longitude": listing.location.longitude
       }
     },
     "educationRequirements": {
       "@type": "EducationalOccupationalCredential",
-      "credentialCategory": `Level ${listing.course.level} Apprenticeship`
+      "credentialCategory": `Level ${listing.course.level} Apprenticeship`,
+      "educationalLevel": listing.course.level.toString(),
+      "qualifications": listing.qualifications || []
     },
-    "numberOfPositions": listing.numberOfPositions || 1,
+    "experienceRequirements": listing.skills ? {
+      "@type": "OccupationalExperienceRequirements",
+      "skills": listing.skills
+    } : undefined,
+    "skills": listing.skills || [],
+    "responsibilities": listing.fullDescription || listing.description,
+    "totalJobOpenings": listing.numberOfPositions || 1,
     "employmentUnit": {
       "@type": "Organization",
       "name": listing.providerName
@@ -81,10 +96,29 @@ export default async function ApprenticeshipDetail({ params }: { params: { id: s
     "baseSalary": listing.wage.wageType === 'Competitive Salary' ? undefined : {
       "@type": "MonetaryAmount",
       "currency": "GBP",
-      "value": listing.wage.wageAdditionalInformation || "Negotiable",
-      "unitText": listing.wage.wageUnit || "YEAR"
+      "value": {
+        "@type": "QuantitativeValue",
+        "value": listing.wage.wageAdditionalInformation || "Competitive",
+        "unitText": listing.wage.wageUnit || "YEAR"
+      }
     },
-    "jobBenefits": listing.wage.wageAdditionalInformation || undefined
+    "jobBenefits": listing.wage.wageAdditionalInformation || undefined,
+    "workHours": `${listing.hoursPerWeek} hours per week. ${listing.workingWeekDescription || ''}`,
+    "applicationContact": {
+      "@type": "ContactPoint",
+      "telephone": listing.employerContactPhone || undefined,
+      "email": listing.employerContactEmail || undefined,
+      "contactType": "Hiring Manager",
+      "name": listing.employerContactName || undefined
+    },
+    "jobStartDate": listing.startDate || undefined,
+    "identifier": {
+      "@type": "PropertyValue",
+      "name": "Vacancy Reference",
+      "value": listing.vacancyReference
+    },
+    "industry": listing.course.route,
+    "specialCommitments": listing.isDisabilityConfident ? ["DisabilityConfident"] : undefined
   };
 
   return (
