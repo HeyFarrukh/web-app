@@ -37,6 +37,7 @@ class VacancyService {
 
     return {
       id: listing.id,
+      slug: listing.slug || listing.id.toString(),
       title: listing.title,
       description: listing.description,
       employerName: listing.employer_name,
@@ -187,12 +188,6 @@ class VacancyService {
 
   async getVacancyById(id: string): Promise<ListingType | null> {
     try {
-      // Validate ID format (assuming UUID format)
-      if (!id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-        console.error('Invalid vacancy ID format');
-        return null;
-      }
-
       const { data, error } = await supabase
         .from(this.TABLE_NAME)
         .select('*')
@@ -200,19 +195,43 @@ class VacancyService {
         .single();
 
       if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      if (!data) {
-        console.log(`[VacancyService] No vacancy found for ID: ${id}`);
+        console.error('[VacancyService] Error fetching vacancy:', error);
         return null;
       }
 
-      return this.transformListing(data as SupabaseListing);
+      if (!data) {
+        return null;
+      }
+
+      return this.transformListing(data);
     } catch (error) {
-      console.error('Error in getVacancyById:', error);
-      throw error;
+      console.error('[VacancyService] Error in getVacancyById:', error);
+      return null;
+    }
+  }
+
+  async getVacancyBySlug(slug: string): Promise<ListingType | null> {
+    try {
+      const { data, error } = await supabase
+        .from(this.TABLE_NAME)
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error) {
+        console.error('[VacancyService] Error fetching vacancy by slug:', error);
+        return null;
+      }
+
+      if (!data) {
+        // Try fetching by ID as fallback for backward compatibility
+        return this.getVacancyById(slug);
+      }
+
+      return this.transformListing(data);
+    } catch (error) {
+      console.error('[VacancyService] Error in getVacancyBySlug:', error);
+      return null;
     }
   }
 

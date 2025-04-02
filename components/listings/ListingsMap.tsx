@@ -127,7 +127,7 @@ export const ListingsMap: React.FC<ListingsMapProps> = ({ listings }) => {
         const formattedAddress = `${listing.address.addressLine1}, ${listing.address.postcode}`;
         
         // Create detail URL with all current parameters
-        const url = new URL(`/apprenticeships/${listing.id}`, window.location.origin);
+        const url = new URL(`/apprenticeships/${listing.slug}`, window.location.origin);
         const currentPage = searchParams?.get('page') || '1';
         url.searchParams.set('fromPage', currentPage);
         url.searchParams.set('scrollToId', listing.id.toString());

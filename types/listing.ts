@@ -20,6 +20,7 @@ export interface ApprenticeshipAddress {
 
 export interface ListingType {
   id: string;
+  slug: string;
   address: ApprenticeshipAddress;
   apprenticeshipLevel: string;
   closingDate: Date;
@@ -59,6 +60,7 @@ export interface ListingType {
 
 export interface SupabaseListing {
   id: string;
+  slug: string;
   title: string;
   description: string;
   employer_name: string;
