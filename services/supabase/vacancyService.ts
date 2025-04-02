@@ -112,11 +112,7 @@ class VacancyService {
     }
   }
 
-  async getVacancies({
-    page = 1,
-    pageSize = 10,
-    filters = {}
-  }: {
+  async getVacancies({ page = 1, pageSize = 10, filters = {} }: {
     page: number;
     pageSize: number;
     filters: {
@@ -127,67 +123,59 @@ class VacancyService {
     };
   }) {
     try {
-      console.log("[VacancyService] getVacancies called with filters:", filters);
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize - 1;
       const now = new Date().toISOString();
-      
-      // Validate and sanitize input parameters
-      const sanitizedPage = Math.max(1, Math.floor(Number(page)));
-      const sanitizedPageSize = Math.min(50, Math.max(1, Math.floor(Number(pageSize))));
-      const from = (sanitizedPage - 1) * sanitizedPageSize;
-      const to = from + sanitizedPageSize - 1;
 
-      // Start with base query
       let query = supabase
         .from(this.TABLE_NAME)
         .select('*', { count: 'exact' })
         .eq('is_active', true)
         .gt('closing_date', now);
 
-      // Apply filters using Supabase's built-in methods which handle escaping
-      if (filters.search?.trim()) {
-        // Use textSearch for better security and performance
+      // Apply filters
+      if (filters.search) {
         query = query.or(
-          `title.ilike.%${filters.search}%,` +
-          `description.ilike.%${filters.search}%,` +
-          `employer_name.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%`
         );
       }
 
-      if (filters.location?.trim()) {
-        // Use eq or ilike with proper escaping
-        query = query.ilike('address_line3', `%${filters.location}%`);
+      if (filters.location) {
+        const locationFilter = [
+          `postcode.ilike.%${filters.location}%`,
+          `address_line1.ilike.%${filters.location}%`,
+          `address_line2.ilike.%${filters.location}%`,
+          `address_line3.ilike.%${filters.location}%`
+        ].join(',');
+        query = query.or(locationFilter);
       }
 
-      if (filters.level?.trim()) {
-        // Ensure level is a valid number
-        const levelNumber = parseInt(filters.level, 10);
-        if (!isNaN(levelNumber) && levelNumber > 0) {
-          query = query.eq('course_level', levelNumber);
-        }
+      if (filters.level) {
+        query = query.eq('apprenticeship_level', filters.level);
       }
 
-      if (filters.category?.trim()) {
-        query = query.eq('course_route', filters.category.trim());
+      if (filters.category) {
+        query = query.eq('course_route', filters.category);
       }
 
-      // Apply pagination and ordering using safe methods
+      // Apply ordering and pagination after all filters
       query = query
-        .range(from, to)
-        .order('posted_date', { ascending: false });
+        .order('posted_date', { ascending: false })
+        .range(start, end);
 
-      const { data, error, count } = await query;
+      const { data: listings, count, error } = await query;
 
       if (error) {
-        console.error("[VacancyService] Supabase query error:", error);
-        throw error;
+        console.error('[VacancyService] Error fetching vacancies:', error);
+        throw new Error('Failed to fetch vacancies');
       }
 
       return {
-        vacancies: data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [],
+        vacancies: listings?.map(listing => this.transformListing(listing)) || [],
         total: count || 0
       };
-    } catch (error: any) {
-      console.error("Error in getVacancies:", error);
+    } catch (error) {
+      console.error('[VacancyService] Error in getVacancies:', error);
       throw error;
     }
   }

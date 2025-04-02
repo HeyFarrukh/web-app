@@ -6,19 +6,22 @@ import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 
 interface PaginationProps {
   currentPage: number;
-  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
   onPageChange: (page: number) => void;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
   currentPage,
-  totalPages,
+  totalItems,
+  itemsPerPage,
   onPageChange,
 }) => {
-    const searchParams = useSearchParams();
-    const pathname = usePathname();
-    const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
 
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const getPageNumbers = () => {
     const pages = [];
@@ -50,20 +53,24 @@ export const Pagination: React.FC<PaginationProps> = ({
     return pages;
   };
 
-    const createQueryString = (page: number) => {
+  const createQueryString = (page: number) => {
     const params = new URLSearchParams(searchParams?.toString() || '');
     params.set('page', page.toString());
     return params.toString();
   };
 
   const handlePageClick = (pageNumber: number) => {
-    onPageChange(pageNumber);
-        const queryString = createQueryString(pageNumber);
-        router.push(`${pathname}?${queryString}`, { scroll: false });
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      onPageChange(pageNumber);
+      const queryString = createQueryString(pageNumber);
+      router.push(`${pathname}?${queryString}`, { scroll: false });
+    }
   };
 
+  if (totalPages <= 1) return null;
+
   return (
-    <div className="flex items-center justify-center space-x-2">
+    <nav aria-label="Apprenticeship listings pagination" className="flex items-center justify-center space-x-2 py-4">
       <button
         onClick={() => handlePageClick(currentPage - 1)}
         disabled={currentPage === 1}
@@ -85,6 +92,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                   ? 'bg-orange-500 text-white'
                   : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
+              aria-current={currentPage === page ? 'page' : undefined}
             >
               {page}
             </button>
@@ -100,6 +108,6 @@ export const Pagination: React.FC<PaginationProps> = ({
       >
         <ChevronRight className="w-5 h-5" />
       </button>
-    </div>
+    </nav>
   );
 };

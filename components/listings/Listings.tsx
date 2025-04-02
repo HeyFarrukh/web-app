@@ -60,18 +60,19 @@ export const Listings = () => {
     const fetchListings = async () => {
       try {
         setLoading(true);
+        setError(null);
+
         const result = await vacancyService.getVacancies({
           page: currentPage,
           pageSize: ITEMS_PER_PAGE,
-          filters: filters
+          filters
         });
 
         setListings(result.vacancies);
         setTotalItems(result.total);
-        setError(null);
       } catch (err) {
-        setError('Failed to fetch apprenticeships. Please try again later.');
         console.error('Error fetching listings:', err);
+        setError('Failed to fetch apprenticeships. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -80,9 +81,9 @@ export const Listings = () => {
     fetchListings();
   }, [currentPage, filters]);
 
-  // Update URL when page changes
+  // Update URL when page or filters change
   useEffect(() => {
-    const queryString = createQueryString({ 
+    const queryString = createQueryString({
       page: currentPage.toString(),
       ...filters
     });
@@ -91,82 +92,60 @@ export const Listings = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ 
-      top: 0,
-      behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleFilterChange = (newFilters: FilterParams) => {
-    setCurrentPage(1); // Reset to page 1 when filters change
     setFilters(newFilters);
+    setCurrentPage(1); // Reset to page 1 when filters change
   };
 
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          Available Apprenticeships
-        </h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-1 lg:sticky lg:top-24 lg:self-start">
-            <ListingsFilter onFilterChange={handleFilterChange} initialFilters={filters} />
-          </div>
-
-          <div className="lg:col-span-3">
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg mb-6">
-                {error}
-              </div>
-            )}
-
-            {loading ? (
-              <div className="space-y-6">
-                {[...Array(ITEMS_PER_PAGE)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-pulse"
-                  >
-                    <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4" />
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2" />
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <>
-                <div className="space-y-6 mb-8">
-                  {listings.map((listing) => (
-                    <ListingCard
-                      key={listing.id}
-                      listing={listing}
-                    />
-                  ))}
-                </div>
-
-                {listings.length === 0 && !loading && (
-                  <div className="text-center py-12 text-gray-600 dark:text-gray-400">
-                    No apprenticeships found matching your criteria.
-                  </div>
-                )}
-
-                {totalPages > 1 && (
-                  <div className="mt-8">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={handlePageChange}
-                    />
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+    <div className="space-y-6">
+      <ListingsFilter onFilterChange={handleFilterChange} initialFilters={filters} />
+      
+      {loading ? (
+        <div className="flex justify-center items-center min-h-[200px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
         </div>
-      </div>
+      ) : (
+        <>
+          {listings.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No apprenticeships found matching your criteria.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {listings.map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          )}
+          
+          {totalItems > ITEMS_PER_PAGE && (
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              itemsPerPage={ITEMS_PER_PAGE}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };

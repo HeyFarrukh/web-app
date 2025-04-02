@@ -291,11 +291,12 @@ export default function Listings() {
                     </div>
                   )}
                 </div>
-                {totalPages > 1 && (
+                {totalItems > ITEMS_PER_PAGE && (
                   <div className="mt-8">
                     <Pagination
                       currentPage={currentPage}
-                      totalPages={totalPages}
+                      totalItems={totalItems}
+                      itemsPerPage={ITEMS_PER_PAGE}
                       onPageChange={handlePageChange}
                     />
                   </div>
