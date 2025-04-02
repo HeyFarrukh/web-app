@@ -123,6 +123,7 @@ class VacancyService {
     };
   }) {
     try {
+      console.log("[VacancyService] getVacancies called with filters:", filters);
       const start = (page - 1) * pageSize;
       const end = start + pageSize - 1;
       const now = new Date().toISOString();
@@ -134,13 +135,13 @@ class VacancyService {
         .gt('closing_date', now);
 
       // Apply filters
-      if (filters.search) {
+      if (filters.search?.trim()) {
         query = query.or(
           `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%`
         );
       }
 
-      if (filters.location) {
+      if (filters.location?.trim()) {
         const locationFilter = [
           `postcode.ilike.%${filters.location}%`,
           `address_line1.ilike.%${filters.location}%`,
@@ -150,8 +151,12 @@ class VacancyService {
         query = query.or(locationFilter);
       }
 
-      if (filters.level) {
-        query = query.eq('apprenticeship_level', filters.level);
+      if (filters.level?.trim()) {
+        // Ensure level is a valid number
+        const levelNumber = parseInt(filters.level, 10);
+        if (!isNaN(levelNumber) && levelNumber > 0) {
+          query = query.eq('course_level', levelNumber);
+        }
       }
 
       if (filters.category) {
@@ -166,7 +171,7 @@ class VacancyService {
       const { data: listings, count, error } = await query;
 
       if (error) {
-        console.error('[VacancyService] Error fetching vacancies:', error);
+        console.error("[VacancyService] Error fetching vacancies:", error);
         throw new Error('Failed to fetch vacancies');
       }
 
@@ -175,7 +180,7 @@ class VacancyService {
         total: count || 0
       };
     } catch (error) {
-      console.error('[VacancyService] Error in getVacancies:', error);
+      console.error("[VacancyService] Error in getVacancies:", error);
       throw error;
     }
   }
