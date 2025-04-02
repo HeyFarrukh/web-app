@@ -1,13 +1,22 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sun, Moon, Sparkles, LogOut, User, Mail, Bookmark } from 'lucide-react';
-import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-import supabase from '@/config/supabase';
-import { Analytics } from '@/services/analytics/analytics';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X,
+  Sun,
+  Moon,
+  Sparkles,
+  LogOut,
+  User,
+  Mail,
+  Bookmark,
+} from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import supabase from "@/config/supabase";
+import { Analytics } from "@/services/analytics/analytics";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -17,20 +26,20 @@ interface MobileMenuProps {
   onThemeToggle: () => void;
 }
 
-export const MobileMenu: React.FC<MobileMenuProps> = ({ 
-  isOpen, 
-  onClose, 
+export const MobileMenu: React.FC<MobileMenuProps> = ({
+  isOpen,
+  onClose,
   isDark,
-  onThemeToggle 
+  onThemeToggle,
 }) => {
   const { isAuthenticated, userData } = useAuth();
   const router = useRouter();
-  
+
   const handleNavigation = (to: string) => {
     onClose();
-    if (to.startsWith('#')) {
+    if (to.startsWith("#")) {
       const element = document.querySelector(to);
-      element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      element?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -39,17 +48,18 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
       onClose();
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
+
       // Clear user data cookie
-      document.cookie = 'user_data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-      
+      document.cookie =
+        "user_data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+
       // Track successful logout
-      Analytics.event('auth', 'sign_out_success');
-      
-      router.push('/');
+      Analytics.event("auth", "sign_out_success");
+
+      router.push("/");
     } catch (error) {
-      console.error('Logout failed:', error);
-      Analytics.event('auth', 'sign_out_error');
+      console.error("Logout failed:", error);
+      Analytics.event("auth", "sign_out_error");
     }
   };
 
@@ -66,30 +76,37 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
             onClick={onClose}
           />
           <motion.div
-            initial={{ transform: 'translateY(-100%)' }}
-            animate={{ transform: 'translateY(0%)' }}
-            exit={{ transform: 'translateY(-100%)' }}
-            transition={{ 
+            initial={{ transform: "translateY(-100%)" }}
+            animate={{ transform: "translateY(0%)" }}
+            exit={{ transform: "translateY(-100%)" }}
+            transition={{
               duration: 0.3,
-              ease: 'easeOut',
-              staggerChildren: 0.05
+              ease: "easeOut",
+              staggerChildren: 0.05,
             }}
             className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 z-50 md:hidden shadow-xl rounded-b-2xl will-change-transform"
             style={{
-              willChange: 'transform',
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden'
+              willChange: "transform",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
             }}
           >
             <div className="p-6">
               <div className="flex justify-between items-center mb-8">
-                <Link href="/" className="text-xl font-extrabold" onClick={onClose}>
-                  <span className="text-gray-900 dark:text-white">APPRENTICE</span>
+                <Link
+                  href="/"
+                  className="text-xl font-extrabold"
+                  onClick={onClose}
+                >
+                  <span className="text-gray-900 dark:text-white">
+                    APPRENTICE
+                  </span>
                   <span className="text-orange-500">WATCH</span>
                 </Link>
                 <button
                   onClick={onClose}
                   className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  aria-label="Close mobile menu"
                 >
                   <X className="w-6 h-6 text-gray-600 dark:text-gray-300" />
                 </button>
@@ -97,22 +114,22 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
 
               <nav className="space-y-2">
                 {[
-                  { to: '/apprenticeships', label: 'Apprenticeships' },
-                  { 
-                    to: '/optimise-cv', 
-                    label: 'Optimise CV',
+                  { to: "/apprenticeships", label: "Apprenticeships" },
+                  {
+                    to: "/optimise-cv",
+                    label: "Optimise CV",
                     icon: Sparkles,
-                    special: true 
+                    special: true,
                   },
-                  { to: '/team', label: 'Team' }
+                  { to: "/team", label: "Team" },
                 ].map(({ to, label, icon: Icon, special }) => (
                   <motion.div
                     key={to}
-                    whileHover={{ transform: 'translateZ(0) scale(1.02)' }}
-                    whileTap={{ transform: 'translateZ(0) scale(0.98)' }}
-                    style={{ 
-                      willChange: 'transform',
-                      transform: 'translateZ(0)'
+                    whileHover={{ transform: "translateZ(0) scale(1.02)" }}
+                    whileTap={{ transform: "translateZ(0) scale(0.98)" }}
+                    style={{
+                      willChange: "transform",
+                      transform: "translateZ(0)",
                     }}
                   >
                     <Link href={to}>
@@ -120,8 +137,8 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                         onClick={() => handleNavigation(to)}
                         className={`w-full text-left py-4 px-4 rounded-xl ${
                           special
-                            ? 'bg-orange-500/10 text-orange-500'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-800'
+                            ? "bg-orange-500/10 text-orange-500"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-800"
                         } transition-colors flex items-center space-x-2`}
                       >
                         {Icon && <Icon className="w-5 h-5" />}
@@ -136,9 +153,9 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 <div className="mt-6 border-t border-gray-100 dark:border-gray-800 pt-6">
                   <div className="flex items-center space-x-4 px-4 mb-4">
                     {userData.picture ? (
-                      <img 
-                        src={userData.picture} 
-                        alt={userData.name || ''} 
+                      <img
+                        src={userData.picture}
+                        alt={userData.name || ""}
                         className="w-12 h-12 rounded-full border-2 border-orange-500"
                       />
                     ) : (
@@ -148,7 +165,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                     )}
                     <div className="flex-1">
                       <p className="font-medium text-gray-900 dark:text-white">
-                        {userData.name || 'User'}
+                        {userData.name || "User"}
                       </p>
                       <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
                         <Mail className="w-4 h-4 mr-1" />
@@ -156,7 +173,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Link
                       href="/saved-apprenticeships"
@@ -177,12 +194,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                 </div>
               )}
 
-              <motion.div 
+              <motion.div
                 className="mt-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.1, duration: 0.2, ease: 'easeOut' }}
-                style={{ willChange: 'opacity' }}
+                transition={{ delay: 0.1, duration: 0.2, ease: "easeOut" }}
+                style={{ willChange: "opacity" }}
               >
                 <button
                   onClick={onThemeToggle}
