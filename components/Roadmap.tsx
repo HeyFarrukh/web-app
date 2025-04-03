@@ -6,9 +6,8 @@ import { Check } from 'lucide-react';
 
 const objectives = [
   { title: 'AI CV-Optimisation', completed: true },
-  { title: 'CV Guide', completed: true },
+  { title: 'Resource Hub', completed: true },
   { title: 'List All Apprenticeships in One Place', completed: false },
-  { title: 'Cover Letter Guide', completed: false },
   { title: 'Apprenticeship Community', completed: false },
   { title: 'Mentor Matching', completed: false },
   { title: 'AI Virtual Interview Preparation', completed: false },
