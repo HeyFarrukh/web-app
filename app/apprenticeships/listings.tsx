@@ -233,7 +233,7 @@ export default function Listings() {
             <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm">
               <button
                 onClick={() => handleViewModeChange('list')}
-                className={`p-2 rounded-l-lg ${viewMode === 'list' ? 'bg-orange-500 text-white' : 'text-gray-600 dark:text-gray-300'}`}
+                className={`p-2 rounded-l-lg ${viewMode === 'list' ? 'bg-orange-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:text-orange-500'}`}
                 aria-label="List View"
               >
                 <List className="w-5 h-5" />
@@ -242,7 +242,7 @@ export default function Listings() {
                 <PulseAnimation persistKey="map-view">
                   <button
                     onClick={() => handleViewModeChange('map')}
-                    className="p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                    className={`p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors`}
                     aria-label="Map View"
                   >
                     <MapIcon className="w-5 h-5" />
@@ -251,7 +251,7 @@ export default function Listings() {
               ) : (
                 <button
                   onClick={() => handleViewModeChange('map')}
-                  className="p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors"
+                  className={`p-2 rounded-r-lg ${viewMode === 'map' ? 'bg-orange-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:text-orange-500'} transition-colors`}
                   aria-label="Map View"
                 >
                   <MapIcon className="w-5 h-5" />
