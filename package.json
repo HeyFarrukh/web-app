@@ -26,7 +26,7 @@
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.323.0",
     "mapbox-gl": "^3.10.0",
-    "next": "^14.2.24",
+    "next": "^14.2.26",
     "pdfjs-dist": "^4.10.38",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
