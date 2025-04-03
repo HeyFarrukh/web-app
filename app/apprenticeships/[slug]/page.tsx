@@ -119,8 +119,8 @@ export default async function ApprenticeshipDetail({ params }: { params: { slug:
     "@type": "JobPosting",
     "title": listing.title,
     "description": listing.description, 
-    "datePosted": listing.postedDate,
-    "validThrough": listing.closingDate || "2025-12-31", // Sensible fallback for expiry
+    "datePosted": new Date(listing.postedDate).toISOString(),
+    "validThrough": listing.closingDate ? new Date(listing.closingDate).toISOString() : "2025-12-31T23:59:59Z", // Sensible fallback for expiry
     "employmentType": "APPRENTICESHIP",
     "url": canonicalUrl, 
     "hiringOrganization": {
