@@ -140,6 +140,8 @@ const distanceOptions = [
   { value: ANYWHERE_DISTANCE, label: 'Anywhere in the UK' }
 ];
 
+const ukPostcodeRegex = /^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i;
+
 export function OnboardingFlow() {
   const { userData } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -204,9 +206,8 @@ export function OnboardingFlow() {
     const currentStepData = steps[currentStep];
     const fieldValue = formData[currentStepData.field as keyof UserPreferences];
 
-    // Special validation for age field - runs regardless of required status
+    // Special validation for age field
     if (currentStepData.field === 'age') {
-      // Only validate if user has entered something
       if (fieldValue !== null && fieldValue !== '') {
         const numericAge = Number(fieldValue);
         if (isNaN(numericAge) || numericAge < 16 || numericAge > 70) {
@@ -214,12 +215,24 @@ export function OnboardingFlow() {
           return false;
         }
       }
-      // Clear error and return true if age is empty or valid
       setError(null);
       return true;
     }
 
-    // Handle required field validation for non-age fields
+    // Special validation for postcode field
+    if (currentStepData.field === 'postcode') {
+      if (fieldValue !== null && fieldValue !== '') {
+        const postcode = fieldValue.toString().trim().toUpperCase();
+        if (!ukPostcodeRegex.test(postcode)) {
+          setError('Please enter a valid UK postcode');
+          return false;
+        }
+      }
+      setError(null);
+      return true;
+    }
+
+    // Handle required field validation for other fields
     if (currentStepData.required) {
       // Validation for array fields
       if (Array.isArray(fieldValue)) {
@@ -364,13 +377,21 @@ export function OnboardingFlow() {
 
       case 'postcode':
         return (
-          <input
-            type="text"
-            value={formData.postcode}
-            onChange={(e) => setFormData({ ...formData, postcode: e.target.value })}
-            className="w-full p-3 border border-gray-300 rounded-lg"
-            placeholder="Enter your postcode"
-          />
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={formData.postcode || ''}
+              onChange={(e) => {
+                const value = e.target.value.toUpperCase();
+                setFormData({ ...formData, postcode: value });
+                setError(null);
+              }}
+              className={`w-full p-3 border rounded-lg transition-colors ${
+                error ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-300'
+              }`}
+              placeholder="Enter your postcode (optional)"
+            />
+          </div>
         );
 
       case 'age':
