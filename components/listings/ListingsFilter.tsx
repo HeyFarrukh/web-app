@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search } from 'lucide-react';
+import { Search, MapPin, BookOpen, Briefcase } from 'lucide-react';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { Analytics } from '@/services/analytics/analytics';
 import { debounce } from '@/utils/debounce';
+import { displayCategories, getDbCategory, getDisplayCategory } from '@/utils/categoryMapping';
 
 interface ListingsFilterProps {
   onFilterChange: (filters: { search: string; location: string; level: string; category: string }) => void;
@@ -64,7 +65,8 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
       setSearchInputValue(value);
       debouncedSearchChange(value);
     } else {
-      const newFilters = { ...filters, [field]: value };
+      const newValue = field === 'category' ? getDbCategory(value) : value;
+      const newFilters = { ...filters, [field]: newValue };
       setFilters(newFilters);
       
       // Track specific filter interactions with more detailed analytics
@@ -84,7 +86,7 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
         }
       }
       
-      onFilterChange(newFilters); // Call onFilterChange directly for non-search filters
+      onFilterChange(newFilters);
     }
   };
   
@@ -103,81 +105,110 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
   };
   
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md space-y-4">
-      <form onSubmit={handleSubmit}>
-        <div className="relative">
+    <div className="backdrop-blur-md bg-white/90 dark:bg-gray-800/90 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 w-full max-w-md mx-auto">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-5">Find Your Perfect Apprenticeship</h2>
+      
+      <form onSubmit={handleSubmit} className="mb-4">
+        <div className="relative group">
           <input
             type="text"
             placeholder="Search apprenticeships..."
             value={searchInputValue}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 font-medium transition-all duration-300 focus:ring-4 focus:ring-orange-300 dark:focus:ring-orange-800 focus:border-orange-500 hover:border-orange-300 dark:hover:border-orange-700 shadow-sm text-sm"
           />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-orange-500 dark:text-orange-400 w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
         </div>
       </form>
 
       <div className="space-y-4">
-        <div>
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <div className="relative">
+          <label htmlFor="location" className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <MapPin className="w-4 h-4 mr-2 text-orange-500 dark:text-orange-400" />
             Location
           </label>
-          <select
-            id="location"
-            value={filters.location}
-            onChange={(e) => handleFilterChange('location', e.target.value)}
-            disabled={loading}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          >
-            <option value="">All Locations</option>
-            {locations.map(location => (
-              <option key={location} value={location}>{location}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="location"
+              value={filters.location}
+              onChange={(e) => handleFilterChange('location', e.target.value)}
+              disabled={loading}
+              className="w-full px-4 py-2.5 rounded-xl bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 disabled:opacity-50 transition-all duration-300 focus:ring-4 focus:ring-orange-300 dark:focus:ring-orange-800 focus:border-orange-500 hover:border-orange-300 dark:hover:border-orange-700 font-medium shadow-sm appearance-none text-sm"
+            >
+              <option value="">All Locations</option>
+              {locations.map(location => (
+                <option key={location} value={location}>{location}</option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="level" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <div className="relative">
+          <label htmlFor="level" className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <BookOpen className="w-4 h-4 mr-2 text-orange-500 dark:text-orange-400" />
             Apprenticeship Level
           </label>
-          <select
-            id="level"
-            value={filters.level}
-            onChange={(e) => handleFilterChange('level', e.target.value)}
-            disabled={loading}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          >
-            <option value="">All Levels</option>
-            {levels.map(level => (
-              <option key={level} value={level.toString()}>
-                Level {level}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="level"
+              value={filters.level}
+              onChange={(e) => handleFilterChange('level', e.target.value)}
+              disabled={loading}
+              className="w-full px-4 py-2.5 rounded-xl bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 disabled:opacity-50 transition-all duration-300 focus:ring-4 focus:ring-orange-300 dark:focus:ring-orange-800 focus:border-orange-500 hover:border-orange-300 dark:hover:border-orange-700 font-medium shadow-sm appearance-none text-sm"
+            >
+              <option value="">All Levels</option>
+              {levels.map(level => (
+                <option key={level} value={level.toString()}>
+                  Level {level}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <div className="relative">
+          <label htmlFor="category" className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Briefcase className="w-4 h-4 mr-2 text-orange-500 dark:text-orange-400" />
             Category
           </label>
-          <select
-            id="category"
-            value={filters.category}
-            onChange={(e) => handleFilterChange('category', e.target.value)}
-            disabled={loading}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          >
-            <option value="">All Categories</option>
-            {categories.map(category => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="category"
+              value={filters.category ? getDisplayCategory(filters.category) : ''}
+              onChange={(e) => handleFilterChange('category', e.target.value)}
+              disabled={loading}
+              className="w-full px-4 py-2.5 rounded-xl bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 disabled:opacity-50 transition-all duration-300 focus:ring-4 focus:ring-orange-300 dark:focus:ring-orange-800 focus:border-orange-500 hover:border-orange-300 dark:hover:border-orange-700 font-medium shadow-sm appearance-none text-sm"
+            >
+              <option value="">All Categories</option>
+              {displayCategories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
       {loading && (
-        <div className="text-sm text-gray-500 dark:text-gray-400 text-center">
-          Loading filter options...
+        <div className="flex items-center justify-center mt-4 space-x-2">
+          <div className="w-3 h-3 rounded-full bg-orange-500 animate-pulse"></div>
+          <div className="w-3 h-3 rounded-full bg-orange-500 animate-pulse delay-75"></div>
+          <div className="w-3 h-3 rounded-full bg-orange-500 animate-pulse delay-150"></div>
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 ml-2">Loading options...</span>
         </div>
       )}
     </div>
