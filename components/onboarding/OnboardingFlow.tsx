@@ -72,7 +72,7 @@ const steps: OnboardingStep[] = [
 ];
 
 const sectorOptions = [
-  "Technology", "Engineering", "Healthcare", "Business", 
+  "Technology & IT", "Engineering", "Healthcare", "Business", 
   "Construction", "Creative", "Education", "Finance"
 ];
 
@@ -165,17 +165,35 @@ export function OnboardingFlow() {
 
   const validateCurrentStep = (): boolean => {
     const currentStepData = steps[currentStep];
-    if (!currentStepData.required) return true;
-
     const fieldValue = formData[currentStepData.field as keyof UserPreferences];
-    if (Array.isArray(fieldValue)) {
-      if (fieldValue.length === 0) {
-        setError(`Please select at least one ${currentStepData.field.replace('preferred_', '').replace('_', ' ')}`);
+
+    // Special validation for age field - runs regardless of required status
+    if (currentStepData.field === 'age') {
+      // Only validate if user has entered something
+      if (fieldValue !== null && fieldValue !== '') {
+        const numericAge = Number(fieldValue);
+        if (isNaN(numericAge) || numericAge < 16 || numericAge > 70) {
+          setError('Please enter a valid age between 16 and 70');
+          return false;
+        }
+      }
+      // Clear error and return true if age is empty or valid
+      setError(null);
+      return true;
+    }
+
+    // Handle required field validation for non-age fields
+    if (currentStepData.required) {
+      // Validation for array fields
+      if (Array.isArray(fieldValue)) {
+        if (fieldValue.length === 0) {
+          setError(`Please select at least one ${currentStepData.field.replace('preferred_', '').replace('_', ' ')}`);
+          return false;
+        }
+      } else if (fieldValue === null || fieldValue === "") {
+        setError(`Please provide your ${currentStepData.field.replace('_', ' ')}`);
         return false;
       }
-    } else if (fieldValue === null || fieldValue === "") {
-      setError(`Please provide your ${currentStepData.field.replace('_', ' ')}`);
-      return false;
     }
     
     setError(null);
@@ -316,13 +334,21 @@ export function OnboardingFlow() {
 
       case 'age':
         return (
-          <input
-            type="number"
-            value={formData.age || ''}
-            onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) || null })}
-            className="w-full p-3 border border-gray-300 rounded-lg"
-            placeholder="Enter your age"
-          />
+          <div className="space-y-2">
+            <input
+              type="number"
+              value={formData.age || ''}
+              onChange={(e) => {
+                const value = e.target.value ? Number(e.target.value) : null;
+                setFormData({ ...formData, age: value });
+                setError(null);
+              }}
+              className={`w-full p-3 border rounded-lg transition-colors ${
+                error ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-300'
+              }`}
+              placeholder="Enter your age (16-70)"
+            />
+          </div>
         );
     }
   };
