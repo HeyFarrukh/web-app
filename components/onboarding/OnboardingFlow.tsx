@@ -6,7 +6,9 @@ import { Dialog } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import supabase from '@/config/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import { Briefcase, GraduationCap, MapPin, Navigation, Home, User } from 'lucide-react';
+import { User, MapPin, Briefcase, GraduationCap, 
+  Code, HardHat, Heart, Building2, Paintbrush, GraduationCap as Education, 
+  Scale, LineChart, Truck, Coffee, Leaf, Scissors, Shield } from 'lucide-react';
 
 interface OnboardingStep {
   title: string;
@@ -53,14 +55,14 @@ const steps: OnboardingStep[] = [
     description: "Select the maximum distance you're willing to commute",
     field: "willing_to_travel_distance_miles",
     skippable: true,
-    icon: Navigation
+    icon: Briefcase
   },
   {
     title: "What's your postcode?",
     description: "This helps us find opportunities near you",
     field: "postcode",
     skippable: true,
-    icon: Home
+    icon: MapPin
   },
   {
     title: "What's your age?",
@@ -72,9 +74,36 @@ const steps: OnboardingStep[] = [
 ];
 
 const sectorOptions = [
-  "Technology & IT", "Engineering", "Healthcare", "Business", 
-  "Construction", "Creative", "Education", "Finance"
+  "Technology & IT",
+  "Engineering & Construction",
+  "Healthcare & Social Care",
+  "Business & Admin",
+  "Creative & Design",
+  "Education & Childcare",
+  "Finance, Law & Accounting",
+  "Sales & Marketing",
+  "Transport & Logistics",
+  "Hospitality & Catering",
+  "Environmental & Animal Care",
+  "Beauty & Hair",
+  "Protective & Public Services",
 ];
+
+const sectorIcons = {
+  "Technology & IT": Code,
+  "Engineering & Construction": HardHat,
+  "Healthcare & Social Care": Heart,
+  "Business & Admin": Building2,
+  "Creative & Design": Paintbrush,
+  "Education & Childcare": GraduationCap,
+  "Finance, Law & Accounting": Scale,
+  "Sales & Marketing": LineChart,
+  "Transport & Logistics": Truck,
+  "Hospitality & Catering": Coffee,
+  "Environmental & Animal Care": Leaf,
+  "Beauty & Hair": Scissors,
+  "Protective & Public Services": Shield,
+};
 
 const courseLevelOptions = [
   { value: 2, label: "Intermediate - Level 2" },
@@ -86,8 +115,16 @@ const courseLevelOptions = [
 ];
 
 const locationOptions = [
-  "London", "Manchester", "Birmingham", "Leeds", 
-  "Liverpool", "Newcastle", "Bristol", "Cardiff"
+  "London",
+  "Manchester",
+  "Birmingham",
+  "Leeds",
+  "Liverpool",
+  "Newcastle upon Tyne",
+  "Bristol",
+  "Nottingham",
+  "Sheffield",
+  "Leicester"
 ];
 
 const ANYWHERE_DISTANCE = 9999;
@@ -230,25 +267,29 @@ export function OnboardingFlow() {
     switch (step.field) {
       case 'preferred_sectors':
         return (
-          <div className="grid grid-cols-2 gap-3">
-            {sectorOptions.map((sector) => (
-              <button
-                key={sector}
-                onClick={() => {
-                  const sectors = formData.preferred_sectors.includes(sector)
-                    ? formData.preferred_sectors.filter(s => s !== sector)
-                    : [...formData.preferred_sectors, sector];
-                  setFormData({ ...formData, preferred_sectors: sectors });
-                }}
-                className={`p-3 rounded-lg border transition-all ${
-                  formData.preferred_sectors.includes(sector)
-                    ? 'bg-orange-500 text-white border-orange-600'
-                    : 'border-gray-300 hover:border-orange-500'
-                }`}
-              >
-                {sector}
-              </button>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-2">
+            {sectorOptions.map((sector) => {
+              const Icon = sectorIcons[sector as keyof typeof sectorIcons];
+              return (
+                <button
+                  key={sector}
+                  onClick={() => {
+                    const sectors = formData.preferred_sectors.includes(sector)
+                      ? formData.preferred_sectors.filter(s => s !== sector)
+                      : [...formData.preferred_sectors, sector];
+                    setFormData({ ...formData, preferred_sectors: sectors });
+                  }}
+                  className={`p-4 rounded-lg border transition-all flex items-center gap-3 ${
+                    formData.preferred_sectors.includes(sector)
+                      ? 'bg-orange-500 text-white border-orange-600'
+                      : 'border-gray-300 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/10'
+                  }`}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-left">{sector}</span>
+                </button>
+              );
+            })}
           </div>
         );
 
