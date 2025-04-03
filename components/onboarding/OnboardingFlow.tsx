@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { User, MapPin, Briefcase, GraduationCap, 
   Code, HardHat, Heart, Building2, Paintbrush, GraduationCap as Education, 
   Scale, LineChart, Truck, Coffee, Leaf, Scissors, Shield } from 'lucide-react';
+import { displayCategories, getDbCategory } from '@/utils/categoryMapping';
 
 interface OnboardingStep {
   title: string;
@@ -73,36 +74,23 @@ const steps: OnboardingStep[] = [
   }
 ];
 
-const sectorOptions = [
-  "Technology & IT",
-  "Engineering & Construction",
-  "Healthcare & Social Care",
-  "Business & Admin",
-  "Creative & Design",
-  "Education & Childcare",
-  "Finance, Law & Accounting",
-  "Sales & Marketing",
-  "Transport & Logistics",
-  "Hospitality & Catering",
-  "Environmental & Animal Care",
-  "Beauty & Hair",
-  "Protective & Public Services",
-];
+const sectorOptions = displayCategories;
 
 const sectorIcons = {
-  "Technology & IT": Code,
-  "Engineering & Construction": HardHat,
-  "Healthcare & Social Care": Heart,
-  "Business & Admin": Building2,
-  "Creative & Design": Paintbrush,
-  "Education & Childcare": GraduationCap,
-  "Finance, Law & Accounting": Scale,
-  "Sales & Marketing": LineChart,
-  "Transport & Logistics": Truck,
-  "Hospitality & Catering": Coffee,
-  "Environmental & Animal Care": Leaf,
-  "Beauty & Hair": Scissors,
-  "Protective & Public Services": Shield,
+  "Technology and IT": Code,
+  "Business and Administration": Building2,
+  "Legal, Finance, and Accounting": Scale,
+  "Sales and Marketing": LineChart,
+  "Care Services": Heart,
+  "Hair and Beauty": Scissors,
+  "Health and Science": GraduationCap,
+  "Catering and Hospitality": Coffee,
+  "Construction": HardHat,
+  "Engineering and Manufacturing": HardHat,
+  "Creative and Design": Paintbrush,
+  "Public Safety and Emergency Services": Shield,
+  "Transportation and Logistics": Truck,
+  "Agriculture, Environment, and Animal Care": Leaf
 };
 
 const courseLevelOptions = [
@@ -260,9 +248,14 @@ export function OnboardingFlow() {
     } else {
       // Save all data
       try {
+        const dataToSave = {
+          ...formData,
+          preferred_sectors: formData.preferred_sectors.map(getDbCategory)
+        };
+        
         const { error: saveError } = await supabase
           .from('users')
-          .update(formData)
+          .update(dataToSave)
           .eq('id', userData?.id);
         
         if (saveError) throw saveError;

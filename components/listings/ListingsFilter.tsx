@@ -5,6 +5,7 @@ import { Search } from 'lucide-react';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { Analytics } from '@/services/analytics/analytics';
 import { debounce } from '@/utils/debounce';
+import { displayCategories, getDbCategory, getDisplayCategory } from '@/utils/categoryMapping';
 
 interface ListingsFilterProps {
   onFilterChange: (filters: { search: string; location: string; level: string; category: string }) => void;
@@ -64,7 +65,8 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
       setSearchInputValue(value);
       debouncedSearchChange(value);
     } else {
-      const newFilters = { ...filters, [field]: value };
+      const newValue = field === 'category' ? getDbCategory(value) : value;
+      const newFilters = { ...filters, [field]: newValue };
       setFilters(newFilters);
       
       // Track specific filter interactions with more detailed analytics
@@ -84,7 +86,7 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
         }
       }
       
-      onFilterChange(newFilters); // Call onFilterChange directly for non-search filters
+      onFilterChange(newFilters);
     }
   };
   
@@ -162,13 +164,13 @@ export const ListingsFilter: React.FC<ListingsFilterProps> = ({ onFilterChange, 
           </label>
           <select
             id="category"
-            value={filters.category}
+            value={filters.category ? getDisplayCategory(filters.category) : ''}
             onChange={(e) => handleFilterChange('category', e.target.value)}
             disabled={loading}
             className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:opacity-50 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           >
             <option value="">All Categories</option>
-            {categories.map(category => (
+            {displayCategories.map(category => (
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
