@@ -12,6 +12,11 @@ const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), {
   ssr: false,
 });
 
+// Import OnboardingFlow with no SSR since it uses browser APIs
+const OnboardingFlow = dynamic(() => import('@/components/onboarding/OnboardingFlow').then(mod => ({ default: mod.OnboardingFlow })), {
+  ssr: false,
+});
+
 const inter = Inter({ subsets: ['latin'] });
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -137,6 +142,7 @@ export default function RootLayout({
         <Footer />
         <SpeedInsights />
         <GoogleAnalytics />
+        <OnboardingFlow />
       </body>
     </html>
   );
