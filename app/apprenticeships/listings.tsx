@@ -53,18 +53,25 @@ export default function Listings() {
 
   // Track view mode changes
   const handleViewModeChange = (mode: 'list' | 'map') => {
-    if (typeof window !== 'undefined') {
-      Analytics.event('ui_interaction', 'view_mode_change', mode);
-    }
-    setViewMode(mode);
+    // Clear current listings immediately when switching views to prevent flash of wrong data
+    setListings([]);
+    setLoading(true);
     
-    // Update URL with view mode
+    // Update the URL with the new view mode
     const queryString = createQueryString({
       ...filters,
       page: currentPage.toString(),
-      view: mode
+      view: mode,
     });
     router.push(`${pathname}?${queryString}`, { scroll: false });
+
+    // Track the view mode change
+    if (typeof window !== 'undefined') {
+      Analytics.event('ui_interaction', 'view_mode_change', mode);
+    }
+
+    // Update the view mode state
+    setViewMode(mode);
     
     // If user switches to map view, don't show the animation anymore
     if (mode === 'map') {
