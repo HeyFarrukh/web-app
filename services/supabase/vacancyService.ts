@@ -423,46 +423,62 @@ class VacancyService {
   } = {}, attempt = 0): Promise<ListingType[]> {
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 2000;
+    const PAGE_SIZE = 1000; // Supabase's max limit per request
 
     try {
       console.log("[VacancyService] getAllVacanciesForMap called with filters:", filters);
       const now = new Date().toISOString();
-      let query = supabase
-        .from(this.TABLE_NAME)
-        .select('*')
-        .eq('is_active', true)
-        .gt('closing_date', now);
+      let allVacancies: SupabaseListing[] = [];
+      let startIndex = 0;
 
-      // Apply filters using Supabase's built-in methods which handle escaping
-      if (filters.search?.trim()) {
-        query = query.or(
-          `title.ilike.%${filters.search}%,` +
-          `description.ilike.%${filters.search}%,` +
-          `employer_name.ilike.%${filters.search}%`
-        );
-      }
+      while (true) {
+        let query = supabase
+          .from(this.TABLE_NAME)
+          .select('*')
+          .eq('is_active', true)
+          .gt('closing_date', now);
 
-      if (filters.location?.trim()) {
-        query = query.ilike('address_line3', `%${filters.location}%`);
-      }
-
-      if (filters.level?.trim()) {
-        const levelNumber = parseInt(filters.level, 10);
-        if (!isNaN(levelNumber) && levelNumber > 0) {
-          query = query.eq('course_level', levelNumber);
+        // Apply filters using Supabase's built-in methods which handle escaping
+        if (filters.search?.trim()) {
+          query = query.or(
+            `title.ilike.%${filters.search}%,` +
+            `description.ilike.%${filters.search}%,` +
+            `employer_name.ilike.%${filters.search}%`
+          );
         }
+
+        if (filters.location?.trim()) {
+          query = query.ilike('address_line3', `%${filters.location}%`);
+        }
+
+        if (filters.level?.trim()) {
+          const levelNumber = parseInt(filters.level, 10);
+          if (!isNaN(levelNumber) && levelNumber > 0) {
+            query = query.eq('course_level', levelNumber);
+          }
+        }
+
+        if (filters.category?.trim()) {
+          query = query.eq('course_route', filters.category.trim());
+        }
+
+        // Add pagination
+        query = query.range(startIndex, startIndex + PAGE_SIZE - 1);
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+        
+        if (!data || data.length === 0) break; // No more results
+        
+        allVacancies = [...allVacancies, ...data];
+        if (data.length < PAGE_SIZE) break; // Last page
+        
+        startIndex += PAGE_SIZE;
       }
-
-      if (filters.category?.trim()) {
-        query = query.eq('course_route', filters.category.trim());
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
       
-      console.log(`[VacancyService] Found ${data?.length || 0} vacancies for map`);
-      return data ? (data as SupabaseListing[]).map(d => this.transformListing(d)) : [];
+      console.log(`[VacancyService] Found ${allVacancies.length} vacancies for map`);
+      return allVacancies.map(d => this.transformListing(d));
     } catch (error: any) {
       console.error("Error in getAllVacanciesForMap:", error);
       

@@ -8,10 +8,11 @@ import { Pagination } from '@/components/listings/Pagination';
 import { ListingType } from '@/types/listing';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { ListingsMap } from '@/components/listings/ListingsMap';
-import { List, Map as MapIcon } from 'lucide-react';
+import { List, Map as MapIcon, MapPin } from 'lucide-react';
 import { ApprenticeshipListingsTracker } from '@/components/pages/ApprenticeshipListingsTracker';
 import { Analytics } from '@/services/analytics/analytics';
 import { PulseAnimation } from '@/components/ui/PulseAnimation';
+import { Info } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -118,9 +119,14 @@ export default function Listings() {
         
         let result;
         if (viewMode === 'map') {
-          // For map view, fetch all vacancies
-          const vacancies = await vacancyService.getAllVacanciesForMap(filters);
-          result = { vacancies, total: vacancies.length };
+          // Only fetch for map view if a category is selected
+          if (filters.category) {
+            const vacancies = await vacancyService.getAllVacanciesForMap(filters);
+            result = { vacancies, total: vacancies.length };
+          } else {
+            // Return empty result if no category selected
+            result = { vacancies: [], total: 0 };
+          }
         } else {
           // For list view, use pagination
           result = await vacancyService.getVacancies({
@@ -304,22 +310,33 @@ export default function Listings() {
               </>
             ) : (
               <div className="mb-8">
-                {loading ? (
-                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 h-[500px] animate-pulse">
-                    <div className="h-full bg-gray-200 dark:bg-gray-700 rounded-lg" />
-                  </div>
-                ) : listings.length > 0 ? (
-                  <>
-                    <ListingsMap listings={listings} />
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
-                      Showing {listings.length} of {totalItems} apprenticeships. 
-                      {totalItems > 100 && ' Zoom in or apply filters to see more specific results.'}
-                    </p>
-                  </>
-                ) : (
-                  <div className="text-center py-12 text-gray-600 dark:text-gray-400">
-                    No apprenticeships found matching your criteria.
-                  </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg h-[500px] relative">
+                  {loading ? (
+                    <div className="h-full animate-pulse">
+                      <div className="h-full bg-gray-200 dark:bg-gray-700 rounded-lg" />
+                    </div>
+                  ) : (
+                    <>
+                      <ListingsMap listings={listings} />
+                      {!filters.category && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                          <div className="text-center p-4">
+                            <MapPin className="w-8 h-8 text-orange-500 mx-auto mb-2" />
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Please Select a Category</h3>
+                            <p className="text-gray-600 dark:text-gray-300 mt-1">
+                            Select a category from the filters above or our poor little map might overheat and explode 🫠🔥
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+                {listings.length > 0 && filters.category && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
+                    Showing {listings.length} of {totalItems} apprenticeships. 
+                    {totalItems > 100 && ' Zoom in or apply filters to see more specific results.'}
+                  </p>
                 )}
               </div>
             )}
