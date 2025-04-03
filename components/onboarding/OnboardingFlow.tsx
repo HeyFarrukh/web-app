@@ -90,12 +90,24 @@ const locationOptions = [
   "Liverpool", "Newcastle", "Bristol", "Cardiff"
 ];
 
-const distanceOptions = [5, 10, 15, 20, 25, 30, 50];
+const ANYWHERE_DISTANCE = 9999;
+
+const distanceOptions = [
+  { value: 5, label: '5 miles' },
+  { value: 10, label: '10 miles' },
+  { value: 15, label: '15 miles' },
+  { value: 20, label: '20 miles' },
+  { value: 25, label: '25 miles' },
+  { value: 30, label: '30 miles' },
+  { value: 50, label: '50 miles' },
+  { value: ANYWHERE_DISTANCE, label: 'Anywhere in the UK' }
+];
 
 export function OnboardingFlow() {
   const { userData } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<UserPreferences>({
     preferred_sectors: [],
     preferred_course_levels: [],
@@ -151,21 +163,45 @@ export function OnboardingFlow() {
     checkRequiredData();
   }, [userData?.id]);
 
+  const validateCurrentStep = (): boolean => {
+    const currentStepData = steps[currentStep];
+    if (!currentStepData.required) return true;
+
+    const fieldValue = formData[currentStepData.field as keyof UserPreferences];
+    if (Array.isArray(fieldValue)) {
+      if (fieldValue.length === 0) {
+        setError(`Please select at least one ${currentStepData.field.replace('preferred_', '').replace('_', ' ')}`);
+        return false;
+      }
+    } else if (fieldValue === null || fieldValue === "") {
+      setError(`Please provide your ${currentStepData.field.replace('_', ' ')}`);
+      return false;
+    }
+    
+    setError(null);
+    return true;
+  };
+
   const handleNext = async () => {
+    if (!validateCurrentStep()) {
+      return;
+    }
+
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       // Save all data
       try {
-        const { error } = await supabase
+        const { error: saveError } = await supabase
           .from('users')
           .update(formData)
           .eq('id', userData?.id);
         
-        if (error) throw error;
+        if (saveError) throw saveError;
         setIsOpen(false);
       } catch (error) {
         console.error('Error saving preferences:', error);
+        setError('Failed to save your preferences. Please try again.');
       }
     }
   };
@@ -249,17 +285,19 @@ export function OnboardingFlow() {
       case 'willing_to_travel_distance_miles':
         return (
           <div className="space-y-3">
-            {distanceOptions.map((distance) => (
+            {distanceOptions.map((option) => (
               <button
-                key={distance}
-                onClick={() => setFormData({ ...formData, willing_to_travel_distance_miles: distance })}
+                key={option.value}
+                onClick={() => setFormData({ ...formData, willing_to_travel_distance_miles: option.value })}
                 className={`w-full p-3 rounded-lg border transition-all ${
-                  formData.willing_to_travel_distance_miles === distance
+                  formData.willing_to_travel_distance_miles === option.value
                     ? 'bg-orange-500 text-white border-orange-600'
-                    : 'border-gray-300 hover:border-orange-500'
+                    : option.value === ANYWHERE_DISTANCE 
+                      ? 'bg-gradient-to-r from-orange-500/20 to-orange-400/20 border-orange-300 hover:from-orange-500/30 hover:to-orange-400/30'
+                      : 'border-gray-300 hover:border-orange-500'
                 }`}
               >
-                {distance} miles
+                {option.label}
               </button>
             ))}
           </div>
@@ -325,20 +363,40 @@ export function OnboardingFlow() {
 
               <Dialog.Title className="text-2xl font-bold text-center leading-6 text-gray-900 dark:text-white mb-2">
                 {steps[currentStep].title}
+                {steps[currentStep].required && (
+                  <span className="ml-1 text-sm text-orange-500"></span>
+                )}
               </Dialog.Title>
               
               <p className="text-sm text-center text-gray-600 dark:text-gray-300 mb-8">
                 {steps[currentStep].description}
+                {steps[currentStep].required && (
+                  <span className="block mt-1 text-orange-500 text-xs">
+                    
+                  </span>
+                )}
               </p>
 
               <div className="mt-4">
                 {renderStepContent()}
               </div>
 
+              {/* Error message */}
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 text-sm text-center text-red-500 dark:text-red-400"
+                >
+                  {error}
+                </motion.p>
+              )}
+
               <div className="mt-8 flex justify-between">
                 {steps[currentStep].skippable && (
                   <button
                     onClick={() => {
+                      setError(null);
                       if (currentStep < steps.length - 1) {
                         setCurrentStep(currentStep + 1);
                       } else {
