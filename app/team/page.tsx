@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import { Analytics } from '@/services/analytics/analytics';
 
 interface TeamMember {
   name: string;
@@ -221,6 +222,11 @@ const SeniorLeadCard: React.FC<{ member: TeamMember }> = ({ member }) => (
 export default function Team() {
   const founders = teamMembers.filter(member => member.type === 'founder');
   const seniorLeads = teamMembers.filter(member => member.type === 'senior-lead');
+
+  useEffect(() => {
+    Analytics.pageView('/team');
+    Analytics.event('page_interaction', 'view_team_page');
+  }, []);
 
   return (
     <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
