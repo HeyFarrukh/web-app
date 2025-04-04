@@ -23,10 +23,10 @@ interface TeamMember {
 const teamMembers: TeamMember[] = [
   {
     name: "Farrukh Ahmad",
-    role: "Founder",
+    role: "Founder & CEO",
     type: "founder",
     image: "/media/farrukh-av.png",
-    description: "I got tired of the endless search for apprenticeships—scattered websites, outdated listings, and zero clarity. So I built ApprenticeWatch with an incredible team that shares the same vision. Our goal? To make finding opportunities simple and stress-free. If something’s broken, you fix it—and that’s exactly what we’re doing. This isn’t just another platform; it’s a game-changer for anyone serious about kickstarting their career.",
+    description: "I got tired of the endless search for apprenticeships — scattered websites, outdated listings, and zero clarity. So I built ApprenticeWatch with an incredible team that shares the same vision. Our goal? To make finding opportunities simple and stress-free. If something’s broken, you fix it — and that’s exactly what we’re doing. This isn’t just another platform; it’s a game-changer for anyone serious about kickstarting their career.",
     links: {
       github: "https://github.com/HeyFarrukh?utm_source=apprentice-watch",
       linkedin: "https://www.linkedin.com/in/farrukh-ahmad-9547b1260?utm_source=apprentice-watch",
@@ -40,7 +40,7 @@ const teamMembers: TeamMember[] = [
     role: "Co-Founder",
     type: "founder",
     image: "/media/jamal-av.png",
-    description: "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change. I'm focused on expanding the platform's presence and ensuring that every young professional has access to the opportunities they need to succeed—because no one should miss out due to a lack of visibility. ",
+    description: "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change. I'm focused on expanding the platform's presence and ensuring that every young professional has access to the opportunities they need to succeed — because no one should miss out due to a lack of visibility. ",
     links: {
       github: "https://github.com",
       linkedin: "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
@@ -61,6 +61,20 @@ const teamMembers: TeamMember[] = [
     },
     contact: {
       email: "humza@apprenticewatch.com"
+    }
+  },
+  {
+    name: "Ezra Baldwin",
+    role: "Security Architect",
+    type: "senior-lead",
+    image: "/media/ezra-av.png",
+    description: "YOUR TEXT ",
+    links: {
+      github: "https://github.com/STENTORS?utm_source=apprentice-watch",
+      linkedin: "https://www.linkedin.com/in/ezra-baldwin-stentors?utm_source=apprentice-watch",
+    },
+    contact: {
+      email: "ezra@apprenticewatch.com"
     }
   },
 ];
@@ -243,9 +257,11 @@ export default function Team() {
           transition={{ delay: 0.3 }}
           className="mb-24"
         >
-          {seniorLeads.map((member, index) => (
-            <SeniorLeadCard key={`${member.name}-${index}`} member={member} />
-          ))}
+          <div className="grid md:grid-cols-2 gap-12">
+            {seniorLeads.map((member, index) => (
+              <SeniorLeadCard key={`${member.name}-${index}`} member={member} />
+            ))}
+          </div>
         </motion.div>
       </div>
     </div>
