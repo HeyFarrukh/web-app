@@ -49,6 +49,7 @@ export interface ListingType {
   ukprn: number;
   vacancyReference: string;
   vacancyUrl: string;
+  companyVacancyUrl?: string;
   wage: ApprenticeshipWage;
   workingWeekDescription: string;
   logo?: string;
@@ -66,6 +67,7 @@ export interface SupabaseListing {
   employer_name: string;
   vacancy_reference: string;
   vacancy_url: string;
+  company_vacancy_url?: string;
   course_title: string;
   apprenticeship_level: string;
   is_active: boolean;

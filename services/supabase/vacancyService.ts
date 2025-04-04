@@ -43,6 +43,7 @@ class VacancyService {
       employerName: listing.employer_name,
       vacancyReference: listing.vacancy_reference,
       vacancyUrl: listing.vacancy_url,
+      companyVacancyUrl: listing.company_vacancy_url,
       providerName: listing.provider_name,
       postedDate: new Date(listing.posted_date),
       closingDate: new Date(listing.closing_date),

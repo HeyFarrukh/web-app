@@ -353,7 +353,9 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
 
                   {listing.is_active ? (
                     <a
-                      href={listing.vacancyUrl}
+                      href={listing.companyVacancyUrl && listing.companyVacancyUrl !== "GOVUK_INTERNAL_APPLICATION" 
+                        ? listing.companyVacancyUrl 
+                        : listing.vacancyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block w-full bg-orange-500 text-white text-center py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium"
@@ -726,7 +728,9 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
             <div className="sm:text-right">
               {listing.is_active ? (
                 <a
-                  href={listing.vacancyUrl}
+                  href={listing.companyVacancyUrl && listing.companyVacancyUrl !== "GOVUK_INTERNAL_APPLICATION" 
+                    ? listing.companyVacancyUrl 
+                    : listing.vacancyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full bg-orange-500 text-white text-center py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-orange-600 transition-colors font-medium"
