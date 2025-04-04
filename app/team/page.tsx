@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Github, Linkedin, Twitter, Mail } from 'lucide-react';
-import { Analytics } from '@/services/analytics/analytics';
+import React, { useEffect } from "react";
+import { motion } from "framer-motion";
+import { Github, Linkedin, Twitter, Mail } from "lucide-react";
+import { Analytics } from "@/services/analytics/analytics";
 
 interface TeamMember {
   name: string;
   role: string;
   image: string;
   description: string;
-  type: 'founder' | 'senior-lead' | 'ambassador';
+  type: "founder" | "senior-lead" | "ambassador";
   links: {
     github?: string;
     linkedin?: string;
@@ -27,56 +27,63 @@ const teamMembers: TeamMember[] = [
     role: "Founder & CEO",
     type: "founder",
     image: "/media/farrukh-av.png",
-    description: "I got tired of the endless search for apprenticeships — scattered websites, outdated listings, and zero clarity. So I built ApprenticeWatch with an incredible team that shares the same vision. Our goal? To make finding opportunities simple and stress-free. If something’s broken, you fix it — and that’s exactly what we’re doing. This isn’t just another platform; it’s a game-changer for anyone serious about kickstarting their career.",
+    description:
+      "I got tired of the endless search for apprenticeships — scattered websites, outdated listings, and zero clarity. So I built ApprenticeWatch with an incredible team that shares the same vision. Our goal? To make finding opportunities simple and stress-free. If something’s broken, you fix it — and that’s exactly what we’re doing. This isn’t just another platform; it’s a game-changer for anyone serious about kickstarting their career.",
     links: {
       github: "https://github.com/HeyFarrukh?utm_source=apprentice-watch",
-      linkedin: "https://www.linkedin.com/in/farrukh-ahmad-9547b1260?utm_source=apprentice-watch",
+      linkedin:
+        "https://www.linkedin.com/in/farrukh-ahmad-9547b1260?utm_source=apprentice-watch",
     },
     contact: {
-      email: "farrukh@apprenticewatch.com"
-    }
+      email: "farrukh@apprenticewatch.com",
+    },
   },
   {
     name: "Jamal Mitchell",
     role: "Co-Founder",
     type: "founder",
     image: "/media/jamal-av.png",
-    description: "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change. I'm focused on expanding the platform's presence and ensuring that every young professional has access to the opportunities they need to succeed — because no one should miss out due to a lack of visibility. ",
+    description:
+      "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change. I'm focused on expanding the platform's presence and ensuring that every young professional has access to the opportunities they need to succeed — because no one should miss out due to a lack of visibility. ",
     links: {
       github: "https://github.com",
-      linkedin: "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
+      linkedin:
+        "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
     },
     contact: {
-      email: "jamal@apprenticewatch.com"
-    }
+      email: "jamal@apprenticewatch.com",
+    },
   },
   {
     name: "Humza",
     role: "Chief Technical Officer",
     type: "senior-lead",
     image: "/media/humza-av.png",
-    description: "As a friend of both founders, I really connected with their vision and saw firsthand how challenging the apprenticeship application process can be. I joined the team because I genuinely believe in what they're building, and I wanted to use my experience in development and operations to help turn that vision into reality.",
+    description:
+      "As a friend of both founders, I really connected with their vision and saw firsthand how challenging the apprenticeship application process can be. I joined the team because I genuinely believe in what they're building, and I wanted to use my experience in development and operations to help turn that vision into reality.",
     links: {
       github: "https://github.com/hhussain04",
       linkedin: "https://www.linkedin.com/in/humzahussain04/",
     },
     contact: {
-      email: "humza@apprenticewatch.com"
-    }
+      email: "humza@apprenticewatch.com",
+    },
   },
   {
     name: "Ezra Baldwin",
     role: "Security Architect",
     type: "senior-lead",
     image: "/media/ezra-av.png",
-    description: "YOUR TEXT ",
+    description:
+      "Having been through the apprenticeship application process, I know how frustrating and unclear it can be. I joined ApprenticeWatch to help fix that. I’ve secured degree apprenticeships with Siemens, Airbus and HSBC, so I understand what applicants are up against. I’m glad to help build something that supports students at every step.",
     links: {
       github: "https://github.com/STENTORS?utm_source=apprentice-watch",
-      linkedin: "https://www.linkedin.com/in/ezra-baldwin-stentors?utm_source=apprentice-watch",
+      linkedin:
+        "https://www.linkedin.com/in/ezra-baldwin-stentors?utm_source=apprentice-watch",
     },
     contact: {
-      email: "ezra@apprenticewatch.com"
-    }
+      email: "ezra@apprenticewatch.com",
+    },
   },
 ];
 
@@ -89,32 +96,36 @@ const FounderCard: React.FC<{ member: TeamMember }> = ({ member }) => (
   >
     <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-orange-600/10 rounded-2xl transform -rotate-1 group-hover:rotate-0 transition-transform duration-300" />
     <div className="absolute inset-0 bg-gradient-to-l from-orange-500/10 to-orange-600/10 rounded-2xl transform rotate-1 group-hover:rotate-0 transition-transform duration-300" />
-    
+
     <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl group-hover:shadow-2xl transition-all duration-300">
       <div className="flex flex-col items-center">
         <div className="relative mb-6">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full animate-spin-slow opacity-75 blur-sm" />
           <div className="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-white dark:ring-gray-800">
-            <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+            <img
+              src={member.image}
+              alt={member.name}
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-lg">
             {member.role}
           </div>
         </div>
-        
+
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
           {member.name}
         </h2>
-        
+
         {member.contact?.email && (
-          <a 
+          <a
             href={`mailto:${member.contact.email}`}
             className="text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-500 font-medium mb-4 transition-colors"
           >
             {member.contact.email}
           </a>
         )}
-        
+
         <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
           {member.description}
         </p>
@@ -162,7 +173,11 @@ const SeniorLeadCard: React.FC<{ member: TeamMember }> = ({ member }) => (
       <div className="flex flex-col md:flex-row md:items-start gap-8">
         <div className="relative flex-shrink-0 mx-auto md:mx-0">
           <div className="w-28 h-28 rounded-full overflow-hidden ring-2 ring-orange-500">
-            <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+            <img
+              src={member.image}
+              alt={member.name}
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-md">
             {member.role}
@@ -184,7 +199,9 @@ const SeniorLeadCard: React.FC<{ member: TeamMember }> = ({ member }) => (
               </a>
             )}
 
-            <p className="text-gray-600 dark:text-gray-300 text-sm">{member.description}</p>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              {member.description}
+            </p>
 
             <div className="flex justify-center md:justify-start space-x-3 pt-2">
               {member.links.github && (
@@ -220,12 +237,14 @@ const SeniorLeadCard: React.FC<{ member: TeamMember }> = ({ member }) => (
 );
 
 export default function Team() {
-  const founders = teamMembers.filter(member => member.type === 'founder');
-  const seniorLeads = teamMembers.filter(member => member.type === 'senior-lead');
+  const founders = teamMembers.filter((member) => member.type === "founder");
+  const seniorLeads = teamMembers.filter(
+    (member) => member.type === "senior-lead"
+  );
 
   useEffect(() => {
-    Analytics.pageView('/team');
-    Analytics.event('page_interaction', 'view_team_page');
+    Analytics.pageView("/team");
+    Analytics.event("page_interaction", "view_team_page");
   }, []);
 
   return (
@@ -240,7 +259,8 @@ export default function Team() {
             Meet the <span className="text-orange-500">Team</span>
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            The minds behind ApprenticeWatch, working to revolutionise how apprenticeships are discovered and accessed.
+            The minds behind ApprenticeWatch, working to revolutionise how
+            apprenticeships are discovered and accessed.
           </p>
         </motion.div>
 
