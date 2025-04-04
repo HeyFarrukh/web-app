@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { Check } from "lucide-react";
 
 const objectives = [
-  { title: 'AI CV-Optimisation', completed: true },
-  { title: 'Resource Hub', completed: true },
-  { title: 'List All Apprenticeships in One Place', completed: false },
-  { title: 'Apprenticeship Community', completed: false },
-  { title: 'Mentor Matching', completed: false },
-  { title: 'AI Virtual Interview Preparation', completed: false },
+  { title: "AI CV-Optimisation", completed: true },
+  { title: "Resource Hub", completed: true },
+  { title: "List All Apprenticeships in One Place", completed: false },
+  { title: "Apprenticeship Community", completed: false },
+  { title: "Mentor Matching", completed: false },
+  { title: "AI Virtual Interview Preparation", completed: false },
 ];
 
 export const Roadmap = () => {
   return (
     <section id="roadmap" className="py-20 bg-orange-50 dark:bg-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.h2 
+        <motion.h2
           className="text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -37,19 +37,23 @@ export const Roadmap = () => {
               whileHover={{ scale: 1.02 }}
             >
               <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                  objective.completed 
-                    ? 'bg-green-500 text-white' 
-                    : 'bg-gray-200 dark:bg-gray-700'
-                }`}>
-                  {objective.completed && <Check className="w-5 h-5" />}
+                <div
+                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                    objective.completed
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-200 dark:bg-gray-700"
+                  }`}
+                >
+                  {objective.completed && (
+                    <Check className="w-5 h-5" aria-label="Completed" />
+                  )}
                 </div>
                 <div className="flex-1 space-y-2">
                   <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">
                     {objective.title}
                   </h3>
                   <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
-                    {objective.completed 
+                    {objective.completed
                       ? "✨ Completed and ready to use!"
                       : "🚀 Coming soon - We're working hard on this feature."}
                   </p>
