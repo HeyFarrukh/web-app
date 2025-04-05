@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     description: 'Discover all apprenticeships in one place. Find opportunities, optimise your CV with AI, and access more features to help you land your first apprenticeship.',
     images: [
       {
-        url: 'https://apprenticewatch.com/media/apprentice-watch.png',
+        url: 'https://apprenticewatch.com/media/meta/apprentice-watch.png',
         width: 1200,
         height: 630,
         alt: 'ApprenticeWatch',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'ApprenticeWatch - Discover Every Apprenticeship Opportunity',
     description: 'Discover all apprenticeships in one place. Find opportunities, optimise your CV with AI, and access more features to help you land your first apprenticeship.',
-    images: ['https://apprenticewatch.com/media/apprentice-watch.png'],
+    images: ['https://apprenticewatch.com/media/meta/apprentice-watch.png'],
   }
 };
 
