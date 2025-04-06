@@ -291,7 +291,7 @@ export default function Listings() {
           </div>
           <div className="lg:col-span-3">
             {/* View toggle and sort controls in a single row */}
-            <div className="flex justify-between items-center mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-2">
+            <div className="flex justify-between items-center mb-4">
               <ListingsSortToggle 
                 currentSort={sortOption} 
                 onSortChange={handleSortChange} 
@@ -303,7 +303,7 @@ export default function Listings() {
                   className={`p-2 rounded-l-lg ${
                     viewMode === "list"
                       ? "bg-orange-500 text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:text-orange-500"
+                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-orange-500"
                   }`}
                   aria-label="List View"
                 >
@@ -313,7 +313,7 @@ export default function Listings() {
                   <PulseAnimation persistKey="map-view">
                     <button
                       onClick={() => handleViewModeChange("map")}
-                      className={`p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors`}
+                      className={`p-2 rounded-r-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors`}
                       aria-label="Map View"
                     >
                       <MapIcon className="w-5 h-5" />
@@ -325,7 +325,7 @@ export default function Listings() {
                     className={`p-2 rounded-r-lg ${
                       viewMode === "map"
                         ? "bg-orange-500 text-white"
-                        : "text-gray-600 dark:text-gray-300 hover:text-orange-500"
+                        : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-orange-500"
                     } transition-colors`}
                     aria-label="Map View"
                   >
