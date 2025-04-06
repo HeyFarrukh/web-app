@@ -281,9 +281,23 @@ export default function Listings() {
               </p>
             )}
           </div>
-          <div className="flex items-center mt-4 sm:mt-0">
-            <div className="flex flex-col items-start space-y-2">
-              <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-1">
+            <ListingsFilter
+              onFilterChange={handleFilterChange}
+              initialFilters={filters}
+            />
+          </div>
+          <div className="lg:col-span-3">
+            {/* View toggle and sort controls in a single row */}
+            <div className="flex justify-between items-center mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-2">
+              <ListingsSortToggle 
+                currentSort={sortOption} 
+                onSortChange={handleSortChange} 
+              />
+              
+              <div className="flex items-center">
                 <button
                   onClick={() => handleViewModeChange("list")}
                   className={`p-2 rounded-l-lg ${
@@ -319,21 +333,8 @@ export default function Listings() {
                   </button>
                 )}
               </div>
-              <ListingsSortToggle 
-                currentSort={sortOption} 
-                onSortChange={handleSortChange} 
-              />
             </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-1 lg:sticky lg:top-24 lg:self-start">
-            <ListingsFilter
-              onFilterChange={handleFilterChange}
-              initialFilters={filters}
-            />
-          </div>
-          <div className="lg:col-span-3">
+
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg mb-6">
                 {error}
