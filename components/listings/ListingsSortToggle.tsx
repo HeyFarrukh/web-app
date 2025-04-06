@@ -56,13 +56,13 @@ export const ListingsSortToggle: React.FC<ListingsSortToggleProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors min-w-[120px]"
+        className="flex items-center space-x-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
         aria-label={`Sort apprenticeships by ${currentOption.label}`}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <ArrowUpDown className="w-4 h-4" />
-        <span className="hidden sm:inline truncate">{currentOption.label}</span>
+        <ArrowUpDown className="w-4 h-4 mr-1" />
+        <span className="truncate">{currentOption.label}</span>
       </button>
 
       {isOpen && (
@@ -75,7 +75,7 @@ export const ListingsSortToggle: React.FC<ListingsSortToggleProps> = ({
           <div className="py-0">
             <button
               onClick={() => handleSelect('recommended')}
-              className={`w-full flex items-center px-4 py-2 text-sm text-left ${
+              className={`w-full flex items-center px-4 py-3 text-sm text-left ${
                 currentSort === 'recommended' 
                   ? 'bg-orange-500 text-white' 
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -88,7 +88,7 @@ export const ListingsSortToggle: React.FC<ListingsSortToggleProps> = ({
             </button>
             <button
               onClick={() => handleSelect('latest')}
-              className={`w-full flex items-center px-4 py-2 text-sm text-left ${
+              className={`w-full flex items-center px-4 py-3 text-sm text-left ${
                 currentSort === 'latest' 
                   ? 'bg-orange-500 text-white' 
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -101,7 +101,7 @@ export const ListingsSortToggle: React.FC<ListingsSortToggleProps> = ({
             </button>
             <button
               onClick={() => handleSelect('expiring')}
-              className={`w-full flex items-center px-4 py-2 text-sm text-left ${
+              className={`w-full flex items-center px-4 py-3 text-sm text-left ${
                 currentSort === 'expiring' 
                   ? 'bg-orange-500 text-white' 
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
