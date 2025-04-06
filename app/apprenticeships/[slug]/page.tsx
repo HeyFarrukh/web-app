@@ -26,6 +26,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     notFound();
   }
 
+  // Helper function to check if the apprenticeship is expired
+  const isExpired = (closingDate: Date): boolean => {
+    if (!closingDate) return false;
+    const now = new Date();
+    return now > new Date(closingDate);
+  };
+
+  // Check if this apprenticeship has expired
+  const expired = isExpired(listing.closingDate);
+
   // Helper function for logo URL (from both files)
   const getLogoUrl = (employerName: string) => {
     const normalizedEmployerName = employerName.toLowerCase();
@@ -54,10 +64,24 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const canonicalUrl = `https://apprenticewatch.com/apprenticeships/${listing.slug}`;
   const locationName = listing.address.addressLine3 || 'UK'; 
 
+  // Create a description that indicates if the apprenticeship is expired
+  const description = expired
+    ? `[EXPIRED] This Level ${listing.course.level} ${listing.course.route} apprenticeship at ${listing.employerName} has expired and is no longer accepting applications.`
+    : `Level ${listing.course.level} ${listing.course.route} apprenticeship: ${listing.title} at ${listing.employerName}. ${formatWage(listing.wage)}. ${listing.hoursPerWeek}h/week in ${locationName}. Start date: ${new Date(listing.startDate).toLocaleDateString()}. Apply now!`;
+
+  // Similarly update the OpenGraph and Twitter descriptions
+  const ogDescription = expired
+    ? `[EXPIRED] This apprenticeship at ${listing.employerName} has expired and is no longer accepting applications.`
+    : `Apply for the ${listing.title} apprenticeship at ${listing.employerName}. Level ${listing.course.level} opportunity in ${locationName}. ${formatWage(listing.wage)}.`;
+
+  const twitterDescription = expired
+    ? `[EXPIRED] This Level ${listing.course.level} apprenticeship has expired and is no longer accepting applications.`
+    : `Level ${listing.course.level} ${listing.course.route} apprenticeship in ${locationName}. ${formatWage(listing.wage)}. Apply now!`;
+
   return {
     title: `${listing.title} - Level ${listing.course.level} Apprenticeship at ${listing.employerName} | ApprenticeWatch`,
 
-    description: `Level ${listing.course.level} ${listing.course.route} apprenticeship: ${listing.title} at ${listing.employerName}. ${formatWage(listing.wage)}. ${listing.hoursPerWeek}h/week in ${locationName}. Start date: ${new Date(listing.startDate).toLocaleDateString()}. Apply now!`,
+    description: description,
 
     keywords: [
       'apprenticeship',
@@ -71,12 +95,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       'apprenticeship jobs', 
       'apprentice', 
       'career',
-
+      ...(expired ? ['expired apprenticeship', 'closed opportunity'] : []),
     ].filter(Boolean), 
 
     openGraph: {
-      title: `${listing.title} - Level ${listing.course.level} ${listing.course.route} Apprenticeship`, // More descriptive title from old
-      description: `Apply for the ${listing.title} apprenticeship at ${listing.employerName}. Level ${listing.course.level} opportunity in ${locationName}. ${formatWage(listing.wage)}.`, // Detailed description + fallback
+      title: `${listing.title} - Level ${listing.course.level} ${listing.course.route} Apprenticeship${expired ? " [EXPIRED]" : ""}`,
+      description: ogDescription,
       type: 'website', 
       url: canonicalUrl, 
       images: [{ 
@@ -89,8 +113,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
     twitter: {
       card: 'summary_large_image', 
-      title: `${listing.title} at ${listing.employerName}`, 
-      description: `Level ${listing.course.level} ${listing.course.route} apprenticeship in ${locationName}. ${formatWage(listing.wage)}. Apply now!`, // Restored from old + fallback
+      title: `${listing.title} at ${listing.employerName}${expired ? " [EXPIRED]" : ""}`, 
+      description: twitterDescription,
       images: [getLogoUrl(listing.employerName)] 
     },
 
@@ -108,6 +132,16 @@ export default async function ApprenticeshipDetail({ params }: { params: { slug:
     notFound();
   }
 
+  // Helper function to check if the apprenticeship is expired
+  const isExpired = (closingDate: Date): boolean => {
+    if (!closingDate) return false;
+    const now = new Date();
+    return now > new Date(closingDate);
+  };
+
+  // Check if this apprenticeship has expired
+  const expired = isExpired(listing.closingDate);
+
   // Use the slug in the canonical URL
   const canonicalUrl = `https://apprenticewatch.com/apprenticeships/${listing.slug}`;
   const locationCity = listing.address.addressLine3 || "Unknown City";
@@ -117,11 +151,14 @@ export default async function ApprenticeshipDetail({ params }: { params: { slug:
   const jobPostingSchema = {
     "@context": "https://schema.org",
     "@type": "JobPosting",
-    "title": listing.title,
-    "description": listing.description, 
+    "title": expired ? `[EXPIRED] ${listing.title}` : listing.title,
+    "description": expired 
+      ? `This apprenticeship has expired and is no longer accepting applications. ${listing.description}`
+      : listing.description, 
     "datePosted": new Date(listing.postedDate).toISOString(),
     "validThrough": listing.closingDate ? new Date(listing.closingDate).toISOString() : "2025-12-31T23:59:59Z", // Sensible fallback for expiry
-    "employmentType": "APPRENTICESHIP",
+    // For expired jobs, adding a more descriptive employment type
+    "employmentType": expired ? "EXPIRED APPRENTICESHIP" : "APPRENTICESHIP",
     "url": canonicalUrl, 
     "hiringOrganization": {
       "@type": "Organization",
@@ -162,14 +199,16 @@ export default async function ApprenticeshipDetail({ params }: { params: { slug:
       }
     } : {}),
     "skills": listing.skills || [], 
-    "responsibilities": listing.fullDescription || listing.description,
-    "totalJobOpenings": listing.numberOfPositions || 1, // Default to 1 if unspecified
+    "responsibilities": expired
+      ? `Note: This apprenticeship is no longer available. ${listing.fullDescription || listing.description}`
+      : listing.fullDescription || listing.description,
+    "totalJobOpenings": expired ? 0 : (listing.numberOfPositions || 1), // Set to 0 if expired
     "employmentUnit": { // Typically the training provider
       "@type": "Organization",
       "name": listing.providerName
     },
-    // Conditionally add baseSalary if not 'Competitive Salary'
-    ...(listing.wage.wageType !== 'Competitive Salary' ? {
+    // Conditionally add baseSalary if not 'Competitive Salary' and not expired
+    ...(!expired && listing.wage.wageType !== 'Competitive Salary' ? {
       "baseSalary": listing.wage.wageType === 'Competitive Salary' ? undefined : {
         "@type": "MonetaryAmount",
         "currency": "GBP",
@@ -181,10 +220,12 @@ export default async function ApprenticeshipDetail({ params }: { params: { slug:
       },
     } : {}),
     // Use wageAdditionalInformation for jobBenefits if it exists and isn't just the wage type
-    "jobBenefits": (listing.wage.wageAdditionalInformation && listing.wage.wageAdditionalInformation !== listing.wage.wageType) ? listing.wage.wageAdditionalInformation : undefined,
+    "jobBenefits": (!expired && listing.wage.wageAdditionalInformation && 
+      listing.wage.wageAdditionalInformation !== listing.wage.wageType) ? 
+      listing.wage.wageAdditionalInformation : undefined,
     "workHours": `${listing.hoursPerWeek} hours per week. ${listing.workingWeekDescription || ''}`.trim(),
-    // Conditionally add applicationContact if email or phone exist
-    ...((listing.employerContactEmail || listing.employerContactPhone) ? {
+    // Conditionally add applicationContact if email or phone exist and not expired
+    ...(!expired && (listing.employerContactEmail || listing.employerContactPhone) ? {
       "applicationContact": {
         "@type": "ContactPoint",
         "telephone": listing.employerContactPhone || undefined,
