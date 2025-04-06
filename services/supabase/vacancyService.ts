@@ -118,7 +118,7 @@ class VacancyService {
     }
   }
 
-  async getVacancies({ page = 1, pageSize = 10, filters = {} }: {
+  async getVacancies({ page = 1, pageSize = 10, filters = {}, sortBy = 'recommended' }: {
     page: number;
     pageSize: number;
     filters: {
@@ -127,9 +127,10 @@ class VacancyService {
       level?: string;
       category?: string;
     };
+    sortBy?: 'recommended' | 'latest' | 'expiring';
   }) {
     try {
-      vacancyLogger.info(`Fetching vacancies with page: ${page}, pageSize: ${pageSize}, filters: ${JSON.stringify(filters)}`);
+      vacancyLogger.info(`Fetching vacancies with page: ${page}, pageSize: ${pageSize}, filters: ${JSON.stringify(filters)}, sortBy: ${sortBy}`);
       const now = new Date().toISOString();
       
       // Calculate pagination
@@ -174,9 +175,22 @@ class VacancyService {
         vacancyLogger.debug(`Applied category filter: ${filters.category}`);
       }
 
-      // Order by quality score (highest first)
-      query = query.order('quality_scores(total_score)', { ascending: false, nullsFirst: false });
-      vacancyLogger.info('Ordering results by quality_scores(total_score) DESC');
+      // Apply sorting based on the sortBy parameter
+      switch (sortBy) {
+        case 'latest':
+          vacancyLogger.info('Ordering results by posted_date DESC (latest first)');
+          query = query.order('posted_date', { ascending: false });
+          break;
+        case 'expiring':
+          vacancyLogger.info('Ordering results by closing_date ASC (expiring soon first)');
+          query = query.order('closing_date', { ascending: true });
+          break;
+        case 'recommended':
+        default:
+          vacancyLogger.info('Ordering results by quality_scores(total_score) DESC (recommended first)');
+          query = query.order('quality_scores(total_score)', { ascending: false, nullsFirst: false });
+          break;
+      }
 
       // Add pagination
       query = query.range(from, to);
@@ -219,7 +233,7 @@ class VacancyService {
       }) || [];
 
       // Log detailed information about top apprenticeships
-      if (qualityScores.length > 0) {
+      if (qualityScores.length > 0 && sortBy === 'recommended') {
         vacancyLogger.info(`Top ${Math.min(5, qualityScores.length)} apprenticeships by quality score:`);
         qualityScores.slice(0, 5).forEach((item, index) => {
           vacancyLogger.info(`#${index + 1}: ${item.employer} (ID: ${item.id}) - Score: ${item.score}`);

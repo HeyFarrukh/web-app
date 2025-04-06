@@ -13,6 +13,7 @@ import { ApprenticeshipListingsTracker } from "@/components/pages/Apprenticeship
 import { Analytics } from "@/services/analytics/analytics";
 import { PulseAnimation } from "@/components/ui/PulseAnimation";
 import { Info } from "lucide-react";
+import { ListingsSortToggle, SortOption } from "@/components/listings/ListingsSortToggle";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -39,6 +40,10 @@ export default function Listings() {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "map">(() => {
     return searchParams?.get("view") === "map" ? "map" : "list";
+  });
+  const [sortOption, setSortOption] = useState<SortOption>(() => {
+    const sort = searchParams?.get("sort") as SortOption;
+    return sort && ['recommended', 'latest', 'expiring'].includes(sort) ? sort : 'recommended';
   });
   const [filters, setFilters] = useState<FilterParams>({
     search: searchParams?.get("search") || "",
@@ -118,6 +123,28 @@ export default function Listings() {
     router.push(`${pathname}?${queryString}`, { scroll: false });
   };
 
+  // Handle sort option change
+  const handleSortChange = (sort: SortOption) => {
+    // Clear current listings immediately when changing sort to prevent flash of wrong data
+    setListings([]);
+    setLoading(true);
+    setSortOption(sort);
+    
+    // Update the URL with the new sort option
+    const queryString = createQueryString({
+      ...filters,
+      page: currentPage.toString(),
+      view: viewMode,
+      sort: sort,
+    });
+    router.push(`${pathname}?${queryString}`, { scroll: false });
+    
+    // Track the sort change
+    if (typeof window !== "undefined") {
+      Analytics.event("ui_interaction", "sort_change", sort);
+    }
+  };
+
   useEffect(() => {
     const fetchListings = async (attempt = 0) => {
       let fetchError = false;
@@ -142,6 +169,7 @@ export default function Listings() {
             page: currentPage,
             pageSize: ITEMS_PER_PAGE,
             filters,
+            sortBy: sortOption
           });
         }
 
@@ -180,7 +208,7 @@ export default function Listings() {
     };
 
     fetchListings();
-  }, [currentPage, filters, viewMode]);
+  }, [currentPage, filters, sortOption, viewMode]);
 
   // Handle scrolling to specific listing when returning from detail page
   useEffect(() => {
@@ -198,15 +226,26 @@ export default function Listings() {
   }, [loading, searchParams]);
 
   const createQueryString = (params: Record<string, string>) => {
-    const newSearchParams = new URLSearchParams(searchParams?.toString() || "");
+    const newParams = new URLSearchParams();
+    
+    // Add all parameters that have values
     Object.entries(params).forEach(([key, value]) => {
       if (value) {
-        newSearchParams.set(key, value);
-      } else {
-        newSearchParams.delete(key);
+        newParams.set(key, value);
       }
     });
-    return newSearchParams.toString();
+    
+    // Make sure view mode is always included
+    if (!params.view && viewMode) {
+      newParams.set('view', viewMode);
+    }
+    
+    // Make sure sort option is always included
+    if (!params.sort && sortOption) {
+      newParams.set('sort', sortOption);
+    }
+    
+    return newParams.toString();
   };
 
   const handlePageChange = (newPage: number) => {
@@ -243,41 +282,47 @@ export default function Listings() {
             )}
           </div>
           <div className="flex items-center mt-4 sm:mt-0">
-            <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-              <button
-                onClick={() => handleViewModeChange("list")}
-                className={`p-2 rounded-l-lg ${
-                  viewMode === "list"
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:text-orange-500"
-                }`}
-                aria-label="List View"
-              >
-                <List className="w-5 h-5" />
-              </button>
-              {viewMode === "list" && showMapAnimation ? (
-                <PulseAnimation persistKey="map-view">
+            <div className="flex flex-col items-start space-y-2">
+              <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                <button
+                  onClick={() => handleViewModeChange("list")}
+                  className={`p-2 rounded-l-lg ${
+                    viewMode === "list"
+                      ? "bg-orange-500 text-white"
+                      : "text-gray-600 dark:text-gray-300 hover:text-orange-500"
+                  }`}
+                  aria-label="List View"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+                {viewMode === "list" && showMapAnimation ? (
+                  <PulseAnimation persistKey="map-view">
+                    <button
+                      onClick={() => handleViewModeChange("map")}
+                      className={`p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors`}
+                      aria-label="Map View"
+                    >
+                      <MapIcon className="w-5 h-5" />
+                    </button>
+                  </PulseAnimation>
+                ) : (
                   <button
                     onClick={() => handleViewModeChange("map")}
-                    className={`p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors`}
+                    className={`p-2 rounded-r-lg ${
+                      viewMode === "map"
+                        ? "bg-orange-500 text-white"
+                        : "text-gray-600 dark:text-gray-300 hover:text-orange-500"
+                    } transition-colors`}
                     aria-label="Map View"
                   >
                     <MapIcon className="w-5 h-5" />
                   </button>
-                </PulseAnimation>
-              ) : (
-                <button
-                  onClick={() => handleViewModeChange("map")}
-                  className={`p-2 rounded-r-lg ${
-                    viewMode === "map"
-                      ? "bg-orange-500 text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:text-orange-500"
-                  } transition-colors`}
-                  aria-label="Map View"
-                >
-                  <MapIcon className="w-5 h-5" />
-                </button>
-              )}
+                )}
+              </div>
+              <ListingsSortToggle 
+                currentSort={sortOption} 
+                onSortChange={handleSortChange} 
+              />
             </div>
           </div>
         </div>
