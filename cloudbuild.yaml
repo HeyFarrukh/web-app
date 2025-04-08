@@ -16,7 +16,6 @@ steps:
       - --env=NEXT_PUBLIC_MAPBOX_TOKEN=$_NEXT_PUBLIC_MAPBOX_TOKEN
       - --env=REVALIDATION_SECRET_TOKEN=$_REVALIDATION_SECRET_TOKEN
       - --env=NEXT_PUBLIC_GA_TRACKING_ID=$_NEXT_PUBLIC_GA_TRACKING_ID
-      - --env=NODE_ENV=production
     id: Buildpack
     volumes:
       - name: pack-cache
