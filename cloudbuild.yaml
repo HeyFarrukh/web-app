@@ -1,5 +1,5 @@
 steps:
-  # Step 1: Build with Buildpacks and persistent caching
+  # Step 1: Build the image using Buildpacks with persistent caching
   - name: 'gcr.io/k8s-skaffold/pack'
     entrypoint: 'bash'
     args:
@@ -21,14 +21,17 @@ steps:
       - name: 'pack-cache'
         path: /cache
 
-  # Step 2: Push image to Artifact Registry
+  # Step 2: Push the image to Artifact Registry (reuse volume to satisfy GCP)
   - name: 'gcr.io/cloud-builders/docker'
     id: Push
     args:
       - push
       - europe-west2-docker.pkg.dev/apprenticewatch-55cb9/cloud-run-source-deploy/web-app/web-app:$COMMIT_SHA
+    volumes:
+      - name: 'pack-cache'
+        path: /cache
 
-  # Step 3: Deploy to Cloud Run
+  # Step 3: Deploy the image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: Deploy
     args:
@@ -54,14 +57,14 @@ substitutions:
   _SERVICE_NAME: web-app
   _TRIGGER_ID: c8892f2e-df9a-418e-bca0-d54efc8a090f
 
-  # Securely defined in Trigger UI
+  # Secrets: define these in Cloud Build Trigger UI only — not here in real use
   _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
   _NEXT_PUBLIC_SUPABASE_ANON_KEY: your-anon-key
   _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
-  _NEXT_PUBLIC_LOGODEV_KEY: your-logo-key
+  _NEXT_PUBLIC_LOGODEV_KEY: your-logodev-key
   _NEXT_PUBLIC_GEMINI_API_KEY: your-gemini-key
   _NEXT_PUBLIC_MAPBOX_TOKEN: your-mapbox-token
-  _REVALIDATION_SECRET_TOKEN: your-secret
+  _REVALIDATION_SECRET_TOKEN: your-secret-token
   _NEXT_PUBLIC_GA_TRACKING_ID: G-1GKBR9HKF3
 
 tags:
