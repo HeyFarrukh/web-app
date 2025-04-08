@@ -1,0 +1,73 @@
+steps:
+  # Step 1: Build the image using Buildpacks with persistent caching
+  - name: 'gcr.io/k8s-skaffold/pack'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pack build $_IMAGE_NAME \
+          --builder gcr.io/buildpacks/builder \
+          --path . \
+          --cache-dir /cache \
+          --env NEXT_PUBLIC_SUPABASE_URL=$_NEXT_PUBLIC_SUPABASE_URL \
+          --env NEXT_PUBLIC_SUPABASE_ANON_KEY=$_NEXT_PUBLIC_SUPABASE_ANON_KEY \
+          --env NEXT_PUBLIC_BASE_URL=$_NEXT_PUBLIC_BASE_URL \
+          --env NEXT_PUBLIC_LOGODEV_KEY=$_NEXT_PUBLIC_LOGODEV_KEY \
+          --env NEXT_PUBLIC_GEMINI_API_KEY=$_NEXT_PUBLIC_GEMINI_API_KEY \
+          --env NEXT_PUBLIC_MAPBOX_TOKEN=$_NEXT_PUBLIC_MAPBOX_TOKEN \
+          --env REVALIDATION_SECRET_TOKEN=$_REVALIDATION_SECRET_TOKEN \
+          --env NEXT_PUBLIC_GA_TRACKING_ID=$_NEXT_PUBLIC_GA_TRACKING_ID \
+    volumes:
+      - name: 'pack-cache'
+        path: /cache
+
+  # Step 2: Push the image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Push
+    args:
+      - push
+      - $_IMAGE_NAME
+
+  # Step 3: Deploy the image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: Deploy
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - '--platform=managed'
+      - '--image=$_IMAGE_NAME'
+      - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID'
+      - '--region=$_DEPLOY_REGION'
+      - '--quiet'
+
+images:
+  - $_IMAGE_NAME
+
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _DEPLOY_REGION: europe-west2
+  _SERVICE_NAME: web-app
+  _TRIGGER_ID: c8892f2e-df9a-418e-bca0-d54efc8a090f
+
+  # Image name in Artifact Registry
+  _IMAGE_NAME: europe-west2-docker.pkg.dev/apprenticewatch-55cb9/cloud-run-source-deploy/web-app/web-app:$COMMIT_SHA
+
+  # Buildpack environment variables (define actual values securely in GCP UI)
+  _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
+  _NEXT_PUBLIC_SUPABASE_ANON_KEY: supabase-anon-key
+  _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
+  _NEXT_PUBLIC_LOGODEV_KEY: your-logodev-key
+  _NEXT_PUBLIC_GEMINI_API_KEY: GEMINI-KEY
+  _NEXT_PUBLIC_MAPBOX_TOKEN: mapbox-token
+  _REVALIDATION_SECRET_TOKEN: secret-token
+  _NEXT_PUBLIC_GA_TRACKING_ID: G-1GKBR9HKF3
+
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - buildpacks
+  - production
