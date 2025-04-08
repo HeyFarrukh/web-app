@@ -1,27 +1,26 @@
 steps:
-  # Step 1: Build the image using Buildpacks with persistent caching
+  # Step 1: Build using Buildpacks with persistent caching
   - name: 'gcr.io/k8s-skaffold/pack'
-    entrypoint: 'bash'
+    entrypoint: 'pack'
     args:
-      - '-c'
-      - |
-        pack build europe-west2-docker.pkg.dev/apprenticewatch-55cb9/cloud-run-source-deploy/web-app/web-app:$COMMIT_SHA \
-          --builder gcr.io/buildpacks/builder \
-          --path . \
-          --cache-dir /cache \
-          --env NEXT_PUBLIC_SUPABASE_URL=$_NEXT_PUBLIC_SUPABASE_URL \
-          --env NEXT_PUBLIC_SUPABASE_ANON_KEY=$_NEXT_PUBLIC_SUPABASE_ANON_KEY \
-          --env NEXT_PUBLIC_BASE_URL=$_NEXT_PUBLIC_BASE_URL \
-          --env NEXT_PUBLIC_LOGODEV_KEY=$_NEXT_PUBLIC_LOGODEV_KEY \
-          --env NEXT_PUBLIC_GEMINI_API_KEY=$_NEXT_PUBLIC_GEMINI_API_KEY \
-          --env NEXT_PUBLIC_MAPBOX_TOKEN=$_NEXT_PUBLIC_MAPBOX_TOKEN \
-          --env REVALIDATION_SECRET_TOKEN=$_REVALIDATION_SECRET_TOKEN \
-          --env NEXT_PUBLIC_GA_TRACKING_ID=$_NEXT_PUBLIC_GA_TRACKING_ID \
+      - build
+      - europe-west2-docker.pkg.dev/apprenticewatch-55cb9/cloud-run-source-deploy/web-app/web-app:$COMMIT_SHA
+      - --builder=gcr.io/buildpacks/builder
+      - --path=.
+      - --cache-dir=/cache
+      - --env=NEXT_PUBLIC_SUPABASE_URL=$_NEXT_PUBLIC_SUPABASE_URL
+      - --env=NEXT_PUBLIC_SUPABASE_ANON_KEY=$_NEXT_PUBLIC_SUPABASE_ANON_KEY
+      - --env=NEXT_PUBLIC_BASE_URL=$_NEXT_PUBLIC_BASE_URL
+      - --env=NEXT_PUBLIC_LOGODEV_KEY=$_NEXT_PUBLIC_LOGODEV_KEY
+      - --env=NEXT_PUBLIC_GEMINI_API_KEY=$_NEXT_PUBLIC_GEMINI_API_KEY
+      - --env=NEXT_PUBLIC_MAPBOX_TOKEN=$_NEXT_PUBLIC_MAPBOX_TOKEN
+      - --env=REVALIDATION_SECRET_TOKEN=$_REVALIDATION_SECRET_TOKEN
+      - --env=NEXT_PUBLIC_GA_TRACKING_ID=$_NEXT_PUBLIC_GA_TRACKING_ID
     volumes:
       - name: 'pack-cache'
         path: /cache
 
-  # Step 2: Push the image to Artifact Registry (reuse volume to satisfy GCP)
+  # Step 2: Push the image to Artifact Registry (reuse cache volume)
   - name: 'gcr.io/cloud-builders/docker'
     id: Push
     args:
@@ -31,7 +30,7 @@ steps:
       - name: 'pack-cache'
         path: /cache
 
-  # Step 3: Deploy the image to Cloud Run
+  # Step 3: Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: Deploy
     args:
@@ -39,11 +38,11 @@ steps:
       - services
       - update
       - $_SERVICE_NAME
-      - '--platform=managed'
-      - '--image=europe-west2-docker.pkg.dev/apprenticewatch-55cb9/cloud-run-source-deploy/web-app/web-app:$COMMIT_SHA'
-      - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID'
-      - '--region=$_DEPLOY_REGION'
-      - '--quiet'
+      - --platform=managed
+      - --image=europe-west2-docker.pkg.dev/apprenticewatch-55cb9/cloud-run-source-deploy/web-app/web-app:$COMMIT_SHA
+      - --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+      - --region=$_DEPLOY_REGION
+      - --quiet
 
 images:
   - europe-west2-docker.pkg.dev/apprenticewatch-55cb9/cloud-run-source-deploy/web-app/web-app:$COMMIT_SHA
@@ -57,11 +56,11 @@ substitutions:
   _SERVICE_NAME: web-app
   _TRIGGER_ID: c8892f2e-df9a-418e-bca0-d54efc8a090f
 
-  # Secrets: define these in Cloud Build Trigger UI only — not here in real use
+  # Inject these securely in the GCP Trigger UI
   _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
   _NEXT_PUBLIC_SUPABASE_ANON_KEY: your-anon-key
   _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
-  _NEXT_PUBLIC_LOGODEV_KEY: your-logodev-key
+  _NEXT_PUBLIC_LOGODEV_KEY: your-logo-key
   _NEXT_PUBLIC_GEMINI_API_KEY: your-gemini-key
   _NEXT_PUBLIC_MAPBOX_TOKEN: your-mapbox-token
   _REVALIDATION_SECRET_TOKEN: your-secret-token
