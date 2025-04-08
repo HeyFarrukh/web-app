@@ -1,5 +1,5 @@
 steps:
-  # Step 1: Build and push with Buildpacks using persistent cache
+  # Step 1: Build using Buildpacks (same working structure as before)
   - name: gcr.io/k8s-skaffold/pack
     entrypoint: pack
     args:
@@ -8,8 +8,6 @@ steps:
       - --builder=gcr.io/buildpacks/builder:v1
       - --network=cloudbuild
       - --path=.
-      - --publish
-      - --cache-image=gcr.io/apprenticewatch-55cb9/web-app-build-cache
       - --env=NEXT_PUBLIC_SUPABASE_URL=$_NEXT_PUBLIC_SUPABASE_URL
       - --env=NEXT_PUBLIC_SUPABASE_ANON_KEY=$_NEXT_PUBLIC_SUPABASE_ANON_KEY
       - --env=NEXT_PUBLIC_BASE_URL=$_NEXT_PUBLIC_BASE_URL
@@ -18,12 +16,24 @@ steps:
       - --env=NEXT_PUBLIC_MAPBOX_TOKEN=$_NEXT_PUBLIC_MAPBOX_TOKEN
       - --env=REVALIDATION_SECRET_TOKEN=$_REVALIDATION_SECRET_TOKEN
       - --env=NEXT_PUBLIC_GA_TRACKING_ID=$_NEXT_PUBLIC_GA_TRACKING_ID
+      - --env=NODE_ENV=production
     id: Buildpack
+    volumes:
+      - name: pack-cache
+        path: /cache
 
-  # Step 2: Deploy to Cloud Run
+  # Step 2: Push to Artifact Registry (reference volume to satisfy GCP)
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    id: Push
+    volumes:
+      - name: pack-cache
+        path: /cache
+
+  # Step 3: Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: Deploy
-    entrypoint: gcloud
     args:
       - run
       - services
@@ -34,6 +44,8 @@ steps:
       - --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
       - --region=$_DEPLOY_REGION
       - --quiet
+    id: Deploy
+    entrypoint: gcloud
 
 images:
   - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
@@ -51,7 +63,7 @@ substitutions:
   _TRIGGER_ID: c8892f2e-df9a-418e-bca0-d54efc8a090f
   _SERVICE_NAME: web-app
 
-  # Define these in the Cloud Build Trigger UI
+  # These should be securely defined in the Cloud Build Trigger UI
   _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
   _NEXT_PUBLIC_SUPABASE_ANON_KEY: your-anon-key
   _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
@@ -63,6 +75,5 @@ substitutions:
 
 tags:
   - gcp-cloud-build-deploy-cloud-run
-  - buildpacks
-  - persistent-cache
+  - gcp-cloud-build-deploy-cloud-run-managed
   - web-app
