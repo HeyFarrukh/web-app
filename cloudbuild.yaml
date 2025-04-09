@@ -14,6 +14,7 @@ steps:
       - --builder=gcr.io/buildpacks/builder:v1
       - --network=cloudbuild
       - --path=.
+      - --publish
       - --cache-image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:latest
       - --env=NEXT_PUBLIC_SUPABASE_URL=$_NEXT_PUBLIC_SUPABASE_URL
       - --env=NEXT_PUBLIC_SUPABASE_ANON_KEY=$_NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -24,9 +25,8 @@ steps:
       - --env=REVALIDATION_SECRET_TOKEN=$_REVALIDATION_SECRET_TOKEN
       - --env=NEXT_PUBLIC_GA_TRACKING_ID=$_NEXT_PUBLIC_GA_TRACKING_ID
     id: Buildpack
-    # Remove the volume reference here
 
-  # Step 2: Tag the image as latest for future caching
+  # Step 2: Tag the image as latest for future caching 
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'tag'
@@ -34,14 +34,7 @@ steps:
       - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:latest
     id: TagLatest
 
-  # Step 3: Push images to Artifact Registry (both versioned and latest)
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-    id: PushVersioned
-    # Remove the volume reference here
-
+  # Step 3: Push images to Artifact Registry (latest only since versioned is pushed by pack)
   - name: gcr.io/cloud-builders/docker
     args:
       - push
@@ -71,7 +64,6 @@ images:
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
-  # Keep volume caching only here in the global options
   volumes:
     - name: 'pack-cache'
       path: '/cache'
