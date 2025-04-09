@@ -1,5 +1,3 @@
-# Dockerfile (v11 - For workspace build)
-
 # Use a minimal base image matching the runtime needed
 FROM node:18-alpine AS runner
 WORKDIR /app
