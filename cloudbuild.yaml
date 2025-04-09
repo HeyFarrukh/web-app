@@ -1,4 +1,4 @@
-# cloudbuild.yaml (v8 - Revert to docker cp, use cloud-sdk for tar steps)
+# cloudbuild.yaml (v9 - Fixed tar commands for cache archives)
 
 substitutions:
   # ... (substitutions remain the same) ...
@@ -22,7 +22,7 @@ substitutions:
   _REVALIDATION_SECRET_TOKEN: 'your-secret-token'
 
 steps:
-  # Step 0: Get package lock hash (Unchanged from v6)
+  # Step 0: Get package lock hash (Unchanged)
   - name: 'bash'
     id: 'Get package lock hash'
     script: |
@@ -40,7 +40,7 @@ steps:
       fi
       echo "${LOCKFILE_HASH}" > /workspace/pkg_lock_sha.txt
 
-  # Step 1: Download node_modules cache (Unchanged from v6)
+  # Step 1: Download node_modules cache (Unchanged)
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Download node_modules cache'
     script: |
@@ -62,7 +62,7 @@ steps:
         echo "Node modules cache not found or download failed for hash ${LOCK_HASH}."
       fi
 
-  # Step 2: Extract node_modules cache (Unchanged from v6, uses ubuntu)
+  # Step 2: Extract node_modules cache (Unchanged)
   - name: 'ubuntu'
     id: 'Extract node_modules cache'
     script: |
@@ -80,7 +80,7 @@ steps:
        fi
     waitFor: ['Download node_modules cache']
 
-  # Step 3: Download .next/cache (Unchanged from v6)
+  # Step 3: Download .next/cache (Unchanged)
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Download .next cache'
     script: |
@@ -96,7 +96,7 @@ steps:
         echo ".next cache not found or download failed."
       fi
 
-  # Step 4: Extract .next cache (Unchanged from v6, uses ubuntu)
+  # Step 4: Extract .next cache (Unchanged)
   - name: 'ubuntu'
     id: 'Extract .next cache'
     script: |
@@ -114,14 +114,14 @@ steps:
        fi
     waitFor: ['Extract node_modules cache', 'Download .next cache']
 
-  # Step 5: Pull latest image for Docker cache (Unchanged from v6)
+  # Step 5: Pull latest image for Docker cache (Unchanged)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Pull latest image for cache'
     entrypoint: 'bash'
     args: ['-c', 'docker pull ${_IMAGE_NAME}:latest || exit 0']
     waitFor: ['-']
 
-  # Step 6: Build the Docker image (Unchanged from v6)
+  # Step 6: Build the Docker image (Unchanged)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build'
     args: [
@@ -140,13 +140,13 @@ steps:
         ]
     waitFor: ['Extract .next cache', 'Pull latest image for cache']
 
-  # Step 7: Create dummy container from build image (Unchanged from v6)
+  # Step 7: Create dummy container from build image (Unchanged)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Create dummy container'
     args: ['create', '--name', 'extractor', '${_IMAGE_NAME}:${COMMIT_SHA}']
     waitFor: ['Build']
 
-  # Step 8: Copy node_modules from dummy container (Unchanged from v6)
+  # Step 8: Copy node_modules from dummy container (Unchanged)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Copy node_modules from container'
     script: |
@@ -163,7 +163,7 @@ steps:
        fi
     waitFor: ['Create dummy container', 'Extract node_modules cache']
 
-  # Step 9: Copy .next/cache from dummy container (Unchanged from v6)
+  # Step 9: Copy .next/cache from dummy container (Unchanged)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Copy .next cache from container'
     script: |
@@ -181,33 +181,33 @@ steps:
        fi
     waitFor: ['Create dummy container', 'Extract .next cache']
 
-  # Step 10: Remove the dummy container (Unchanged from v6)
+  # Step 10: Remove the dummy container (Unchanged)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Remove dummy container'
     args: ['rm', 'extractor']
     waitFor: ['Copy node_modules from container', 'Copy .next cache from container']
 
-  # --- Step 11: Create node_modules cache archive (MODIFIED IMAGE) ---
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Use cloud-sdk image
+  # --- Step 11: Create node_modules cache archive (FIXED) ---
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Create node_modules cache archive'
     script: |
        #!/usr/bin/env bash
        set -e
        LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}"
-       NODE_MODULES_DIR="node_modules" # Relative path within /workspace
-       if [[ -d "/workspace/${NODE_MODULES_DIR}" ]] && [[ -n "$(ls -A /workspace/${NODE_MODULES_DIR})" ]]; then
-         echo "Verifying directory /workspace/${NODE_MODULES_DIR} exists and has content (using cloud-sdk image):"
-         ls -ld "/workspace/${NODE_MODULES_DIR}" # DEBUG
+       NODE_MODULES_DIR="/workspace/node_modules"
+       if [[ -d "${NODE_MODULES_DIR}" ]] && [[ -n "$(ls -A ${NODE_MODULES_DIR})" ]]; then
+         echo "Verifying directory ${NODE_MODULES_DIR} exists and has content:"
+         ls -ld "${NODE_MODULES_DIR}"
          echo "Creating node_modules cache archive..."
-         # Change to workspace directory and use relative path for source
-         (cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NODE_MODULES_DIR}")
+         # Fixed: Create tar from specific directory with proper -C flag
+         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C /workspace node_modules
        else
-         echo "Skipping node_modules cache archiving (/workspace/${NODE_MODULES_DIR} does not exist or is empty)."
+         echo "Skipping node_modules cache archiving (${NODE_MODULES_DIR} does not exist or is empty)."
          touch "${LOCAL_CACHE_FILE}" # Create empty file for upload step check
        fi
     waitFor: ['Remove dummy container']
 
-  # Step 12: Upload node_modules cache (Unchanged from v6)
+  # Step 12: Upload node_modules cache (Unchanged)
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Upload node_modules cache'
     script: |
@@ -228,27 +228,27 @@ steps:
        fi
     waitFor: ['Create node_modules cache archive']
 
-  # --- Step 13: Create .next/cache archive (MODIFIED IMAGE) ---
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Use cloud-sdk image
+  # --- Step 13: Create .next/cache archive (FIXED) ---
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Create .next cache archive'
     script: |
        #!/usr/bin/env bash
        set -e
        LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
-       NEXT_CACHE_DIR=".next/cache" # Relative path within /workspace
-       if [[ -d "/workspace/${NEXT_CACHE_DIR}" ]] && [[ -n "$(ls -A /workspace/${NEXT_CACHE_DIR})" ]]; then
-         echo "Verifying directory /workspace/${NEXT_CACHE_DIR} exists and has content (using cloud-sdk image):"
-         ls -ld "/workspace/${NEXT_CACHE_DIR}" # DEBUG
+       NEXT_CACHE_DIR="/workspace/.next/cache"
+       if [[ -d "${NEXT_CACHE_DIR}" ]] && [[ -n "$(ls -A ${NEXT_CACHE_DIR})" ]]; then
+         echo "Verifying directory ${NEXT_CACHE_DIR} exists and has content:"
+         ls -ld "${NEXT_CACHE_DIR}"
          echo "Creating .next/cache archive..."
-         # Change to workspace directory and use relative path for source
-         (cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NEXT_CACHE_DIR}")
+         # Fixed: Create tar from specific directory with proper -C flag
+         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C /workspace .next/cache
        else
-         echo "Skipping .next/cache archiving (/workspace/${NEXT_CACHE_DIR} directory does not exist or is empty)."
+         echo "Skipping .next/cache archiving (${NEXT_CACHE_DIR} directory does not exist or is empty)."
          touch "${LOCAL_CACHE_FILE}" # Create empty file for upload step check
        fi
     waitFor: ['Remove dummy container']
 
-  # Step 14: Upload .next cache (Unchanged from v6)
+  # Step 14: Upload .next cache (Unchanged)
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Upload .next cache'
     script: |
@@ -264,7 +264,7 @@ steps:
        fi
     waitFor: ['Create .next cache archive']
 
-  # Step 15: Push the container image tags (Unchanged from v6)
+  # Step 15: Push the container image tags (Unchanged)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push SHA tag'
     args: ['push', '${_IMAGE_NAME}:${COMMIT_SHA}']
@@ -275,7 +275,7 @@ steps:
     args: ['push', '${_IMAGE_NAME}:latest']
     waitFor: ['Push SHA tag']
 
-  # Step 16: Deploy to Cloud Run (Unchanged from v6)
+  # Step 16: Deploy to Cloud Run (Unchanged)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Deploy'
     entrypoint: gcloud
