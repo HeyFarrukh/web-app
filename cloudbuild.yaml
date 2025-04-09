@@ -1,6 +1,7 @@
-# cloudbuild.yaml (v4 - Fixed script/args conflict in docker cp steps)
+# cloudbuild.yaml (v5 - Fixed tar commands in Steps 11 & 13)
 
 substitutions:
+  # ... (substitutions remain the same) ...
   _SERVICE_NAME: web-app
   _DEPLOY_REGION: europe-west2
   _AR_HOSTNAME: europe-west2-docker.pkg.dev
@@ -8,10 +9,9 @@ substitutions:
   _AR_REPOSITORY: cloud-run-source-deploy
   _PLATFORM: managed
   _IMAGE_NAME: ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}
-  _CACHE_BUCKET: gs://apprentice-watch-web-build-cache-g # Your GCS cache bucket
+  _CACHE_BUCKET: gs://apprentice-watch-web-build-cache-g
   _CACHE_ARCHIVE_NODE: cache-node_modules.tar.gz
   _CACHE_ARCHIVE_NEXT: cache-next.tar.gz
-  # --- Environment Variables (Define securely in Trigger UI) ---
   _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
   _NEXT_PUBLIC_SUPABASE_ANON_KEY: 'your-anon-key'
   _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
@@ -22,6 +22,9 @@ substitutions:
   _REVALIDATION_SECRET_TOKEN: 'your-secret-token'
 
 steps:
+  # Steps 0-10 remain the same as the previous version (v4)
+  # ... (Steps 0-10 unchanged) ...
+
   # Step 0: Get package lock hash
   - name: 'bash'
     id: 'Get package lock hash'
@@ -136,17 +139,13 @@ steps:
     waitFor: ['Build']
 
   # Step 8: Copy node_modules from dummy container to workspace (conditionally)
-  # --- CORRECTED: Removed 'args' field ---
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Copy node_modules from container'
-    # 'args' field REMOVED
     script: |
        #!/usr/bin/env bash
        set -e
-       # Only copy if node_modules weren't extracted from GCS cache
        if [[ ! -f "/workspace/${_CACHE_ARCHIVE_NODE}" ]]; then
          echo "Copying node_modules from built image to workspace..."
-         # Execute docker cp within script
          docker cp extractor:/app/node_modules /workspace/node_modules
        else
          echo "Skipping copy of node_modules from container (already extracted from GCS)."
@@ -154,18 +153,14 @@ steps:
     waitFor: ['Create dummy container', 'Extract node_modules cache']
 
   # Step 9: Copy .next/cache from dummy container to workspace (conditionally)
-  # --- CORRECTED: Removed 'args' field ---
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Copy .next cache from container'
-    # 'args' field REMOVED
     script: |
        #!/usr/bin/env bash
        set -e
-       # Only copy if .next/cache wasn't extracted from GCS cache
        if [[ ! -f "/workspace/${_CACHE_ARCHIVE_NEXT}" ]]; then
          echo "Copying .next/cache from built image to workspace..."
          mkdir -p /workspace/.next # Ensure parent dir exists
-         # Execute docker cp within script
          docker cp extractor:/app/.next/cache /workspace/.next/cache
        else
          echo "Skipping copy of .next/cache from container (already extracted from GCS)."
@@ -178,18 +173,20 @@ steps:
     args: ['rm', 'extractor']
     waitFor: ['Copy node_modules from container', 'Copy .next cache from container']
 
-  # Step 11: Create node_modules cache archive
+  # --- Step 11: Create node_modules cache archive (MODIFIED) ---
   - name: 'ubuntu'
     id: 'Create node_modules cache archive'
     script: |
        #!/usr/bin/env bash
        set -e
        LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}"
-       if [[ -d "/workspace/node_modules" ]] && [[ -n "$(ls -A /workspace/node_modules)" ]]; then
+       NODE_MODULES_DIR="/workspace/node_modules" # Explicit path
+       if [[ -d "${NODE_MODULES_DIR}" ]] && [[ -n "$(ls -A ${NODE_MODULES_DIR})" ]]; then
          echo "Creating node_modules cache archive..."
-         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C /workspace node_modules
+         # Avoid -C, use full path for the directory to archive
+         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NODE_MODULES_DIR}"
        else
-         echo "Skipping node_modules cache archiving (/workspace/node_modules does not exist or is empty)."
+         echo "Skipping node_modules cache archiving (${NODE_MODULES_DIR} does not exist or is empty)."
          touch "${LOCAL_CACHE_FILE}"
        fi
     waitFor: ['Remove dummy container']
@@ -200,6 +197,7 @@ steps:
     script: |
        #!/usr/bin/env bash
        set -e
+       # ... (script content unchanged) ...
        LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
        if [[ "${LOCK_HASH}" == "no-lock-file" ]]; then
          echo "Skipping node_modules cache upload (no lock file)."
@@ -213,20 +211,23 @@ steps:
        else
          echo "Skipping upload of empty or missing node_modules cache archive."
        fi
+
     waitFor: ['Create node_modules cache archive']
 
-  # Step 13: Create .next/cache archive
+  # --- Step 13: Create .next/cache archive (MODIFIED) ---
   - name: 'ubuntu'
     id: 'Create .next cache archive'
     script: |
        #!/usr/bin/env bash
        set -e
        LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
-       if [[ -d "/workspace/.next/cache" ]] && [[ -n "$(ls -A /workspace/.next/cache)" ]]; then
+       NEXT_CACHE_DIR="/workspace/.next/cache" # Explicit path
+       if [[ -d "${NEXT_CACHE_DIR}" ]] && [[ -n "$(ls -A ${NEXT_CACHE_DIR})" ]]; then
          echo "Creating .next/cache archive..."
-         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C /workspace/.next cache
+         # Avoid -C, use full path for the directory to archive
+         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NEXT_CACHE_DIR}"
        else
-         echo "Skipping .next/cache archiving (/workspace/.next/cache directory does not exist or is empty)."
+         echo "Skipping .next/cache archiving (${NEXT_CACHE_DIR} directory does not exist or is empty)."
          touch "${LOCAL_CACHE_FILE}"
        fi
     waitFor: ['Remove dummy container']
@@ -237,6 +238,7 @@ steps:
     script: |
        #!/usr/bin/env bash
        set -e
+       # ... (script content unchanged) ...
        CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
        LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
        if [[ -f "${LOCAL_CACHE_FILE}" ]] && [[ $(stat -c%s "${LOCAL_CACHE_FILE}") -gt 100 ]]; then
@@ -245,6 +247,7 @@ steps:
        else
          echo "Skipping upload of empty or missing .next cache archive."
        fi
+
     waitFor: ['Create .next cache archive']
 
   # Step 15: Push the container image tags
@@ -272,7 +275,6 @@ steps:
       - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=${COMMIT_SHA},gcb-build-id=${BUILD_ID},gcb-trigger-id=${_TRIGGER_ID}'
       - '--region=${_DEPLOY_REGION}'
       - '--quiet'
-      # --- Set Runtime Environment Variables ---
       - '--set-env-vars=NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}'
       - '--set-env-vars=NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY}'
       - '--set-env-vars=NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL}'
@@ -283,7 +285,7 @@ steps:
       - '--set-env-vars=REVALIDATION_SECRET_TOKEN=${_REVALIDATION_SECRET_TOKEN}'
     waitFor: ['Push latest tag']
 
-# List images built
+# ... (images, options, tags remain the same) ...
 images:
   - '${_IMAGE_NAME}:${COMMIT_SHA}'
   - '${_IMAGE_NAME}:latest'
