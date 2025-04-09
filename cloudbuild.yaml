@@ -1,4 +1,4 @@
-# cloudbuild.yaml (v11.1 - Fixed YAML syntax in Deploy step args)
+# cloudbuild.yaml (v11.2 - Removed invalid root 'volumes' block)
 
 substitutions:
   _SERVICE_NAME: web-app
@@ -37,7 +37,7 @@ steps:
     script: |
       #!/usr/bin/env bash
       set -e; LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt); if [[ "${LOCK_HASH}" == "no-lock-file" ]]; then echo "Skipping NPM cache download (no lock file)."; exit 0; fi; CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/npm-${LOCK_HASH}-${_CACHE_ARCHIVE_NPM}"; LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NPM}"; echo "Attempting to download NPM cache: ${CACHE_FILE_GCS_PATH}"; (gsutil -q cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}") || echo "NPM cache not found or download failed for hash ${LOCK_HASH}."
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Use cloud-sdk for tar
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Extract NPM cache'
     script: |
        #!/usr/bin/env bash
@@ -50,7 +50,7 @@ steps:
     script: |
       #!/usr/bin/env bash
       set -e; CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"; LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"; echo "Attempting to download .next cache: ${CACHE_FILE_GCS_PATH}"; (gsutil -q cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}") || echo ".next cache not found or download failed."
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Use cloud-sdk for tar
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Extract .next cache'
     script: |
        #!/usr/bin/env bash
@@ -58,10 +58,11 @@ steps:
     waitFor: ['Download .next cache']
 
   # Step 3: Install Dependencies in Workspace
-  - name: 'node:${_NODE_VERSION}' # Official node image
+  - name: 'node:${_NODE_VERSION}'
     id: 'Install Dependencies'
     entrypoint: 'npm'
     args: ['ci', '--cache', '/workspace/.npm', '--prefer-offline']
+    # Use the named volume WITHIN the step
     volumes:
       - name: npm_cache_vol
         path: /workspace/.npm
@@ -72,6 +73,7 @@ steps:
     id: 'Build App'
     entrypoint: 'npm'
     args: ['run', 'build']
+    # Use the named volume WITHIN the step
     volumes:
       - name: next_build_vol
         path: /workspace/.next
@@ -98,15 +100,16 @@ steps:
     waitFor: ['Build App']
 
   # Step 6: Create and Upload NPM cache
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Has tar
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Create NPM cache archive'
+    # Use the named volume WITHIN the step
     volumes:
       - name: npm_cache_vol
         path: /workspace/.npm
     script: |
        #!/usr/bin/env bash
        set -e; LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NPM}"; NPM_CACHE_DIR=".npm"; if [[ -d "/workspace/${NPM_CACHE_DIR}" ]] && [[ -n "$(ls -A /workspace/${NPM_CACHE_DIR})" ]]; then echo "Creating NPM cache archive from volume..."; ls -ld "/workspace/${NPM_CACHE_DIR}"; (cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NPM_CACHE_DIR}"); else echo "Skipping NPM cache archiving (/workspace/${NPM_CACHE_DIR} does not exist or is empty)."; touch "${LOCAL_CACHE_FILE}"; fi
-    waitFor: ['Install Dependencies']
+    waitFor: ['Install Dependencies'] # Archive after npm ci populates it
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Upload NPM cache'
     script: |
@@ -115,15 +118,16 @@ steps:
     waitFor: ['Create NPM cache archive']
 
   # Step 7: Create and Upload .next cache
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Has tar
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Create .next cache archive'
+    # Use the named volume WITHIN the step
     volumes:
       - name: next_build_vol
         path: /workspace/.next
     script: |
        #!/usr/bin/env bash
        set -e; LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"; NEXT_CACHE_DIR=".next/cache"; if [[ -d "/workspace/${NEXT_CACHE_DIR}" ]] && [[ -n "$(ls -A /workspace/${NEXT_CACHE_DIR})" ]]; then echo "Creating .next cache archive from volume..."; ls -ld "/workspace/${NEXT_CACHE_DIR}"; (cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NEXT_CACHE_DIR}"); else echo "Skipping .next cache archiving (/workspace/${NEXT_CACHE_DIR} directory does not exist or is empty)."; touch "${LOCAL_CACHE_FILE}"; fi
-    waitFor: ['Build App']
+    waitFor: ['Build App'] # Archive after npm run build populates it
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Upload .next cache'
     script: |
@@ -141,11 +145,10 @@ steps:
     args: ['push', '${_IMAGE_NAME}:latest']
     waitFor: ['Push SHA tag']
 
-  # --- Step 9: Deploy (CORRECTED ARGS FORMAT) ---
+  # Step 9: Deploy
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Deploy'
     entrypoint: gcloud
-    # Use block format for args list
     args:
       - 'run'
       - 'services'
@@ -166,12 +169,7 @@ steps:
       - '--set-env-vars=REVALIDATION_SECRET_TOKEN=${_REVALIDATION_SECRET_TOKEN}'
     waitFor: ['Push latest tag']
 
-# Define volumes used by steps
-volumes:
-  - name: npm_cache_vol
-    path: /workspace/.npm
-  - name: next_build_vol
-    path: /workspace/.next
+# --- REMOVED INVALID ROOT 'volumes:' BLOCK ---
 
 # List images built
 images:
