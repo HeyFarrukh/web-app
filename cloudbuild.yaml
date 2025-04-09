@@ -1,4 +1,4 @@
-# cloudbuild.yaml (v12.1 - Fixed variable access in cache restore steps)
+# cloudbuild.yaml (v12.2 - Fixed _CACHE_BUCKET value)
 
 options:
   substitution_option: 'ALLOW_LOOSE'
@@ -12,7 +12,10 @@ substitutions:
   _AR_REPOSITORY: cloud-run-source-deploy
   _PLATFORM: managed
   _IMAGE_NAME: ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}
-  _CACHE_BUCKET: gs://apprentice-watch-web-build-cache-g # Ensure this is correct
+
+  # --- CORRECTED BUCKET NAME ---
+  _CACHE_BUCKET: apprentice-watch-web-build-cache-g # REMOVED gs:// prefix
+
   _CACHE_ARCHIVE_NPM: cache-npm.tar.gz
   _CACHE_ARCHIVE_NEXT: cache-next.tar.gz
   _NODE_VERSION: '18'
@@ -36,11 +39,10 @@ steps:
       set -e
       LOCKFILE_HASH="no-lock-file"; if [[ -f "package-lock.json" ]]; then LOCKFILE_HASH=$(sha1sum package-lock.json | awk '{ print $1 }'); echo "Using package-lock.json hash: ${LOCKFILE_HASH}"; elif [[ -f "yarn.lock" ]]; then LOCKFILE_HASH=$(sha1sum yarn.lock | awk '{ print $1 }'); echo "Using yarn.lock hash: ${LOCKFILE_HASH}"; else echo "Warning: No lock file found."; fi; echo "${LOCKFILE_HASH}" > /workspace/pkg_lock_sha.txt
 
-  # --- Step 1: Restore NPM Cache (MODIFIED SCRIPT) ---
+  # Step 1: Restore NPM Cache
   - id: restore-npm-cache
     name: 'gcr.io/cloud-builders/gsutil'
     waitFor: ['Get package lock hash']
-    # Use entrypoint bash to ensure substitutions are evaluated in the args
     entrypoint: bash
     args:
       - -c
@@ -48,28 +50,27 @@ steps:
         set -Eeuo pipefail
         LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
         if [[ "$${LOCK_HASH}" == "no-lock-file" ]]; then echo "Skipping NPM cache download (no lock file)."; exit 0; fi
+        # Path constructed correctly now: gs://<bucket_name>/...
         CACHE_PATH="gs://${_CACHE_BUCKET}/npm-$${LOCK_HASH}-${_CACHE_ARCHIVE_NPM}"
         ARCHIVE_FILE="/workspace/${_CACHE_ARCHIVE_NPM}"
         echo "Attempting to download NPM cache: $${CACHE_PATH}"
-        # Need double $$ for LOCK_HASH inside the script block passed via -c
         (gsutil -q cp "$${CACHE_PATH}" "$${ARCHIVE_FILE}") \
         && (echo "NPM cache archive downloaded. Extracting..." && mkdir -p /workspace/.npm && tar -xzmf "$${ARCHIVE_FILE}" -C /workspace/.npm && rm "$${ARCHIVE_FILE}" && echo "NPM cache extracted.") \
         || echo "NPM cache not found or download/extract failed."
 
-  # --- Step 2: Restore .next Cache (MODIFIED SCRIPT) ---
+  # Step 2: Restore .next Cache
   - id: restore-next-cache
     name: 'gcr.io/cloud-builders/gsutil'
     waitFor: ['-']
-    # Use entrypoint bash to ensure substitutions are evaluated in the args
     entrypoint: bash
     args:
       - -c
       - |
         set -Eeuo pipefail
+        # Path constructed correctly now: gs://<bucket_name>/...
         CACHE_PATH="gs://${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
         ARCHIVE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
         echo "Attempting to download .next cache: $${CACHE_PATH}"
-        # Need double $$ for variables inside the script block passed via -c
         (gsutil -q cp "$${CACHE_PATH}" "$${ARCHIVE_FILE}") \
         && (echo ".next cache archive downloaded. Extracting..." && mkdir -p /workspace/.next/cache && tar -xzmf "$${ARCHIVE_FILE}" --strip-components=1 -C /workspace/.next/cache && rm "$${ARCHIVE_FILE}" && echo ".next cache extracted.") \
         || echo ".next cache not found or download/extract failed."
@@ -97,7 +98,7 @@ steps:
       - 'NEXT_PUBLIC_MAPBOX_TOKEN=${_NEXT_PUBLIC_MAPBOX_TOKEN}'
       - 'NEXT_PUBLIC_GA_TRACKING_ID=${_NEXT_PUBLIC_GA_TRACKING_ID}'
 
-  # --- Step 5: Save NPM Cache (MODIFIED SCRIPT) ---
+  # Step 5: Save NPM Cache
   - id: save-npm-cache
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     waitFor: ['npm-ci']
@@ -108,6 +109,7 @@ steps:
         set -Eeuo pipefail
         LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
         if [[ "$${LOCK_HASH}" == "no-lock-file" ]]; then echo "Skipping NPM cache save (no lock file)."; exit 0; fi
+        # Path constructed correctly now: gs://<bucket_name>/...
         CACHE_PATH="gs://${_CACHE_BUCKET}/npm-$${LOCK_HASH}-${_CACHE_ARCHIVE_NPM}"
         ARCHIVE_FILE="/workspace/${_CACHE_ARCHIVE_NPM}"
         SOURCE_DIR=".npm"
@@ -121,7 +123,7 @@ steps:
           echo "Skipping NPM cache save (/workspace/$${SOURCE_DIR} not found or empty)."
         fi
 
-  # --- Step 6: Save .next Cache (MODIFIED SCRIPT) ---
+  # Step 6: Save .next Cache
   - id: save-next-cache
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     waitFor: ['npm-build']
@@ -130,6 +132,7 @@ steps:
       - -c
       - |
         set -Eeuo pipefail
+        # Path constructed correctly now: gs://<bucket_name>/...
         CACHE_PATH="gs://${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
         ARCHIVE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
         SOURCE_DIR=".next/cache"
@@ -180,7 +183,7 @@ steps:
       - '--quiet'
       - '--set-env-vars=NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL},NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY},NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL},NEXT_PUBLIC_LOGODEV_KEY=${_NEXT_PUBLIC_LOGODEV_KEY},NEXT_PUBLIC_GEMINI_API_KEY=${_NEXT_PUBLIC_GEMINI_API_KEY},NEXT_PUBLIC_MAPBOX_TOKEN=${_NEXT_PUBLIC_MAPBOX_TOKEN},NEXT_PUBLIC_GA_TRACKING_ID=${_NEXT_PUBLIC_GA_TRACKING_ID},REVALIDATION_SECRET_TOKEN=${_REVALIDATION_SECRET_TOKEN}'
 
-# Images list (optional if using explicit push)
+# Images list
 images:
   - '${_IMAGE_NAME}:${COMMIT_SHA}'
   - '${_IMAGE_NAME}:${_LATEST_TAG_NAME}'
