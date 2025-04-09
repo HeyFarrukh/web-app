@@ -1,9 +1,0 @@
-# .dockerignore
-.git
-.gitignore
-.gcloudignore
-.next
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.DS_Store
