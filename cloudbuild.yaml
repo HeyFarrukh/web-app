@@ -187,7 +187,7 @@ steps:
     args: ['rm', 'extractor']
     waitFor: ['Copy node_modules from container', 'Copy .next cache from container']
 
-  # --- Step 11: Create node_modules cache archive (FIXED) ---
+# Step 11: Create node_modules cache archive (PROPERLY FIXED)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Create node_modules cache archive'
     script: |
@@ -199,8 +199,8 @@ steps:
          echo "Verifying directory ${NODE_MODULES_DIR} exists and has content:"
          ls -ld "${NODE_MODULES_DIR}"
          echo "Creating node_modules cache archive..."
-         # Fixed: Create tar from specific directory with proper -C flag
-         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C /workspace node_modules
+         # Properly fixed: cd to workspace first, then tar relative path
+         cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" node_modules/
        else
          echo "Skipping node_modules cache archiving (${NODE_MODULES_DIR} does not exist or is empty)."
          touch "${LOCAL_CACHE_FILE}" # Create empty file for upload step check
@@ -228,7 +228,7 @@ steps:
        fi
     waitFor: ['Create node_modules cache archive']
 
-  # --- Step 13: Create .next/cache archive (FIXED) ---
+  # Step 13: Create .next/cache archive (PROPERLY FIXED)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Create .next cache archive'
     script: |
@@ -240,8 +240,8 @@ steps:
          echo "Verifying directory ${NEXT_CACHE_DIR} exists and has content:"
          ls -ld "${NEXT_CACHE_DIR}"
          echo "Creating .next/cache archive..."
-         # Fixed: Create tar from specific directory with proper -C flag
-         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C /workspace .next/cache
+         # Properly fixed: cd to workspace first, then tar relative path
+         cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" .next/cache/
        else
          echo "Skipping .next/cache archiving (${NEXT_CACHE_DIR} directory does not exist or is empty)."
          touch "${LOCAL_CACHE_FILE}" # Create empty file for upload step check
