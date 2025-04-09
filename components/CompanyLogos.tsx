@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { LogoScroll } from './logos/LogoScroll';
 import { StatCard } from './stats/StatCard';
 import { vacancyService } from '@/services/supabase/vacancyService';
@@ -49,14 +48,10 @@ export const CompanyLogos = () => {
 
   return (
     <div className="mt-16">
-      <motion.h3 
-        className="text-center text-2xl font-bold text-gray-800 dark:text-white mb-8 tracking-tight"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1 }}
-      >
+      {/* Removed motion animation for faster rendering */}
+      <h3 className="text-center text-2xl font-bold text-gray-800 dark:text-white mb-8 tracking-tight">
         Top Companies Hiring Apprentices
-      </motion.h3>
+      </h3>
 
       <div className="relative w-full overflow-hidden bg-transparent py-8">
         <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-orange-50 dark:from-gray-900 to-transparent z-10" />
@@ -67,20 +62,16 @@ export const CompanyLogos = () => {
         </div>
       </div>
       
-      <motion.div 
-        className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.2 }}
-      >
+      {/* Removed motion animation for faster rendering */}
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
         {stats.map((stat, index) => (
           <StatCard
             key={stat.label}
             {...stat}
-            delay={1.2 + (index * 0.1)}
+            delay={0} // Set delay to 0 to prevent animation delays
           />
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 };
