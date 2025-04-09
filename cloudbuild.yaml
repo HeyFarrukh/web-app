@@ -1,4 +1,4 @@
-# cloudbuild.yaml (v7 - Stream tar from container using docker exec | gsutil cp)
+# cloudbuild.yaml (v8 - Revert to docker cp, use cloud-sdk for tar steps)
 
 substitutions:
   # ... (substitutions remain the same) ...
@@ -22,7 +22,7 @@ substitutions:
   _REVALIDATION_SECRET_TOKEN: 'your-secret-token'
 
 steps:
-  # Step 0: Get package lock hash (Unchanged)
+  # Step 0: Get package lock hash (Unchanged from v6)
   - name: 'bash'
     id: 'Get package lock hash'
     script: |
@@ -40,14 +40,14 @@ steps:
       fi
       echo "${LOCKFILE_HASH}" > /workspace/pkg_lock_sha.txt
 
-  # Step 1: Download node_modules cache (Unchanged)
+  # Step 1: Download node_modules cache (Unchanged from v6)
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Download node_modules cache'
     script: |
       #!/usr/bin/env bash
       set -e
       LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
-      # Create empty file marker if download is skipped or fails
+      # Marker file to track if download failed/skipped
       touch "/workspace/${_CACHE_ARCHIVE_NODE}.missing_or_failed"
       if [[ "${LOCK_HASH}" == "no-lock-file" ]]; then
         echo "Skipping node_modules cache download (no lock file)."
@@ -57,13 +57,12 @@ steps:
       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}"
       echo "Attempting to download node_modules cache: ${CACHE_FILE_GCS_PATH}"
       if (gsutil -q cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}"); then
-        # Remove marker file on success
-        rm -f "/workspace/${_CACHE_ARCHIVE_NODE}.missing_or_failed"
+         rm -f "/workspace/${_CACHE_ARCHIVE_NODE}.missing_or_failed" # Success
       else
         echo "Node modules cache not found or download failed for hash ${LOCK_HASH}."
       fi
 
-  # Step 2: Extract node_modules cache (Unchanged)
+  # Step 2: Extract node_modules cache (Unchanged from v6, uses ubuntu)
   - name: 'ubuntu'
     id: 'Extract node_modules cache'
     script: |
@@ -81,7 +80,7 @@ steps:
        fi
     waitFor: ['Download node_modules cache']
 
-  # Step 3: Download .next/cache (Unchanged)
+  # Step 3: Download .next/cache (Unchanged from v6)
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Download .next cache'
     script: |
@@ -92,12 +91,12 @@ steps:
       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
       echo "Attempting to download .next cache: ${CACHE_FILE_GCS_PATH}"
       if (gsutil -q cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}"); then
-        rm -f "/workspace/${_CACHE_ARCHIVE_NEXT}.missing_or_failed"
+        rm -f "/workspace/${_CACHE_ARCHIVE_NEXT}.missing_or_failed" # Success
       else
         echo ".next cache not found or download failed."
       fi
 
-  # Step 4: Extract .next cache (Unchanged)
+  # Step 4: Extract .next cache (Unchanged from v6, uses ubuntu)
   - name: 'ubuntu'
     id: 'Extract .next cache'
     script: |
@@ -115,14 +114,14 @@ steps:
        fi
     waitFor: ['Extract node_modules cache', 'Download .next cache']
 
-  # Step 5: Pull latest image for Docker cache (Unchanged)
+  # Step 5: Pull latest image for Docker cache (Unchanged from v6)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Pull latest image for cache'
     entrypoint: 'bash'
     args: ['-c', 'docker pull ${_IMAGE_NAME}:latest || exit 0']
     waitFor: ['-']
 
-  # Step 6: Build the Docker image (Unchanged)
+  # Step 6: Build the Docker image (Unchanged from v6)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build'
     args: [
@@ -141,93 +140,142 @@ steps:
         ]
     waitFor: ['Extract .next cache', 'Pull latest image for cache']
 
-  # --- STEPS REPLACED/MODIFIED ---
-
-  # Step 7: Create dummy container from build image (Unchanged)
+  # Step 7: Create dummy container from build image (Unchanged from v6)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Create dummy container'
     args: ['create', '--name', 'extractor', '${_IMAGE_NAME}:${COMMIT_SHA}']
     waitFor: ['Build']
 
-  # Step 8: Archive and Upload node_modules directly from container
-  # Use gcloud image as it has docker, gsutil, and bash/tar
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: 'Archive and Upload node_modules'
+  # Step 8: Copy node_modules from dummy container (Unchanged from v6)
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Copy node_modules from container'
     script: |
-      #!/usr/bin/env bash
-      set -e
-      LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
-      # Only upload if cache wasn't downloaded/extracted OR if lock hash is "no-lock-file" (meaning we must create it)
-      # Check for the marker file created in step 1
-      if [[ -f "/workspace/${_CACHE_ARCHIVE_NODE}.missing_or_failed" ]] || [[ "${LOCK_HASH}" == "no-lock-file" ]]; then
-        if [[ "${LOCK_HASH}" == "no-lock-file" ]]; then
-          echo "Warning: No lock file. node_modules cache will be uploaded without specific hash."
-          # Optionally, you could skip upload here if no lock file means no reliable cache
-          # exit 0
-          CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/no-lock-file-${_CACHE_ARCHIVE_NODE}" # Or handle differently
-        else
-          CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/${LOCK_HASH}-${_CACHE_ARCHIVE_NODE}"
-        fi
+       #!/usr/bin/env bash
+       set -e
+       # Use marker file from Step 1 to check if download failed/skipped
+       if [[ -f "/workspace/${_CACHE_ARCHIVE_NODE}.missing_or_failed" ]]; then
+         echo "Copying node_modules from built image to workspace..."
+         docker cp extractor:/app/node_modules /workspace/node_modules
+         # Clean up marker if we copied
+         rm -f "/workspace/${_CACHE_ARCHIVE_NODE}.missing_or_failed"
+       else
+         echo "Skipping copy of node_modules from container (already extracted from GCS)."
+       fi
+    waitFor: ['Create dummy container', 'Extract node_modules cache']
 
-        echo "Archiving node_modules from container and uploading to ${CACHE_FILE_GCS_PATH}..."
-        # Execute tar inside the container, pipe stdout to gsutil reading stdin (-)
-        # Use -C inside container to get relative paths in archive
-        docker exec extractor tar --ignore-failed-read -czf - -C /app node_modules | \
-          gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp - "${CACHE_FILE_GCS_PATH}"
-
-        echo "node_modules archive uploaded."
-        # Clean up marker file if it exists
-        rm -f "/workspace/${_CACHE_ARCHIVE_NODE}.missing_or_failed"
-      else
-        echo "Skipping node_modules archive and upload (cache likely extracted from GCS)."
-      fi
-    waitFor: ['Create dummy container', 'Extract node_modules cache'] # Wait for container and extraction attempt
-
-  # Step 9: Archive and Upload .next/cache directly from container
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    id: 'Archive and Upload .next cache'
+  # Step 9: Copy .next/cache from dummy container (Unchanged from v6)
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Copy .next cache from container'
     script: |
-      #!/usr/bin/env bash
-      set -e
-      # Only upload if cache wasn't downloaded/extracted
-      # Check for the marker file created in step 3
-      if [[ -f "/workspace/${_CACHE_ARCHIVE_NEXT}.missing_or_failed" ]]; then
-        CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
-        echo "Archiving .next/cache from container and uploading to ${CACHE_FILE_GCS_PATH}..."
+       #!/usr/bin/env bash
+       set -e
+       # Use marker file from Step 3 to check if download failed/skipped
+       if [[ -f "/workspace/${_CACHE_ARCHIVE_NEXT}.missing_or_failed" ]]; then
+         echo "Copying .next/cache from built image to workspace..."
+         mkdir -p /workspace/.next # Ensure parent dir exists
+         docker cp extractor:/app/.next/cache /workspace/.next/cache
+         # Clean up marker if we copied
+         rm -f "/workspace/${_CACHE_ARCHIVE_NEXT}.missing_or_failed"
+       else
+         echo "Skipping copy of .next/cache from container (already extracted from GCS)."
+       fi
+    waitFor: ['Create dummy container', 'Extract .next cache']
 
-        # Execute tar inside the container for .next/cache, pipe stdout to gsutil reading stdin (-)
-        # Use -C inside container to archive relative path 'cache' from within '.next'
-        docker exec extractor tar --ignore-failed-read -czf - -C /app/.next cache | \
-          gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp - "${CACHE_FILE_GCS_PATH}"
-
-        echo ".next/cache archive uploaded."
-        # Clean up marker file if it exists
-        rm -f "/workspace/${_CACHE_ARCHIVE_NEXT}.missing_or_failed"
-      else
-        echo "Skipping .next/cache archive and upload (cache likely extracted from GCS)."
-      fi
-    waitFor: ['Create dummy container', 'Extract .next cache'] # Wait for container and extraction attempt
-
-  # Step 10: Remove the dummy container (Unchanged)
+  # Step 10: Remove the dummy container (Unchanged from v6)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Remove dummy container'
     args: ['rm', 'extractor']
-    # Wait for both archive/upload steps to finish using the container
-    waitFor: ['Archive and Upload node_modules', 'Archive and Upload .next cache']
+    waitFor: ['Copy node_modules from container', 'Copy .next cache from container']
 
-  # Step 11 (was 15): Push the container image tags
+  # --- Step 11: Create node_modules cache archive (MODIFIED IMAGE) ---
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Use cloud-sdk image
+    id: 'Create node_modules cache archive'
+    script: |
+       #!/usr/bin/env bash
+       set -e
+       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}"
+       NODE_MODULES_DIR="node_modules" # Relative path within /workspace
+       if [[ -d "/workspace/${NODE_MODULES_DIR}" ]] && [[ -n "$(ls -A /workspace/${NODE_MODULES_DIR})" ]]; then
+         echo "Verifying directory /workspace/${NODE_MODULES_DIR} exists and has content (using cloud-sdk image):"
+         ls -ld "/workspace/${NODE_MODULES_DIR}" # DEBUG
+         echo "Creating node_modules cache archive..."
+         # Change to workspace directory and use relative path for source
+         (cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NODE_MODULES_DIR}")
+       else
+         echo "Skipping node_modules cache archiving (/workspace/${NODE_MODULES_DIR} does not exist or is empty)."
+         touch "${LOCAL_CACHE_FILE}" # Create empty file for upload step check
+       fi
+    waitFor: ['Remove dummy container']
+
+  # Step 12: Upload node_modules cache (Unchanged from v6)
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'Upload node_modules cache'
+    script: |
+       #!/usr/bin/env bash
+       set -e
+       LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
+       if [[ "${LOCK_HASH}" == "no-lock-file" ]]; then
+         echo "Skipping node_modules cache upload (no lock file)."
+         exit 0
+       fi
+       CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/${LOCK_HASH}-${_CACHE_ARCHIVE_NODE}"
+       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}"
+       if [[ -f "${LOCAL_CACHE_FILE}" ]] && [[ $(stat -c%s "${LOCAL_CACHE_FILE}") -gt 100 ]]; then
+         echo "Uploading node_modules cache: ${CACHE_FILE_GCS_PATH}"
+         gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp "${LOCAL_CACHE_FILE}" "${CACHE_FILE_GCS_PATH}"
+       else
+         echo "Skipping upload of empty or missing node_modules cache archive."
+       fi
+    waitFor: ['Create node_modules cache archive']
+
+  # --- Step 13: Create .next/cache archive (MODIFIED IMAGE) ---
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Use cloud-sdk image
+    id: 'Create .next cache archive'
+    script: |
+       #!/usr/bin/env bash
+       set -e
+       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
+       NEXT_CACHE_DIR=".next/cache" # Relative path within /workspace
+       if [[ -d "/workspace/${NEXT_CACHE_DIR}" ]] && [[ -n "$(ls -A /workspace/${NEXT_CACHE_DIR})" ]]; then
+         echo "Verifying directory /workspace/${NEXT_CACHE_DIR} exists and has content (using cloud-sdk image):"
+         ls -ld "/workspace/${NEXT_CACHE_DIR}" # DEBUG
+         echo "Creating .next/cache archive..."
+         # Change to workspace directory and use relative path for source
+         (cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NEXT_CACHE_DIR}")
+       else
+         echo "Skipping .next/cache archiving (/workspace/${NEXT_CACHE_DIR} directory does not exist or is empty)."
+         touch "${LOCAL_CACHE_FILE}" # Create empty file for upload step check
+       fi
+    waitFor: ['Remove dummy container']
+
+  # Step 14: Upload .next cache (Unchanged from v6)
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'Upload .next cache'
+    script: |
+       #!/usr/bin/env bash
+       set -e
+       CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
+       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
+       if [[ -f "${LOCAL_CACHE_FILE}" ]] && [[ $(stat -c%s "${LOCAL_CACHE_FILE}") -gt 100 ]]; then
+         echo "Uploading .next cache: ${CACHE_FILE_GCS_PATH}"
+         gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp "${LOCAL_CACHE_FILE}" "${CACHE_FILE_GCS_PATH}"
+       else
+         echo "Skipping upload of empty or missing .next cache archive."
+       fi
+    waitFor: ['Create .next cache archive']
+
+  # Step 15: Push the container image tags (Unchanged from v6)
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push SHA tag'
     args: ['push', '${_IMAGE_NAME}:${COMMIT_SHA}']
-    # Wait for uploads to finish (redundant now?) and container removal
-    waitFor: ['Remove dummy container'] # Simplified wait, uploads happen before removal
+    waitFor: ['Upload node_modules cache', 'Upload .next cache']
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push latest tag'
     args: ['push', '${_IMAGE_NAME}:latest']
     waitFor: ['Push SHA tag']
 
-  # Step 12 (was 16): Deploy to Cloud Run (Unchanged)
+  # Step 16: Deploy to Cloud Run (Unchanged from v6)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Deploy'
     entrypoint: gcloud
