@@ -1,5 +1,4 @@
-# cloudbuild.yaml (v12.3 - Disable .next cache, add sleep before deploy)
-# Use this version again, knowing the NPM cache exists in GCS now.
+# cloudbuild.yaml (v13 - Workspace build, NPM cache, Original Deploy Step)
 
 options:
   substitution_option: 'ALLOW_LOOSE'
@@ -15,8 +14,9 @@ substitutions:
   _IMAGE_NAME: ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}
   _CACHE_BUCKET: apprentice-watch-web-build-cache-g
   _CACHE_ARCHIVE_NPM: cache-npm.tar.gz
-  # _CACHE_ARCHIVE_NEXT: cache-next.tar.gz # <-- Stays REMOVED for this test
+  # _CACHE_ARCHIVE_NEXT: cache-next.tar.gz # Still disabled
   _NODE_VERSION: '18'
+  # ENV VARS for build (Define securely in Trigger UI)
   _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
   _NEXT_PUBLIC_SUPABASE_ANON_KEY: 'your-anon-key'
   _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
@@ -24,7 +24,7 @@ substitutions:
   _NEXT_PUBLIC_GEMINI_API_KEY: 'your-gemini-key'
   _NEXT_PUBLIC_MAPBOX_TOKEN: 'your-mapbox-token'
   _NEXT_PUBLIC_GA_TRACKING_ID: G-1GKBR9HKF3
-  _REVALIDATION_SECRET_TOKEN: 'your-secret-token'
+  # _REVALIDATION_SECRET_TOKEN: 'your-secret-token' # Not passed to build steps
   _LATEST_TAG_NAME: 'latest'
 
 steps:
@@ -38,7 +38,7 @@ steps:
 
   # Step 1: Restore NPM Cache
   - id: restore-npm-cache
-    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Use cloud-sdk for tar extract
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     waitFor: ['Get package lock hash']
     entrypoint: bash
     args:
@@ -50,40 +50,32 @@ steps:
         CACHE_PATH="gs://${_CACHE_BUCKET}/npm-$${LOCK_HASH}-${_CACHE_ARCHIVE_NPM}"
         ARCHIVE_FILE="/workspace/${_CACHE_ARCHIVE_NPM}"
         echo "Attempting to download NPM cache: $${CACHE_PATH}"
-        # Try downloading AND THEN extracting, failing build if extract fails
         if (gsutil -q cp "$${CACHE_PATH}" "$${ARCHIVE_FILE}"); then
           echo "NPM cache archive downloaded. Extracting..."
           mkdir -p /workspace/.npm
-          # Use tar from cloud-sdk image
           if (tar -xzmf "$${ARCHIVE_FILE}" -C /workspace/.npm); then
              rm "$${ARCHIVE_FILE}" && echo "NPM cache extracted successfully."
           else
-             echo "ERROR: NPM cache extraction failed."
-             # rm "$${ARCHIVE_FILE}" # Optional: remove corrupted download
-             exit 1 # Fail the build step
+             echo "ERROR: NPM cache extraction failed." && exit 1
           fi
         else
-          # Download failed, log it but continue build without cache
           echo "NPM cache not found or download failed."
         fi
 
-  # --- Step 2 REMOVED (Restore .next Cache) ---
-
-  # Step 3: Install Dependencies
+  # Step 2: Install Dependencies (Should be FAST)
   - id: npm-ci
     name: 'node:${_NODE_VERSION}'
     waitFor: ['restore-npm-cache']
     entrypoint: npm
-    # This step should now be faster if Step 1 succeeded
     args: ['ci', '--cache', '/workspace/.npm', '--prefer-offline']
 
-  # Step 4: Build Next.js App
+  # Step 3: Build Next.js App
   - id: npm-build
     name: 'node:${_NODE_VERSION}'
     waitFor: ['npm-ci']
     entrypoint: npm
     args: ['run', 'build']
-    env:
+    env: # Env vars needed ONLY for build time
       - 'NODE_ENV=production'
       - 'NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}'
       - 'NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY}'
@@ -93,7 +85,7 @@ steps:
       - 'NEXT_PUBLIC_MAPBOX_TOKEN=${_NEXT_PUBLIC_MAPBOX_TOKEN}'
       - 'NEXT_PUBLIC_GA_TRACKING_ID=${_NEXT_PUBLIC_GA_TRACKING_ID}'
 
-  # Step 5: Save NPM Cache
+  # Step 4: Save NPM Cache
   - id: save-npm-cache
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     waitFor: ['npm-ci']
@@ -112,25 +104,20 @@ steps:
             exit 0
         fi
         echo "Creating and uploading NPM cache to $${CACHE_PATH}..."
-        # Allow tar errors but fail build if upload fails
+        # Ignore tar errors, fail only if gsutil fails
         (cd /workspace && tar --ignore-failed-read -czf "$${ARCHIVE_FILE}" "$${SOURCE_DIR}") || echo "Warning: tar command for NPM cache exited with non-zero status."
-        # Proceed to upload even if tar had non-fatal errors, fail build only if gsutil fails
         if [[ -f "$${ARCHIVE_FILE}" ]]; then
           echo "Archive file exists. Uploading..."
           if (gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp "$${ARCHIVE_FILE}" "$${CACHE_PATH}"); then
              rm "$${ARCHIVE_FILE}" && echo "NPM cache saved."
           else
-             echo "ERROR: gsutil upload failed for NPM cache."
-             exit 1
+             echo "ERROR: gsutil upload failed for NPM cache." && exit 1
           fi
         else
-          echo "ERROR: Archive file not created by tar for NPM cache."
-          exit 1
+          echo "ERROR: Archive file not created by tar for NPM cache." && exit 1
         fi
 
-  # --- Step 6 REMOVED (Save .next Cache) ---
-
-  # Step 7: Build and Push Docker Image
+  # Step 5: Build Docker Image (Uses simplified Dockerfile v11)
   - id: docker-build
     name: 'gcr.io/cloud-builders/docker'
     waitFor: ['npm-build']
@@ -144,22 +131,21 @@ steps:
       - '${_IMAGE_NAME}:${_LATEST_TAG_NAME}'
       - '.'
 
-  - id: docker-push
+  # Step 6: Explicit Docker Push Tags
+  - id: docker-push-commit
     name: 'gcr.io/cloud-builders/docker'
-    waitFor: ['docker-build', 'save-npm-cache'] # Removed wait for .next cache save
-    args: ['push', '${_IMAGE_NAME}']
+    waitFor: ['docker-build', 'save-npm-cache']
+    args: ['push', '${_IMAGE_NAME}:${COMMIT_SHA}']
 
-  # Step 8: Short Delay
-  - name: 'bash'
-    id: 'sleep-before-deploy'
-    waitFor: ['docker-push']
-    entrypoint: sleep # Direct entrypoint is cleaner
-    args: ['15']
+  - id: docker-push-latest
+    name: 'gcr.io/cloud-builders/docker'
+    waitFor: ['docker-push-commit']
+    args: ['push', '${_IMAGE_NAME}:${_LATEST_TAG_NAME}']
 
-  # Step 9: Deploy to Cloud Run
-  - id: cloudrun-deploy
-    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    waitFor: ['sleep-before-deploy']
+  # Step 7: Deploy using the ORIGINAL command structure
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: 'Deploy' # Keep ID simple
+    waitFor: ['docker-push-latest'] # Wait for push
     entrypoint: gcloud
     args:
       - 'run'
@@ -167,11 +153,13 @@ steps:
       - 'update'
       - '${_SERVICE_NAME}'
       - '--platform=managed'
-      - '--image=${_IMAGE_NAME}:${COMMIT_SHA}'
+      # Use the exact image name format from original
+      - '--image=${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      # Keep labels consistent
       - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=${COMMIT_SHA},gcb-build-id=${BUILD_ID},gcb-trigger-id=${_TRIGGER_ID}'
       - '--region=${_DEPLOY_REGION}'
       - '--quiet'
-      - '--set-env-vars=NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL},NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY},NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL},NEXT_PUBLIC_LOGODEV_KEY=${_NEXT_PUBLIC_LOGODEV_KEY},NEXT_PUBLIC_GEMINI_API_KEY=${_NEXT_PUBLIC_GEMINI_API_KEY},NEXT_PUBLIC_MAPBOX_TOKEN=${_NEXT_PUBLIC_MAPBOX_TOKEN},NEXT_PUBLIC_GA_TRACKING_ID=${_NEXT_PUBLIC_GA_TRACKING_ID},REVALIDATION_SECRET_TOKEN=${_REVALIDATION_SECRET_TOKEN}'
+      # NO --set-env-vars included, matching the original exactly
 
 # Images list
 images:
