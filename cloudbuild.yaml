@@ -1,9 +1,10 @@
 # cloudbuild.yaml (v13.1 - Re-enable .next cache)
 
 options:
+  machineType: E2_HIGHCPU_8
   substitution_option: 'ALLOW_LOOSE'
   logging: CLOUD_LOGGING_ONLY
-  machineType: E2_STANDARD_2
+
 
 substitutions:
   _SERVICE_NAME: web-app
@@ -15,16 +16,16 @@ substitutions:
   _IMAGE_NAME: ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}
   _CACHE_BUCKET: apprentice-watch-web-build-cache-g
   _CACHE_ARCHIVE_NPM: cache-npm.tar.gz
-  _CACHE_ARCHIVE_NEXT: cache-next.tar.gz # <-- RE-ENABLED
+  _CACHE_ARCHIVE_NEXT: cache-next.tar.gz # 
   _NODE_VERSION: '18'
   _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
-  _NEXT_PUBLIC_SUPABASE_ANON_KEY: 'your-anon-key'
+  _NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon-key'
   _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
-  _NEXT_PUBLIC_LOGODEV_KEY: 'your-logodev-key'
-  _NEXT_PUBLIC_GEMINI_API_KEY: 'your-gemini-key'
-  _NEXT_PUBLIC_MAPBOX_TOKEN: 'your-mapbox-token'
+  _NEXT_PUBLIC_LOGODEV_KEY: 'logodev-key'
+  _NEXT_PUBLIC_GEMINI_API_KEY: 'gemini-key'
+  _NEXT_PUBLIC_MAPBOX_TOKEN: 'mapbox-token'
   _NEXT_PUBLIC_GA_TRACKING_ID: G-1GKBR9HKF3
-  _REVALIDATION_SECRET_TOKEN: 'your-secret-token'
+  _REVALIDATION_SECRET_TOKEN: 'secret-token'
   _LATEST_TAG_NAME: 'latest'
 
 steps:
