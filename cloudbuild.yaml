@@ -24,9 +24,7 @@ steps:
       - --env=REVALIDATION_SECRET_TOKEN=$_REVALIDATION_SECRET_TOKEN
       - --env=NEXT_PUBLIC_GA_TRACKING_ID=$_NEXT_PUBLIC_GA_TRACKING_ID
     id: Buildpack
-    volumes:
-      - name: pack-cache
-        path: /cache
+    # Remove the volume reference here
 
   # Step 2: Tag the image as latest for future caching
   - name: 'gcr.io/cloud-builders/docker'
@@ -42,9 +40,7 @@ steps:
       - push
       - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: PushVersioned
-    volumes:
-      - name: pack-cache
-        path: /cache
+    # Remove the volume reference here
 
   - name: gcr.io/cloud-builders/docker
     args:
@@ -75,7 +71,7 @@ images:
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
-  # Add volume caching
+  # Keep volume caching only here in the global options
   volumes:
     - name: 'pack-cache'
       path: '/cache'
