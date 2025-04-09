@@ -3,7 +3,7 @@
 options:
   substitution_option: 'ALLOW_LOOSE'
   logging: CLOUD_LOGGING_ONLY
-  machineType: 'e2-standard-2'
+  machineType: e2-standard-2
 
 substitutions:
   _SERVICE_NAME: web-app
