@@ -28,15 +28,14 @@ substitutions:
   # _TRIGGER_ID: 'c8892f2e-df9a-418e-bca0-d54efc8a090f' # Example
 
 steps:
-  # 0. Restore Cache (node_modules) from GCS if package-lock.json hasn't changed
-  - name: 'gcr.io/cloud-builders/git'
-    args: ['rev-parse', 'HEAD:package-lock.json']
+  # 0. Get package-lock.json hash
+  - name: 'gcr.io/cloud-builders/git' # Using this image is fine since entrypoint is overridden
     id: 'Get package-lock hash'
     entrypoint: 'bash'
+    # REMOVED the conflicting 'args' field below
     script: |
       set -e
       if [[ -f "package-lock.json" ]]; then
-        # Handle potential path differences if Dockerfile is not in root
         sha1sum package-lock.json | awk '{ print $1 }' > /workspace/pkg_lock_sha.txt
       # Add elif for yarn.lock if needed
       # elif [[ -f "yarn.lock" ]]; then
@@ -45,6 +44,7 @@ steps:
         echo "no-lock-file" > /workspace/pkg_lock_sha.txt
       fi
 
+  # 1. Download node_modules cache if exists for this hash
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Download node_modules cache'
     entrypoint: 'bash'
@@ -52,61 +52,67 @@ steps:
       set -e
       LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
       CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/${LOCK_HASH}-${_CACHE_ARCHIVE_NODE}"
-      LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NODE}"
+      LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}" # Use /workspace explicitly
       echo "Attempting to download node_modules cache: ${CACHE_FILE_GCS_PATH}"
-      gsutil cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}" || echo "Node modules cache not found or download failed for hash ${LOCK_HASH}."
+      # Use gsutil -q option for quieter output on success
+      gsutil -q cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}" || echo "Node modules cache not found or download failed for hash ${LOCK_HASH}."
 
-  - name: 'ubuntu'
+  # 2. Extract node_modules cache if downloaded
+  - name: 'ubuntu' # Using ubuntu image which has tar
     id: 'Extract node_modules cache'
     entrypoint: 'bash'
     script: |
        set -e
-       LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NODE}"
+       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}" # Use /workspace explicitly
        if [[ -f "${LOCAL_CACHE_FILE}" ]]; then
          echo "Extracting node_modules cache..."
-         # Extract into workspace root
-         tar -xzmf "${LOCAL_CACHE_FILE}" || echo "Warning: Failed to extract node_modules cache, continuing..."
+         # Extract into workspace root (/workspace)
+         # Use -m to preserve modification times (sometimes useful for caching tools)
+         tar -xzmf "${LOCAL_CACHE_FILE}" -C /workspace || echo "Warning: Failed to extract node_modules cache, continuing..."
          rm "${LOCAL_CACHE_FILE}"
        else
          echo "No node_modules cache archive found to extract."
        fi
+    waitFor: ['Download node_modules cache'] # Wait for download step
 
-  # 1. Restore .next/cache from GCS (using 'latest')
+  # 3. Download .next/cache from GCS (using 'latest')
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Download .next cache'
     entrypoint: 'bash'
     script: |
       set -e
       CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
-      LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NEXT}"
+      LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}" # Use /workspace explicitly
       echo "Attempting to download .next cache: ${CACHE_FILE_GCS_PATH}"
-      gsutil cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}" || echo ".next cache not found or download failed."
+      gsutil -q cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}" || echo ".next cache not found or download failed."
 
+  # 4. Extract .next cache if downloaded
   - name: 'ubuntu'
     id: 'Extract .next cache'
     entrypoint: 'bash'
     script: |
        set -e
-       LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NEXT}"
+       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}" # Use /workspace explicitly
        if [[ -f "${LOCAL_CACHE_FILE}" ]]; then
          echo "Extracting .next cache..."
-         mkdir -p .next # Ensure .next directory exists
+         mkdir -p /workspace/.next # Ensure .next directory exists in workspace
          # Extract contents of the 'cache' dir from archive into the '.next' dir
-         tar -xzmf "${LOCAL_CACHE_FILE}" --strip-components=1 -C .next || echo "Warning: Failed to extract .next cache, continuing..."
+         # Use --strip-components=1 because archive contains 'cache/*'
+         tar -xzmf "${LOCAL_CACHE_FILE}" --strip-components=1 -C /workspace/.next || echo "Warning: Failed to extract .next cache, continuing..."
          rm "${LOCAL_CACHE_FILE}"
        else
          echo "No .next cache archive found to extract."
        fi
-    waitFor: ['Extract node_modules cache'] # Ensure node_modules are extracted first if needed
+    waitFor: ['Extract node_modules cache', 'Download .next cache'] # Wait for both caches
 
-  # 2. Pull previous image to use as Docker layer cache source
+  # 5. Pull previous image to use as Docker layer cache source
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Pull latest image for cache'
     entrypoint: 'bash'
     args: ['-c', 'docker pull ${_IMAGE_NAME}:latest || exit 0']
     waitFor: ['-'] # Start immediately
 
-  # 3. Build the Docker image using the Dockerfile
+  # 6. Build the Docker image using the Dockerfile
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build'
     args: [
@@ -123,29 +129,42 @@ steps:
             '--build-arg', 'NEXT_PUBLIC_MAPBOX_TOKEN=${_NEXT_PUBLIC_MAPBOX_TOKEN}',
             '--build-arg', 'NEXT_PUBLIC_GA_TRACKING_ID=${_NEXT_PUBLIC_GA_TRACKING_ID}',
             # '--build-arg', 'REVALIDATION_SECRET_TOKEN=${_REVALIDATION_SECRET_TOKEN}', # Usually not needed at build time
-            '.', # Build context (current directory)
+            '.', # Build context (current directory, /workspace)
         ]
-    waitFor: ['Extract .next cache', 'Pull latest image for cache'] # Wait for caches and base image
+    # Wait for caches to be extracted (if they existed) and base image pull attempt
+    waitFor: ['Extract .next cache', 'Pull latest image for cache']
 
-  # 4. Save node_modules cache to GCS (keyed by lock file hash)
+  # 7. Create node_modules cache archive (keyed by lock file hash)
   - name: 'ubuntu'
     id: 'Create node_modules cache archive'
     entrypoint: 'bash'
     script: |
       set -e
-      LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NODE}"
-      # Check if node_modules exists AND was likely populated (e.g., not just an empty dir from failed extraction)
-      if [[ -d "node_modules" ]] && [[ -n "$(ls -A node_modules)" ]]; then
+      # Archive is created in /workspace
+      LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}"
+      # Check if node_modules exists in /workspace
+      if [[ -d "/workspace/node_modules" ]] && [[ -n "$(ls -A /workspace/node_modules)" ]]; then
         echo "Creating node_modules cache archive..."
-        # Use --ignore-failed-read for resilience against minor issues like broken symlinks
-        tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" node_modules
+        # Use --ignore-failed-read for resilience
+        # Archive the node_modules dir from /workspace
+        tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C /workspace node_modules
       else
-        echo "Skipping node_modules cache archiving (directory does not exist or is empty)."
+        echo "Skipping node_modules cache archiving (/workspace/node_modules does not exist or is empty)."
         # Create an empty file so the upload step doesn't fail if cache never existed
         touch "${LOCAL_CACHE_FILE}"
       fi
-    waitFor: ['Build'] # Ensure build is complete
+    # This depends on the Docker build potentially creating node_modules if cache missed
+    # But docker build runs in isolation. This step actually archives the node_modules
+    # created/restored in the /workspace *before* the docker build starts.
+    # Docker build uses its own cached layers or builds them internally.
+    # This step should ideally run *after* a potential `npm install` step *if* we weren't using Docker build.
+    # Since Docker build handles node_modules internally based on its layers,
+    # archiving /workspace/node_modules *after* the build might be incorrect or unnecessary
+    # unless a pre-build `npm install` was performed in the workspace.
+    # Let's assume the GCS node_modules cache is primarily for the *next* build's Docker layer cache hit.
+    waitFor: ['Build'] # Wait for docker build to finish
 
+  # 8. Upload node_modules cache
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Upload node_modules cache'
     entrypoint: 'bash'
@@ -153,63 +172,65 @@ steps:
        set -e
        LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
        CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/${LOCK_HASH}-${_CACHE_ARCHIVE_NODE}"
-       LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NODE}"
-       # Only upload if the archive exists and has substantial content (e.g. > 100 bytes)
+       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}" # Use /workspace explicitly
+       # Only upload if the archive exists and has substantial content
        if [[ -f "${LOCAL_CACHE_FILE}" ]] && [[ $(stat -c%s "${LOCAL_CACHE_FILE}") -gt 100 ]]; then
          echo "Uploading node_modules cache: ${CACHE_FILE_GCS_PATH}"
-         gsutil -h "Cache-Control:private, max-age=0, no-transform" cp "${LOCAL_CACHE_FILE}" "${CACHE_FILE_GCS_PATH}"
+         gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp "${LOCAL_CACHE_FILE}" "${CACHE_FILE_GCS_PATH}"
        else
          echo "Skipping upload of empty or missing node_modules cache archive."
-         # Optionally remove the empty file: rm -f "${LOCAL_CACHE_FILE}"
        fi
     waitFor: ['Create node_modules cache archive']
 
-  # 5. Save .next/cache to GCS (as 'latest')
+  # 9. Create .next/cache archive (as 'latest')
   - name: 'ubuntu'
     id: 'Create .next cache archive'
     entrypoint: 'bash'
     script: |
       set -e
-      LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NEXT}"
-      # Check if the specific cache directory exists inside .next
-      if [[ -d ".next/cache" ]] && [[ -n "$(ls -A .next/cache)" ]]; then
+      LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}" # Use /workspace explicitly
+      # Check if the specific cache directory exists inside /workspace/.next
+      if [[ -d "/workspace/.next/cache" ]] && [[ -n "$(ls -A /workspace/.next/cache)" ]]; then
         echo "Creating .next/cache archive..."
-        # Archive only the 'cache' directory from within '.next'
-        tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C .next cache
+        # Archive only the 'cache' directory from within '/workspace/.next'
+        tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C /workspace/.next cache
       else
-        echo "Skipping .next/cache archiving (.next/cache directory does not exist or is empty)."
+        echo "Skipping .next/cache archiving (/workspace/.next/cache directory does not exist or is empty)."
         touch "${LOCAL_CACHE_FILE}" # Create empty file
       fi
-    waitFor: ['Build'] # Wait for build to ensure .next/cache is potentially populated
+    # This archives the .next/cache restored/created in the /workspace *before* docker build.
+    # The docker build step populates its own .next/cache internally.
+    # Similar to node_modules, this cache helps the *next* build.
+    waitFor: ['Build'] # Wait for docker build to finish
 
+  # 10. Upload .next cache
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'Upload .next cache'
     entrypoint: 'bash'
     script: |
        set -e
        CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
-       LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NEXT}"
+       LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}" # Use /workspace explicitly
        if [[ -f "${LOCAL_CACHE_FILE}" ]] && [[ $(stat -c%s "${LOCAL_CACHE_FILE}") -gt 100 ]]; then
          echo "Uploading .next cache: ${CACHE_FILE_GCS_PATH}"
-         gsutil -h "Cache-Control:private, max-age=0, no-transform" cp "${LOCAL_CACHE_FILE}" "${CACHE_FILE_GCS_PATH}"
+         gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp "${LOCAL_CACHE_FILE}" "${CACHE_FILE_GCS_PATH}"
        else
          echo "Skipping upload of empty or missing .next cache archive."
        fi
     waitFor: ['Create .next cache archive']
 
-  # 6. Push the container image tags to Artifact Registry
+  # 11. Push the container image tags to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push SHA tag'
     args: ['push', '${_IMAGE_NAME}:${COMMIT_SHA}']
-    # Wait for cache uploads, although technically push could start once build is done
-    waitFor: ['Upload node_modules cache', 'Upload .next cache']
+    waitFor: ['Upload node_modules cache', 'Upload .next cache'] # Wait for cache uploads
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push latest tag'
     args: ['push', '${_IMAGE_NAME}:latest']
-    waitFor: ['Push SHA tag'] # Ensure SHA tag push starts/completes first
+    waitFor: ['Push SHA tag']
 
-  # 7. Deploy to Cloud Run, setting runtime environment variables
+  # 12. Deploy to Cloud Run, setting runtime environment variables
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'Deploy'
     entrypoint: gcloud
@@ -224,8 +245,6 @@ steps:
       - '--region=${_DEPLOY_REGION}'
       - '--quiet'
       # --- Set Runtime Environment Variables ---
-      # Use '--set-env-vars' for non-sensitive vars or secrets passed via substitutions (less ideal for secrets)
-      # Use '--update-secrets' or '--set-secrets' (preferred) to mount secrets from Secret Manager directly
       - '--set-env-vars=NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}'
       - '--set-env-vars=NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY}' # Consider --update-secrets
       - '--set-env-vars=NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL}'
@@ -234,10 +253,9 @@ steps:
       - '--set-env-vars=NEXT_PUBLIC_MAPBOX_TOKEN=${_NEXT_PUBLIC_MAPBOX_TOKEN}'     # Consider --update-secrets
       - '--set-env-vars=NEXT_PUBLIC_GA_TRACKING_ID=${_NEXT_PUBLIC_GA_TRACKING_ID}'
       - '--set-env-vars=REVALIDATION_SECRET_TOKEN=${_REVALIDATION_SECRET_TOKEN}' # Consider --update-secrets
-      # Example using Secret Manager (replace 'your-secret-name' and 'latest' version):
+      # Example using Secret Manager:
       # - '--update-secrets=REVALIDATION_SECRET_TOKEN=your-reval-secret-name:latest'
       # - '--update-secrets=NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key-secret:latest'
-      # ... etc for other secrets
     waitFor: ['Push latest tag'] # Wait until image is pushed
 
 # List images that are built by this pipeline
@@ -246,11 +264,11 @@ images:
   - '${_IMAGE_NAME}:latest'
 
 options:
-  # machineType: 'E2_HIGHCPU_8' # Faster machine, uncomment if needed (check pricing)
-  substitutionOption: ALLOW_LOOSE # Allows extra substitutions defined in trigger
+  # machineType: 'E2_HIGHCPU_8' # Faster machine?
+  substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
 
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
-  - web-app # Your service name tag
+  - web-app
