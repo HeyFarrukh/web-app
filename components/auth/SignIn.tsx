@@ -1,12 +1,12 @@
-import { motion } from 'framer-motion';
-import { GoogleSignIn } from './GoogleSignIn';
-import { Analytics } from '@/services/analytics/analytics';
-import { useEffect } from 'react';
+import { motion } from "framer-motion";
+import { GoogleSignIn } from "./GoogleSignIn";
+import { Analytics } from "@/services/analytics/analytics";
+import { useEffect } from "react";
 
 export const SignIn = () => {
   useEffect(() => {
     // Track sign in page view
-    Analytics.event('auth', 'view_signin_page');
+    Analytics.event("auth", "view_signin_page");
   }, []);
 
   return (
@@ -23,12 +23,18 @@ export const SignIn = () => {
         <div className="space-y-6 flex flex-col items-center">
           <GoogleSignIn />
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-            By continuing, you agree to our{' '}
-            <a href="/terms" className="text-orange-600 hover:text-orange-500 dark:text-orange-400">
+            By continuing, you agree to our{" "}
+            <a
+              href="/terms"
+              className="text-orange-600 hover:text-orange-500 dark:text-orange-400"
+            >
               Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="/privacy" className="text-orange-600 hover:text-orange-500 dark:text-orange-400">
+            </a>{" "}
+            and{" "}
+            <a
+              href="/privacy"
+              className="text-orange-600 hover:text-orange-500 dark:text-orange-400"
+            >
               Privacy Policy
             </a>
           </p>

@@ -149,7 +149,8 @@ export const OptimiseCV = () => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/signin");
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(`/signin?redirect=${encodeURIComponent(currentPath)}`);
     }
   }, [isLoading, isAuthenticated, router]);
 
