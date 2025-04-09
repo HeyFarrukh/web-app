@@ -1,4 +1,4 @@
-# Dockerfile
+# Dockerfile (Modified for .npm cache)
 
 # ---- Base Stage ----
 # Use a specific Node version matching your development environment
@@ -10,13 +10,16 @@ WORKDIR /app
 FROM base AS deps
 WORKDIR /app
 
+# --- ADDED: Copy the restored .npm cache if it exists ---
+# This relies on the GCS download/extract steps putting .npm in /workspace/.npm
+COPY .npm /root/.npm
+
 # Copy only package files
 COPY package.json package-lock.json* ./
-# COPY yarn.lock* ./  # Uncomment if using Yarn
 
-# Install dependencies using npm ci (clean install)
-RUN npm ci
-# RUN yarn install --frozen-lockfile # Uncomment if using Yarn
+# --- MODIFIED: Use the cache directory ---
+# Install dependencies using npm ci, pointing to the cache location
+RUN npm ci --cache /root/.npm --prefer-offline
 
 # ---- Builder Stage ----
 # This stage builds the Next.js application
@@ -26,19 +29,17 @@ WORKDIR /app
 # Copy dependencies from the 'deps' stage
 COPY --from=deps /app/node_modules ./node_modules
 
+# --- ADDED: Copy the final .npm cache from deps stage (optional but good practice) ---
+COPY --from=deps /root/.npm /root/.npm
+
 # Copy the rest of the application code
 COPY . .
 
-# --- Add step to restore .next/cache ---
-# This COPY command will run inside the Docker build in Cloud Build.
-# Cloud Build needs to have downloaded and extracted the cache before 'docker build' runs.
-# We will mount or copy the cache into the build context later if needed,
-# but often, just having node_modules cached is a huge win.
-# Let's rely on the GCS step OUTSIDE docker build for .next/cache first.
-# If needed, we could add: COPY --link .next/cache ./.next/cache
+# --- Restore .next/cache (Uncomment if using GCS cache for .next) ---
+COPY --link .next/cache ./.next/cache
 
 # Pass build-time environment variables
-# Ensure NEXT_PUBLIC_ variables are available during the build
+# ... (ARGS/ENVs unchanged) ...
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG NEXT_PUBLIC_BASE_URL
@@ -59,48 +60,34 @@ ENV NEXT_PUBLIC_GA_TRACKING_ID=$NEXT_PUBLIC_GA_TRACKING_ID
 RUN npm run build
 
 # ---- Prune Dev Dependencies Stage ----
-# (Optional but Recommended) Install production dependencies only
+# Modify to use cache as well
 FROM base AS prod-deps
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-# COPY yarn.lock* ./ # Uncomment if using Yarn
+# --- ADDED: Copy .npm cache ---
+COPY --from=builder /root/.npm /root/.npm
 
-RUN npm ci --only=production
-# RUN yarn install --production --frozen-lockfile # Uncomment if using Yarn
+COPY package.json package-lock.json* ./
+
+# --- MODIFIED: Use cache and omit dev ---
+RUN npm ci --omit=dev --cache /root/.npm --prefer-offline
 
 # ---- Runner Stage ----
+# ... (Runner stage mostly unchanged, copies from prod-deps and builder) ...
 # Final, minimal image
 FROM node:18-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-# ENV PORT=8080 # Cloud Run sets PORT automatically, but good practice
 
 # Copy production dependencies
 COPY --from=prod-deps /app/node_modules ./node_modules
 
 # Copy built application assets
-# If using Next.js default output:
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 
-# If using Next.js standalone output (recommended for smaller images):
-# 1. Enable standalone output in next.config.js: output: 'standalone'
-# 2. Copy the standalone folder:
-# COPY --from=builder /app/.next/standalone ./
-# COPY --from=builder /app/.next/static ./.next/static
-# COPY --from=builder /app/public ./public
-
-# Expose the port the app runs on (Next.js default is 3000)
 EXPOSE 3000
-
-# Set the user to a non-root user for security (alpine image has 'node' user)
 USER node
-
-# Start the application (Next.js default)
 CMD ["node_modules/.bin/next", "start"]
-
-# If using standalone output, the command might be different, often:
-# CMD ["node", "server.js"]
