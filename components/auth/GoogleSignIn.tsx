@@ -12,7 +12,6 @@ export const GoogleSignIn = ({ redirect }: GoogleSignInProps) => {
 
   const handleGoogleSignIn = async () => {
     try {
-      console.log("Redirect path:", redirectPath);
       await googleAuthService.signIn(redirectPath);
     } catch (error: any) {
       console.error("Unexpected error during sign in:", error);

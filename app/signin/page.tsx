@@ -1,30 +1,30 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { GoogleSignIn } from '@/components/auth/GoogleSignIn';
-import { Analytics } from '@/services/analytics/analytics';
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { motion } from "framer-motion";
+import { GoogleSignIn } from "@/components/auth/GoogleSignIn";
+import { Analytics } from "@/services/analytics/analytics";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
 
   React.useEffect(() => {
-    Analytics.event('auth', 'view_signin_page');
+    Analytics.event("auth", "view_signin_page");
   }, []);
 
   React.useEffect(() => {
-    console.log('Auth state:', { isLoading, isAuthenticated });
+    console.log("Auth state:", { isLoading, isAuthenticated });
     if (!isLoading && isAuthenticated) {
-      router.push('/');
+      router.push("/");
     }
   }, [isLoading, isAuthenticated, router]);
 
   // Show loading state for a maximum of 3 seconds
   const [showLoading, setShowLoading] = React.useState(true);
-  
+
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setShowLoading(false);
@@ -37,12 +37,12 @@ export default function SignInPage() {
     return () => clearTimeout(timer);
   }, [isLoading]);
 
-      //Log location
-      React.useEffect(() => {
-        if (typeof window !== 'undefined') {
-            console.log("The location is :", window.location.origin);
-        }
-      }, []);
+  //Log location
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      console.log("The location is :", window.location.origin);
+    }
+  }, []);
 
   if (showLoading) {
     return (
@@ -66,12 +66,18 @@ export default function SignInPage() {
         <div className="space-y-6 flex flex-col items-center">
           <GoogleSignIn />
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-            By continuing, you agree to our{' '}
-            <a href="/terms" className="text-orange-600 hover:text-orange-500 dark:text-orange-400">
+            By continuing, you agree to our{" "}
+            <a
+              href="/terms"
+              className="text-orange-600 hover:text-orange-500 dark:text-orange-400"
+            >
               Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="/privacy" className="text-orange-600 hover:text-orange-500 dark:text-orange-400">
+            </a>{" "}
+            and{" "}
+            <a
+              href="/privacy"
+              className="text-orange-600 hover:text-orange-500 dark:text-orange-400"
+            >
               Privacy Policy
             </a>
           </p>

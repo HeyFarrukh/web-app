@@ -36,6 +36,11 @@ export default function SavedApprenticeships() {
       }
     };
 
+    if (!authLoading && !isAuthenticated) {
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(`/signin?redirect=${encodeURIComponent(currentPath)}`);
+    }
+
     if (!authLoading && isAuthenticated && userData) {
       fetchSavedApprenticeships();
     }

@@ -79,8 +79,8 @@ export const SaveButton: React.FC<SaveButtonProps> = ({ vacancyId: slug, classNa
         console.log('[SaveButton] Stored vacancy slug for post-auth saving:', slug);
       }
       
-      Analytics.event('user_action', 'save_attempt_unauthenticated');
-      router.push('/signin');
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(`/signin?redirect=${encodeURIComponent(currentPath)}`);
       return;
     }
 
