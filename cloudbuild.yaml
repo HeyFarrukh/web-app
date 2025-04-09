@@ -1,17 +1,18 @@
-# cloudbuild.yaml (v5 - Fixed tar commands in Steps 11 & 13)
+# cloudbuild.yaml (v6 - Changed tar approach in Steps 11 & 13)
 
 substitutions:
-  # ... (substitutions remain the same) ...
   _SERVICE_NAME: web-app
   _DEPLOY_REGION: europe-west2
   _AR_HOSTNAME: europe-west2-docker.pkg.dev
   _AR_PROJECT_ID: apprenticewatch-55cb9
   _AR_REPOSITORY: cloud-run-source-deploy
   _PLATFORM: managed
+  # $REPO_NAME is usually automatically populated by Cloud Build triggers
   _IMAGE_NAME: ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}
-  _CACHE_BUCKET: gs://apprentice-watch-web-build-cache-g
+  _CACHE_BUCKET: gs://apprentice-watch-web-build-cache-g # Your GCS cache bucket
   _CACHE_ARCHIVE_NODE: cache-node_modules.tar.gz
   _CACHE_ARCHIVE_NEXT: cache-next.tar.gz
+  # === Environment Variables (Define securely in Trigger UI) ===
   _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
   _NEXT_PUBLIC_SUPABASE_ANON_KEY: 'your-anon-key'
   _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
@@ -20,11 +21,10 @@ substitutions:
   _NEXT_PUBLIC_MAPBOX_TOKEN: 'your-mapbox-token'
   _NEXT_PUBLIC_GA_TRACKING_ID: G-1GKBR9HKF3
   _REVALIDATION_SECRET_TOKEN: 'your-secret-token'
+  # _TRIGGER_ID is populated automatically for triggers
+  # _TRIGGER_ID: 'c8892f2e-df9a-418e-bca0-d54efc8a090f' # Example
 
 steps:
-  # Steps 0-10 remain the same as the previous version (v4)
-  # ... (Steps 0-10 unchanged) ...
-
   # Step 0: Get package lock hash
   - name: 'bash'
     id: 'Get package lock hash'
@@ -173,20 +173,22 @@ steps:
     args: ['rm', 'extractor']
     waitFor: ['Copy node_modules from container', 'Copy .next cache from container']
 
-  # --- Step 11: Create node_modules cache archive (MODIFIED) ---
+  # Step 11: Create node_modules cache archive (MODIFIED tar approach)
   - name: 'ubuntu'
     id: 'Create node_modules cache archive'
     script: |
        #!/usr/bin/env bash
        set -e
        LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NODE}"
-       NODE_MODULES_DIR="/workspace/node_modules" # Explicit path
-       if [[ -d "${NODE_MODULES_DIR}" ]] && [[ -n "$(ls -A ${NODE_MODULES_DIR})" ]]; then
+       NODE_MODULES_DIR="node_modules" # Relative path within /workspace
+       if [[ -d "/workspace/${NODE_MODULES_DIR}" ]] && [[ -n "$(ls -A /workspace/${NODE_MODULES_DIR})" ]]; then
+         echo "Verifying directory /workspace/${NODE_MODULES_DIR} exists and has content:"
+         ls -ld "/workspace/${NODE_MODULES_DIR}" # DEBUG
          echo "Creating node_modules cache archive..."
-         # Avoid -C, use full path for the directory to archive
-         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NODE_MODULES_DIR}"
+         # Change to workspace directory and use relative path for source
+         (cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NODE_MODULES_DIR}")
        else
-         echo "Skipping node_modules cache archiving (${NODE_MODULES_DIR} does not exist or is empty)."
+         echo "Skipping node_modules cache archiving (/workspace/${NODE_MODULES_DIR} does not exist or is empty)."
          touch "${LOCAL_CACHE_FILE}"
        fi
     waitFor: ['Remove dummy container']
@@ -197,7 +199,6 @@ steps:
     script: |
        #!/usr/bin/env bash
        set -e
-       # ... (script content unchanged) ...
        LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
        if [[ "${LOCK_HASH}" == "no-lock-file" ]]; then
          echo "Skipping node_modules cache upload (no lock file)."
@@ -211,23 +212,24 @@ steps:
        else
          echo "Skipping upload of empty or missing node_modules cache archive."
        fi
-
     waitFor: ['Create node_modules cache archive']
 
-  # --- Step 13: Create .next/cache archive (MODIFIED) ---
+  # Step 13: Create .next/cache archive (MODIFIED tar approach)
   - name: 'ubuntu'
     id: 'Create .next cache archive'
     script: |
        #!/usr/bin/env bash
        set -e
        LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
-       NEXT_CACHE_DIR="/workspace/.next/cache" # Explicit path
-       if [[ -d "${NEXT_CACHE_DIR}" ]] && [[ -n "$(ls -A ${NEXT_CACHE_DIR})" ]]; then
+       NEXT_CACHE_DIR=".next/cache" # Relative path within /workspace
+       if [[ -d "/workspace/${NEXT_CACHE_DIR}" ]] && [[ -n "$(ls -A /workspace/${NEXT_CACHE_DIR})" ]]; then
+         echo "Verifying directory /workspace/${NEXT_CACHE_DIR} exists and has content:"
+         ls -ld "/workspace/${NEXT_CACHE_DIR}" # DEBUG
          echo "Creating .next/cache archive..."
-         # Avoid -C, use full path for the directory to archive
-         tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NEXT_CACHE_DIR}"
+         # Change to workspace directory and use relative path for source
+         (cd /workspace && tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" "${NEXT_CACHE_DIR}")
        else
-         echo "Skipping .next/cache archiving (${NEXT_CACHE_DIR} directory does not exist or is empty)."
+         echo "Skipping .next/cache archiving (/workspace/${NEXT_CACHE_DIR} directory does not exist or is empty)."
          touch "${LOCAL_CACHE_FILE}"
        fi
     waitFor: ['Remove dummy container']
@@ -238,7 +240,6 @@ steps:
     script: |
        #!/usr/bin/env bash
        set -e
-       # ... (script content unchanged) ...
        CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
        LOCAL_CACHE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
        if [[ -f "${LOCAL_CACHE_FILE}" ]] && [[ $(stat -c%s "${LOCAL_CACHE_FILE}") -gt 100 ]]; then
@@ -247,7 +248,6 @@ steps:
        else
          echo "Skipping upload of empty or missing .next cache archive."
        fi
-
     waitFor: ['Create .next cache archive']
 
   # Step 15: Push the container image tags
@@ -285,13 +285,13 @@ steps:
       - '--set-env-vars=REVALIDATION_SECRET_TOKEN=${_REVALIDATION_SECRET_TOKEN}'
     waitFor: ['Push latest tag']
 
-# ... (images, options, tags remain the same) ...
+# List images built
 images:
   - '${_IMAGE_NAME}:${COMMIT_SHA}'
   - '${_IMAGE_NAME}:latest'
 
 options:
-  # machineType: 'E2_HIGHCPU_8'
+  # machineType: 'E2_HIGHCPU_8' # Optional: Faster machine
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
 
