@@ -121,7 +121,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                     icon: Sparkles,
                     special: true,
                   },
-                  { to: "/team", label: "Team" },
+                  { to: "/join", label: "Join Us" },
                 ].map(({ to, label, icon: Icon, special }) => (
                   <motion.div
                     key={to}

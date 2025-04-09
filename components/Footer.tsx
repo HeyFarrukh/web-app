@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, MapPin } from "lucide-react";
+import { Instagram, Linkedin, Mail, MapPin, Twitter } from "lucide-react";
 
 // Define types for the footer data
 type FooterLink = {
@@ -58,11 +58,20 @@ const footerSections: FooterSection[] = [
 ];
 
 const socialLinks: SocialLink[] = [
-  { icon: Github, href: "https://github.com/apprenticewatch", label: "GitHub" },
+  {
+    icon: Instagram,
+    href: "https://www.instagram.com/apprenticewatch?utm_source=apprentice-watch",
+    label: "Instagram",
+  },
   {
     icon: Linkedin,
-    href: "https://linkedin.com/company/apprenticewatch",
+    href: "https://linkedin.com/company/apprenticewatch?utm_source=apprentice-watch",
     label: "LinkedIn",
+  },
+  {
+    icon: Twitter,
+    href: "https://x.com/ApprenticeWatch?utm_source=apprentice-watch",
+    label: "X",
   },
 ];
 
