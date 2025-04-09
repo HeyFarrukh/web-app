@@ -1,93 +1,256 @@
-steps:
-  # Step 0: Pull cache from previous build
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
-    args: ['-c', 'docker pull $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:latest || exit 0']
-    id: PullCache
-
-  # Step 1: Build using Buildpacks with caching
-  - name: gcr.io/k8s-skaffold/pack
-    entrypoint: pack
-    args:
-      - build
-      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - --builder=gcr.io/buildpacks/builder:v1
-      - --network=cloudbuild
-      - --path=.
-      - --publish
-      - --cache-image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:latest
-      - --env=NEXT_PUBLIC_SUPABASE_URL=$_NEXT_PUBLIC_SUPABASE_URL
-      - --env=NEXT_PUBLIC_SUPABASE_ANON_KEY=$_NEXT_PUBLIC_SUPABASE_ANON_KEY
-      - --env=NEXT_PUBLIC_BASE_URL=$_NEXT_PUBLIC_BASE_URL
-      - --env=NEXT_PUBLIC_LOGODEV_KEY=$_NEXT_PUBLIC_LOGODEV_KEY
-      - --env=NEXT_PUBLIC_GEMINI_API_KEY=$_NEXT_PUBLIC_GEMINI_API_KEY
-      - --env=NEXT_PUBLIC_MAPBOX_TOKEN=$_NEXT_PUBLIC_MAPBOX_TOKEN
-      - --env=REVALIDATION_SECRET_TOKEN=$_REVALIDATION_SECRET_TOKEN
-      - --env=NEXT_PUBLIC_GA_TRACKING_ID=$_NEXT_PUBLIC_GA_TRACKING_ID
-    id: Buildpack
-
-  # Step 2: Tag the image as latest for future caching 
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'tag'
-      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:latest
-    id: TagLatest
-
-  # Step 3: Push images to Artifact Registry (latest only since versioned is pushed by pack)
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:latest
-    id: PushLatest
-
-  # Step 4: Deploy to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    args:
-      - run
-      - services
-      - update
-      - $_SERVICE_NAME
-      - '--platform=managed'
-      - --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
-      - --region=$_DEPLOY_REGION
-      - --quiet
-    id: Deploy
-    entrypoint: gcloud
-
-# Both the versioned and latest tagged images
-images:
-  - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-  - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:latest
-
-options:
-  substitutionOption: ALLOW_LOOSE
-  logging: CLOUD_LOGGING_ONLY
-  volumes:
-    - name: 'pack-cache'
-      path: '/cache'
+# cloudbuild.yaml
 
 substitutions:
+  _SERVICE_NAME: web-app
   _DEPLOY_REGION: europe-west2
   _AR_HOSTNAME: europe-west2-docker.pkg.dev
   _AR_PROJECT_ID: apprenticewatch-55cb9
   _AR_REPOSITORY: cloud-run-source-deploy
   _PLATFORM: managed
-  _TRIGGER_ID: c8892f2e-df9a-418e-bca0-d54efc8a090f
-  _SERVICE_NAME: web-app
-
-  # These should be securely defined in the Cloud Build Trigger UI
+  # $REPO_NAME is usually automatically populated by Cloud Build triggers
+  _IMAGE_NAME: ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}
+  _CACHE_BUCKET: gs://apprentice-watch-web-build-cache-g # Your GCS cache bucket
+  _CACHE_ARCHIVE_NODE: cache-node_modules.tar.gz
+  _CACHE_ARCHIVE_NEXT: cache-next.tar.gz
+  # === Environment Variables ===
+  # Build-time AND Runtime (NEXT_PUBLIC_*)
+  # Define these in Trigger UI (linked to Secret Manager for keys/secrets)
   _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
-  _NEXT_PUBLIC_SUPABASE_ANON_KEY: your-anon-key
+  _NEXT_PUBLIC_SUPABASE_ANON_KEY: 'your-anon-key' # <-- DEFINE IN TRIGGER UI / SECRET MANAGER
   _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
-  _NEXT_PUBLIC_LOGODEV_KEY: your-logodev-key
-  _NEXT_PUBLIC_GEMINI_API_KEY: your-gemini-key
-  _NEXT_PUBLIC_MAPBOX_TOKEN: your-mapbox-token
-  _REVALIDATION_SECRET_TOKEN: your-secret-token
+  _NEXT_PUBLIC_LOGODEV_KEY: 'your-logodev-key'   # <-- DEFINE IN TRIGGER UI / SECRET MANAGER
+  _NEXT_PUBLIC_GEMINI_API_KEY: 'your-gemini-key'  # <-- DEFINE IN TRIGGER UI / SECRET MANAGER
+  _NEXT_PUBLIC_MAPBOX_TOKEN: 'your-mapbox-token' # <-- DEFINE IN TRIGGER UI / SECRET MANAGER
   _NEXT_PUBLIC_GA_TRACKING_ID: G-1GKBR9HKF3
+  # Runtime ONLY
+  _REVALIDATION_SECRET_TOKEN: 'your-secret-token' # <-- DEFINE IN TRIGGER UI / SECRET MANAGER
+  # _TRIGGER_ID is populated automatically for triggers, but define if running manually
+  # _TRIGGER_ID: 'c8892f2e-df9a-418e-bca0-d54efc8a090f' # Example
+
+steps:
+  # 0. Restore Cache (node_modules) from GCS if package-lock.json hasn't changed
+  - name: 'gcr.io/cloud-builders/git'
+    args: ['rev-parse', 'HEAD:package-lock.json']
+    id: 'Get package-lock hash'
+    entrypoint: 'bash'
+    script: |
+      set -e
+      if [[ -f "package-lock.json" ]]; then
+        # Handle potential path differences if Dockerfile is not in root
+        sha1sum package-lock.json | awk '{ print $1 }' > /workspace/pkg_lock_sha.txt
+      # Add elif for yarn.lock if needed
+      # elif [[ -f "yarn.lock" ]]; then
+      #  sha1sum yarn.lock | awk '{ print $1 }' > /workspace/pkg_lock_sha.txt
+      else
+        echo "no-lock-file" > /workspace/pkg_lock_sha.txt
+      fi
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'Download node_modules cache'
+    entrypoint: 'bash'
+    script: |
+      set -e
+      LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
+      CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/${LOCK_HASH}-${_CACHE_ARCHIVE_NODE}"
+      LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NODE}"
+      echo "Attempting to download node_modules cache: ${CACHE_FILE_GCS_PATH}"
+      gsutil cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}" || echo "Node modules cache not found or download failed for hash ${LOCK_HASH}."
+
+  - name: 'ubuntu'
+    id: 'Extract node_modules cache'
+    entrypoint: 'bash'
+    script: |
+       set -e
+       LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NODE}"
+       if [[ -f "${LOCAL_CACHE_FILE}" ]]; then
+         echo "Extracting node_modules cache..."
+         # Extract into workspace root
+         tar -xzmf "${LOCAL_CACHE_FILE}" || echo "Warning: Failed to extract node_modules cache, continuing..."
+         rm "${LOCAL_CACHE_FILE}"
+       else
+         echo "No node_modules cache archive found to extract."
+       fi
+
+  # 1. Restore .next/cache from GCS (using 'latest')
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'Download .next cache'
+    entrypoint: 'bash'
+    script: |
+      set -e
+      CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
+      LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NEXT}"
+      echo "Attempting to download .next cache: ${CACHE_FILE_GCS_PATH}"
+      gsutil cp "${CACHE_FILE_GCS_PATH}" "${LOCAL_CACHE_FILE}" || echo ".next cache not found or download failed."
+
+  - name: 'ubuntu'
+    id: 'Extract .next cache'
+    entrypoint: 'bash'
+    script: |
+       set -e
+       LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NEXT}"
+       if [[ -f "${LOCAL_CACHE_FILE}" ]]; then
+         echo "Extracting .next cache..."
+         mkdir -p .next # Ensure .next directory exists
+         # Extract contents of the 'cache' dir from archive into the '.next' dir
+         tar -xzmf "${LOCAL_CACHE_FILE}" --strip-components=1 -C .next || echo "Warning: Failed to extract .next cache, continuing..."
+         rm "${LOCAL_CACHE_FILE}"
+       else
+         echo "No .next cache archive found to extract."
+       fi
+    waitFor: ['Extract node_modules cache'] # Ensure node_modules are extracted first if needed
+
+  # 2. Pull previous image to use as Docker layer cache source
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Pull latest image for cache'
+    entrypoint: 'bash'
+    args: ['-c', 'docker pull ${_IMAGE_NAME}:latest || exit 0']
+    waitFor: ['-'] # Start immediately
+
+  # 3. Build the Docker image using the Dockerfile
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build'
+    args: [
+            'build',
+            '--tag', '${_IMAGE_NAME}:${COMMIT_SHA}', # Tag with specific commit SHA
+            '--tag', '${_IMAGE_NAME}:latest',         # Also tag with 'latest'
+            '--cache-from', '${_IMAGE_NAME}:latest', # Use latest image as Docker build cache source
+            # --- Pass Build-Time Environment Variables ---
+            '--build-arg', 'NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}',
+            '--build-arg', 'NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY}',
+            '--build-arg', 'NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL}',
+            '--build-arg', 'NEXT_PUBLIC_LOGODEV_KEY=${_NEXT_PUBLIC_LOGODEV_KEY}',
+            '--build-arg', 'NEXT_PUBLIC_GEMINI_API_KEY=${_NEXT_PUBLIC_GEMINI_API_KEY}',
+            '--build-arg', 'NEXT_PUBLIC_MAPBOX_TOKEN=${_NEXT_PUBLIC_MAPBOX_TOKEN}',
+            '--build-arg', 'NEXT_PUBLIC_GA_TRACKING_ID=${_NEXT_PUBLIC_GA_TRACKING_ID}',
+            # '--build-arg', 'REVALIDATION_SECRET_TOKEN=${_REVALIDATION_SECRET_TOKEN}', # Usually not needed at build time
+            '.', # Build context (current directory)
+        ]
+    waitFor: ['Extract .next cache', 'Pull latest image for cache'] # Wait for caches and base image
+
+  # 4. Save node_modules cache to GCS (keyed by lock file hash)
+  - name: 'ubuntu'
+    id: 'Create node_modules cache archive'
+    entrypoint: 'bash'
+    script: |
+      set -e
+      LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NODE}"
+      # Check if node_modules exists AND was likely populated (e.g., not just an empty dir from failed extraction)
+      if [[ -d "node_modules" ]] && [[ -n "$(ls -A node_modules)" ]]; then
+        echo "Creating node_modules cache archive..."
+        # Use --ignore-failed-read for resilience against minor issues like broken symlinks
+        tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" node_modules
+      else
+        echo "Skipping node_modules cache archiving (directory does not exist or is empty)."
+        # Create an empty file so the upload step doesn't fail if cache never existed
+        touch "${LOCAL_CACHE_FILE}"
+      fi
+    waitFor: ['Build'] # Ensure build is complete
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'Upload node_modules cache'
+    entrypoint: 'bash'
+    script: |
+       set -e
+       LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
+       CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/${LOCK_HASH}-${_CACHE_ARCHIVE_NODE}"
+       LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NODE}"
+       # Only upload if the archive exists and has substantial content (e.g. > 100 bytes)
+       if [[ -f "${LOCAL_CACHE_FILE}" ]] && [[ $(stat -c%s "${LOCAL_CACHE_FILE}") -gt 100 ]]; then
+         echo "Uploading node_modules cache: ${CACHE_FILE_GCS_PATH}"
+         gsutil -h "Cache-Control:private, max-age=0, no-transform" cp "${LOCAL_CACHE_FILE}" "${CACHE_FILE_GCS_PATH}"
+       else
+         echo "Skipping upload of empty or missing node_modules cache archive."
+         # Optionally remove the empty file: rm -f "${LOCAL_CACHE_FILE}"
+       fi
+    waitFor: ['Create node_modules cache archive']
+
+  # 5. Save .next/cache to GCS (as 'latest')
+  - name: 'ubuntu'
+    id: 'Create .next cache archive'
+    entrypoint: 'bash'
+    script: |
+      set -e
+      LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NEXT}"
+      # Check if the specific cache directory exists inside .next
+      if [[ -d ".next/cache" ]] && [[ -n "$(ls -A .next/cache)" ]]; then
+        echo "Creating .next/cache archive..."
+        # Archive only the 'cache' directory from within '.next'
+        tar --ignore-failed-read -czf "${LOCAL_CACHE_FILE}" -C .next cache
+      else
+        echo "Skipping .next/cache archiving (.next/cache directory does not exist or is empty)."
+        touch "${LOCAL_CACHE_FILE}" # Create empty file
+      fi
+    waitFor: ['Build'] # Wait for build to ensure .next/cache is potentially populated
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'Upload .next cache'
+    entrypoint: 'bash'
+    script: |
+       set -e
+       CACHE_FILE_GCS_PATH="${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
+       LOCAL_CACHE_FILE="${_CACHE_ARCHIVE_NEXT}"
+       if [[ -f "${LOCAL_CACHE_FILE}" ]] && [[ $(stat -c%s "${LOCAL_CACHE_FILE}") -gt 100 ]]; then
+         echo "Uploading .next cache: ${CACHE_FILE_GCS_PATH}"
+         gsutil -h "Cache-Control:private, max-age=0, no-transform" cp "${LOCAL_CACHE_FILE}" "${CACHE_FILE_GCS_PATH}"
+       else
+         echo "Skipping upload of empty or missing .next cache archive."
+       fi
+    waitFor: ['Create .next cache archive']
+
+  # 6. Push the container image tags to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push SHA tag'
+    args: ['push', '${_IMAGE_NAME}:${COMMIT_SHA}']
+    # Wait for cache uploads, although technically push could start once build is done
+    waitFor: ['Upload node_modules cache', 'Upload .next cache']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push latest tag'
+    args: ['push', '${_IMAGE_NAME}:latest']
+    waitFor: ['Push SHA tag'] # Ensure SHA tag push starts/completes first
+
+  # 7. Deploy to Cloud Run, setting runtime environment variables
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: 'Deploy'
+    entrypoint: gcloud
+    args:
+      - run
+      - services
+      - update
+      - ${_SERVICE_NAME}
+      - '--platform=managed'
+      - '--image=${_IMAGE_NAME}:${COMMIT_SHA}' # Deploy the specific build
+      - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=${COMMIT_SHA},gcb-build-id=${BUILD_ID},gcb-trigger-id=${_TRIGGER_ID}'
+      - '--region=${_DEPLOY_REGION}'
+      - '--quiet'
+      # --- Set Runtime Environment Variables ---
+      # Use '--set-env-vars' for non-sensitive vars or secrets passed via substitutions (less ideal for secrets)
+      # Use '--update-secrets' or '--set-secrets' (preferred) to mount secrets from Secret Manager directly
+      - '--set-env-vars=NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}'
+      - '--set-env-vars=NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY}' # Consider --update-secrets
+      - '--set-env-vars=NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL}'
+      - '--set-env-vars=NEXT_PUBLIC_LOGODEV_KEY=${_NEXT_PUBLIC_LOGODEV_KEY}'         # Consider --update-secrets
+      - '--set-env-vars=NEXT_PUBLIC_GEMINI_API_KEY=${_NEXT_PUBLIC_GEMINI_API_KEY}'   # Consider --update-secrets
+      - '--set-env-vars=NEXT_PUBLIC_MAPBOX_TOKEN=${_NEXT_PUBLIC_MAPBOX_TOKEN}'     # Consider --update-secrets
+      - '--set-env-vars=NEXT_PUBLIC_GA_TRACKING_ID=${_NEXT_PUBLIC_GA_TRACKING_ID}'
+      - '--set-env-vars=REVALIDATION_SECRET_TOKEN=${_REVALIDATION_SECRET_TOKEN}' # Consider --update-secrets
+      # Example using Secret Manager (replace 'your-secret-name' and 'latest' version):
+      # - '--update-secrets=REVALIDATION_SECRET_TOKEN=your-reval-secret-name:latest'
+      # - '--update-secrets=NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key-secret:latest'
+      # ... etc for other secrets
+    waitFor: ['Push latest tag'] # Wait until image is pushed
+
+# List images that are built by this pipeline
+images:
+  - '${_IMAGE_NAME}:${COMMIT_SHA}'
+  - '${_IMAGE_NAME}:latest'
+
+options:
+  # machineType: 'E2_HIGHCPU_8' # Faster machine, uncomment if needed (check pricing)
+  substitutionOption: ALLOW_LOOSE # Allows extra substitutions defined in trigger
+  logging: CLOUD_LOGGING_ONLY
 
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
-  - web-app
+  - web-app # Your service name tag
