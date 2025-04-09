@@ -1,6 +1,8 @@
-# cloudbuild.yaml (v12.2 - Fixed _CACHE_BUCKET value)
+# cloudbuild.yaml (v12.3 - Disable .next cache, add sleep before deploy)
+# Use this version again, knowing the NPM cache exists in GCS now.
 
 options:
+  machineType: E2_HIGHCPU_8
   substitution_option: 'ALLOW_LOOSE'
   logging: CLOUD_LOGGING_ONLY
 
@@ -12,14 +14,10 @@ substitutions:
   _AR_REPOSITORY: cloud-run-source-deploy
   _PLATFORM: managed
   _IMAGE_NAME: ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}
-
-  # --- CORRECTED BUCKET NAME ---
-  _CACHE_BUCKET: apprentice-watch-web-build-cache-g # REMOVED gs:// prefix
-
+  _CACHE_BUCKET: apprentice-watch-web-build-cache-g
   _CACHE_ARCHIVE_NPM: cache-npm.tar.gz
-  _CACHE_ARCHIVE_NEXT: cache-next.tar.gz
+  # _CACHE_ARCHIVE_NEXT: cache-next.tar.gz # <-- Stays REMOVED for this test
   _NODE_VERSION: '18'
-  # ENV VARS (Define securely in Trigger UI)
   _NEXT_PUBLIC_SUPABASE_URL: https://swtrxonxzchgudehqdge.supabase.co
   _NEXT_PUBLIC_SUPABASE_ANON_KEY: 'your-anon-key'
   _NEXT_PUBLIC_BASE_URL: https://apprenticewatch.com
@@ -41,7 +39,7 @@ steps:
 
   # Step 1: Restore NPM Cache
   - id: restore-npm-cache
-    name: 'gcr.io/cloud-builders/gsutil'
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim' # Use cloud-sdk for tar extract
     waitFor: ['Get package lock hash']
     entrypoint: bash
     args:
@@ -50,42 +48,40 @@ steps:
         set -Eeuo pipefail
         LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
         if [[ "$${LOCK_HASH}" == "no-lock-file" ]]; then echo "Skipping NPM cache download (no lock file)."; exit 0; fi
-        # Path constructed correctly now: gs://<bucket_name>/...
         CACHE_PATH="gs://${_CACHE_BUCKET}/npm-$${LOCK_HASH}-${_CACHE_ARCHIVE_NPM}"
         ARCHIVE_FILE="/workspace/${_CACHE_ARCHIVE_NPM}"
         echo "Attempting to download NPM cache: $${CACHE_PATH}"
-        (gsutil -q cp "$${CACHE_PATH}" "$${ARCHIVE_FILE}") \
-        && (echo "NPM cache archive downloaded. Extracting..." && mkdir -p /workspace/.npm && tar -xzmf "$${ARCHIVE_FILE}" -C /workspace/.npm && rm "$${ARCHIVE_FILE}" && echo "NPM cache extracted.") \
-        || echo "NPM cache not found or download/extract failed."
+        # Try downloading AND THEN extracting, failing build if extract fails
+        if (gsutil -q cp "$${CACHE_PATH}" "$${ARCHIVE_FILE}"); then
+          echo "NPM cache archive downloaded. Extracting..."
+          mkdir -p /workspace/.npm
+          # Use tar from cloud-sdk image
+          if (tar -xzmf "$${ARCHIVE_FILE}" -C /workspace/.npm); then
+             rm "$${ARCHIVE_FILE}" && echo "NPM cache extracted successfully."
+          else
+             echo "ERROR: NPM cache extraction failed."
+             # rm "$${ARCHIVE_FILE}" # Optional: remove corrupted download
+             exit 1 # Fail the build step
+          fi
+        else
+          # Download failed, log it but continue build without cache
+          echo "NPM cache not found or download failed."
+        fi
 
-  # Step 2: Restore .next Cache
-  - id: restore-next-cache
-    name: 'gcr.io/cloud-builders/gsutil'
-    waitFor: ['-']
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        set -Eeuo pipefail
-        # Path constructed correctly now: gs://<bucket_name>/...
-        CACHE_PATH="gs://${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
-        ARCHIVE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
-        echo "Attempting to download .next cache: $${CACHE_PATH}"
-        (gsutil -q cp "$${CACHE_PATH}" "$${ARCHIVE_FILE}") \
-        && (echo ".next cache archive downloaded. Extracting..." && mkdir -p /workspace/.next/cache && tar -xzmf "$${ARCHIVE_FILE}" --strip-components=1 -C /workspace/.next/cache && rm "$${ARCHIVE_FILE}" && echo ".next cache extracted.") \
-        || echo ".next cache not found or download/extract failed."
+  # --- Step 2 REMOVED (Restore .next Cache) ---
 
   # Step 3: Install Dependencies
   - id: npm-ci
     name: 'node:${_NODE_VERSION}'
     waitFor: ['restore-npm-cache']
     entrypoint: npm
+    # This step should now be faster if Step 1 succeeded
     args: ['ci', '--cache', '/workspace/.npm', '--prefer-offline']
 
   # Step 4: Build Next.js App
   - id: npm-build
     name: 'node:${_NODE_VERSION}'
-    waitFor: ['npm-ci', 'restore-next-cache']
+    waitFor: ['npm-ci']
     entrypoint: npm
     args: ['run', 'build']
     env:
@@ -109,43 +105,31 @@ steps:
         set -Eeuo pipefail
         LOCK_HASH=$(cat /workspace/pkg_lock_sha.txt)
         if [[ "$${LOCK_HASH}" == "no-lock-file" ]]; then echo "Skipping NPM cache save (no lock file)."; exit 0; fi
-        # Path constructed correctly now: gs://<bucket_name>/...
         CACHE_PATH="gs://${_CACHE_BUCKET}/npm-$${LOCK_HASH}-${_CACHE_ARCHIVE_NPM}"
         ARCHIVE_FILE="/workspace/${_CACHE_ARCHIVE_NPM}"
         SOURCE_DIR=".npm"
-        if [[ -d "/workspace/$${SOURCE_DIR}" ]] && [[ -n "$(ls -A /workspace/$${SOURCE_DIR})" ]]; then
-          echo "Creating and uploading NPM cache to $${CACHE_PATH}..."
-          (cd /workspace && tar --ignore-failed-read -czf "$${ARCHIVE_FILE}" "$${SOURCE_DIR}") && \
-          gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp "$${ARCHIVE_FILE}" "$${CACHE_PATH}" && \
-          rm "$${ARCHIVE_FILE}" && \
-          echo "NPM cache saved."
+        if [[ ! -d "/workspace/$${SOURCE_DIR}" ]] || [[ -z "$(ls -A /workspace/$${SOURCE_DIR})" ]]; then
+            echo "Skipping NPM cache save (/workspace/$${SOURCE_DIR} not found or empty)."
+            exit 0
+        fi
+        echo "Creating and uploading NPM cache to $${CACHE_PATH}..."
+        # Allow tar errors but fail build if upload fails
+        (cd /workspace && tar --ignore-failed-read -czf "$${ARCHIVE_FILE}" "$${SOURCE_DIR}") || echo "Warning: tar command for NPM cache exited with non-zero status."
+        # Proceed to upload even if tar had non-fatal errors, fail build only if gsutil fails
+        if [[ -f "$${ARCHIVE_FILE}" ]]; then
+          echo "Archive file exists. Uploading..."
+          if (gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp "$${ARCHIVE_FILE}" "$${CACHE_PATH}"); then
+             rm "$${ARCHIVE_FILE}" && echo "NPM cache saved."
+          else
+             echo "ERROR: gsutil upload failed for NPM cache."
+             exit 1
+          fi
         else
-          echo "Skipping NPM cache save (/workspace/$${SOURCE_DIR} not found or empty)."
+          echo "ERROR: Archive file not created by tar for NPM cache."
+          exit 1
         fi
 
-  # Step 6: Save .next Cache
-  - id: save-next-cache
-    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    waitFor: ['npm-build']
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        set -Eeuo pipefail
-        # Path constructed correctly now: gs://<bucket_name>/...
-        CACHE_PATH="gs://${_CACHE_BUCKET}/latest-${_CACHE_ARCHIVE_NEXT}"
-        ARCHIVE_FILE="/workspace/${_CACHE_ARCHIVE_NEXT}"
-        SOURCE_DIR=".next/cache"
-        PARENT_DIR=".next"
-        if [[ -d "/workspace/$${SOURCE_DIR}" ]] && [[ -n "$(ls -A /workspace/$${SOURCE_DIR})" ]]; then
-          echo "Creating and uploading .next cache to $${CACHE_PATH}..."
-          (cd "/workspace/$${PARENT_DIR}" && tar --ignore-failed-read -czf "$${ARCHIVE_FILE}" cache) && \
-          gsutil -q -h "Cache-Control:private, max-age=0, no-transform" cp "$${ARCHIVE_FILE}" "$${CACHE_PATH}" && \
-          rm "$${ARCHIVE_FILE}" && \
-          echo ".next cache saved."
-        else
-          echo "Skipping .next cache save (/workspace/$${SOURCE_DIR} not found or empty)."
-        fi
+  # --- Step 6 REMOVED (Save .next Cache) ---
 
   # Step 7: Build and Push Docker Image
   - id: docker-build
@@ -163,13 +147,20 @@ steps:
 
   - id: docker-push
     name: 'gcr.io/cloud-builders/docker'
-    waitFor: ['docker-build', 'save-npm-cache', 'save-next-cache']
+    waitFor: ['docker-build', 'save-npm-cache'] # Removed wait for .next cache save
     args: ['push', '${_IMAGE_NAME}']
 
-  # Step 8: Deploy to Cloud Run
+  # Step 8: Short Delay
+  - name: 'bash'
+    id: 'sleep-before-deploy'
+    waitFor: ['docker-push']
+    entrypoint: sleep # Direct entrypoint is cleaner
+    args: ['15']
+
+  # Step 9: Deploy to Cloud Run
   - id: cloudrun-deploy
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    waitFor: ['docker-push']
+    waitFor: ['sleep-before-deploy']
     entrypoint: gcloud
     args:
       - 'run'
