@@ -210,4 +210,4 @@ Using these formatting features will help you create engaging and visually appea
   <a href="/resources" class="article-cta-button">Browse Resources</a>
 </div>
 
-For more details, check out the [full documentation](/resources/markdown-guide).
+For more details check out the [full documentation](/resources/markdown-guide).
