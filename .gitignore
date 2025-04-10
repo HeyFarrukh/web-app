@@ -33,4 +33,5 @@ Thumbs.db
 
 # Environment variables
 .env
-.env.*
+# Ignore README in /articles
+content/articles/readme.md

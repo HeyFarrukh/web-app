@@ -44,8 +44,8 @@ const teamMembers: TeamMember[] = [
     type: "founder",
     image: "/media/jamal-av.png",
     description:
-      "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change. I'm focused on expanding the platform's presence and ensuring that every young professional has access to the opportunities they need to succeed — because no one should miss out due to a lack of visibility. ",
-    links: {
+      "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change. I'm focused on expanding the platform's presence and ensuring that every young professional has access to the opportunities they need to succeed — because no one should miss out due to a lack of visibility. ",    
+      links: {
       github: "https://github.com",
       linkedin:
         "https://www.linkedin.com/in/jamal-mitchell-a7729428b?utm_source=apprentice-watch",
@@ -83,6 +83,21 @@ const teamMembers: TeamMember[] = [
     },
     contact: {
       email: "ezra@apprenticewatch.com",
+    },
+  },
+  {
+    name: "Onur Arslan",
+    role: "Ambassador Lead",
+    type: "senior-lead",
+    image: "/media/onur-av.png",
+    description:
+      "Having been through ambassador programmes that felt more like box-ticking exercises than real opportunities, I’ve seen where things often go wrong — poor communication, limited support, and a lack of real purpose. I joined ApprenticeWatch because I know what needs to change, and I’m passionate about building a programme that genuinely empowers students and delivers real value at every step.",
+    links: {
+      linkedin:
+        "https://www.linkedin.com/in/onurearslan?utm_source=apprentice-watch",
+    },
+    contact: {
+      email: "onur@apprenticewatch.com",
     },
   },
 ];
@@ -179,7 +194,7 @@ const SeniorLeadCard: React.FC<{ member: TeamMember }> = ({ member }) => (
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-md">
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-1 rounded-full text-xs font-medium whitespace-normal text-center min-w-max max-w-[200px] shadow-md">
             {member.role}
           </div>
         </div>
@@ -283,10 +298,33 @@ export default function Team() {
           transition={{ delay: 0.3 }}
           className="mb-24"
         >
-          <div className="grid md:grid-cols-2 gap-12">
-            {seniorLeads.map((member, index) => (
-              <SeniorLeadCard key={`${member.name}-${index}`} member={member} />
-            ))}
+          <div className="flex flex-col md:flex-row flex-wrap justify-center gap-12">
+            {/* Manually arrange team members for specific layout */}
+            {seniorLeads.length >= 3 && (
+              <>
+                <div className="w-full md:w-5/12 flex">
+                  <div className="w-full h-full flex">
+                    <SeniorLeadCard member={seniorLeads.find(member => member.name === "Humza") || seniorLeads[0]} />
+                  </div>
+                </div>
+                <div className="w-full md:w-5/12 flex">
+                  <div className="w-full h-full flex">
+                    <SeniorLeadCard member={seniorLeads.find(member => member.name === "Ezra Baldwin") || seniorLeads[2]} />
+                  </div>
+                </div>
+                <div className="w-full md:w-9/12 mx-auto mt-8 md:mt-12">
+                  <SeniorLeadCard member={seniorLeads.find(member => member.name === "Onur Arslan") || seniorLeads[1]} />
+                </div>
+              </>
+            )}
+            {/* Fallback if team structure changes */}
+            {seniorLeads.length < 3 && (
+              <div className="grid md:grid-cols-2 gap-12 w-full">
+                {seniorLeads.map((member, index) => (
+                  <SeniorLeadCard key={`${member.name}-${index}`} member={member} />
+                ))}
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

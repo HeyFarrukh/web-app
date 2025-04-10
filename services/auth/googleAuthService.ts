@@ -13,11 +13,12 @@ interface GoogleUser {
 
 class GoogleAuthService {
   async signIn(redirectUrl?: string) {
+    const currentPath = redirectUrl || (typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/');
+      
+    console.log('[GoogleAuthService] Storing redirect path:', currentPath);
+
     try {
       // Get the current path to redirect back after auth
-      const currentPath = redirectUrl || (typeof window !== 'undefined' ? window.location.pathname + window.location.search : '/');
-      
-      console.log('[GoogleAuthService] Storing redirect path:', currentPath);
       
       // Store the redirect URL in localStorage to ensure we can access it post-auth
       if (typeof window !== 'undefined') {
@@ -43,7 +44,7 @@ class GoogleAuthService {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/auth/callback',
+          redirectTo: window.location.origin + redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

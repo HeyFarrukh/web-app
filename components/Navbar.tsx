@@ -80,10 +80,10 @@ export const Navbar = () => {
                 </div>
               </Link>
               <Link
-                href="/team"
+                href="/join"
                 className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400"
               >
-                Team
+                Join Us
               </Link>
 
               <div className="flex items-center space-x-3">
