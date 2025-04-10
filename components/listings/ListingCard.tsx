@@ -70,6 +70,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     level: searchParams?.get("level"),
     category: searchParams?.get("category"),
   };
+  const sortOption = searchParams?.get("sort") || "recommended";
 
   const createDetailUrl = () => {
     const url = new URL(
@@ -80,6 +81,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     );
     url.searchParams.set("fromPage", currentPage);
     url.searchParams.set("scrollToId", listing.id.toString());
+    url.searchParams.set("sort", sortOption);
 
     if (filterParams.search)
       url.searchParams.set("search", filterParams.search);

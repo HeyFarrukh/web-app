@@ -13,6 +13,7 @@ import { ApprenticeshipListingsTracker } from "@/components/pages/Apprenticeship
 import { Analytics } from "@/services/analytics/analytics";
 import { PulseAnimation } from "@/components/ui/PulseAnimation";
 import { Info } from "lucide-react";
+import { ListingsSortToggle, SortOption } from "@/components/listings/ListingsSortToggle";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -40,6 +41,10 @@ export default function Listings() {
   const [viewMode, setViewMode] = useState<"list" | "map">(() => {
     return searchParams?.get("view") === "map" ? "map" : "list";
   });
+  const [sortOption, setSortOption] = useState<SortOption>(() => {
+    const sort = searchParams?.get("sort") as SortOption;
+    return sort && ['recommended', 'latest', 'expiring'].includes(sort) ? sort : 'recommended';
+  });
   const [filters, setFilters] = useState<FilterParams>({
     search: searchParams?.get("search") || "",
     location: searchParams?.get("location") || "",
@@ -53,32 +58,35 @@ export default function Listings() {
 
   // Track view mode changes
   const handleViewModeChange = (mode: "list" | "map") => {
-    // Clear current listings immediately when switching views to prevent flash of wrong data
-    setListings([]);
-    setLoading(true);
+    // Only proceed if the selected view mode is different from the current one
+    if (mode !== viewMode) {
+      // Clear current listings immediately when switching views to prevent flash of wrong data
+      setListings([]);
+      setLoading(true);
 
-    // Update the URL with the new view mode
-    const queryString = createQueryString({
-      ...filters,
-      page: currentPage.toString(),
-      view: mode,
-    });
-    router.push(`${pathname}?${queryString}`, { scroll: false });
+      // Update the URL with the new view mode
+      const queryString = createQueryString({
+        ...filters,
+        page: currentPage.toString(),
+        view: mode,
+      });
+      router.push(`${pathname}?${queryString}`, { scroll: false });
 
-    // Track the view mode change
-    if (typeof window !== "undefined") {
-      Analytics.event("ui_interaction", "view_mode_change", mode);
-    }
-
-    // Update the view mode state
-    setViewMode(mode);
-
-    // If user switches to map view, don't show the animation anymore
-    if (mode === "map") {
-      setShowMapAnimation(false);
-      // Mark as seen in localStorage to prevent showing again
+      // Track the view mode change
       if (typeof window !== "undefined") {
-        localStorage.setItem("feature-hint-map-view", "true");
+        Analytics.event("ui_interaction", "view_mode_change", mode);
+      }
+
+      // Update the view mode state
+      setViewMode(mode);
+
+      // If user switches to map view, don't show the animation anymore
+      if (mode === "map") {
+        setShowMapAnimation(false);
+        // Mark as seen in localStorage to prevent showing again
+        if (typeof window !== "undefined") {
+          localStorage.setItem("feature-hint-map-view", "true");
+        }
       }
     }
   };
@@ -118,6 +126,31 @@ export default function Listings() {
     router.push(`${pathname}?${queryString}`, { scroll: false });
   };
 
+  // Handle sort option change
+  const handleSortChange = (sort: SortOption) => {
+    // Only proceed if the selected sort option is different from the current one
+    if (sort !== sortOption) {
+      // Clear current listings immediately when changing sort to prevent flash of wrong data
+      setListings([]);
+      setLoading(true);
+      setSortOption(sort);
+      
+      // Update the URL with the new sort option
+      const queryString = createQueryString({
+        ...filters,
+        page: currentPage.toString(),
+        view: viewMode,
+        sort: sort,
+      });
+      router.push(`${pathname}?${queryString}`, { scroll: false });
+      
+      // Track the sort change
+      if (typeof window !== "undefined") {
+        Analytics.event("ui_interaction", "sort_change", sort);
+      }
+    }
+  };
+
   useEffect(() => {
     const fetchListings = async (attempt = 0) => {
       let fetchError = false;
@@ -142,6 +175,7 @@ export default function Listings() {
             page: currentPage,
             pageSize: ITEMS_PER_PAGE,
             filters,
+            sortBy: sortOption
           });
         }
 
@@ -180,7 +214,7 @@ export default function Listings() {
     };
 
     fetchListings();
-  }, [currentPage, filters, viewMode]);
+  }, [currentPage, filters, sortOption, viewMode]);
 
   // Handle scrolling to specific listing when returning from detail page
   useEffect(() => {
@@ -198,15 +232,26 @@ export default function Listings() {
   }, [loading, searchParams]);
 
   const createQueryString = (params: Record<string, string>) => {
-    const newSearchParams = new URLSearchParams(searchParams?.toString() || "");
+    const newParams = new URLSearchParams();
+    
+    // Add all parameters that have values
     Object.entries(params).forEach(([key, value]) => {
       if (value) {
-        newSearchParams.set(key, value);
-      } else {
-        newSearchParams.delete(key);
+        newParams.set(key, value);
       }
     });
-    return newSearchParams.toString();
+    
+    // Make sure view mode is always included
+    if (!params.view && viewMode) {
+      newParams.set('view', viewMode);
+    }
+    
+    // Make sure sort option is always included
+    if (!params.sort && sortOption) {
+      newParams.set('sort', sortOption);
+    }
+    
+    return newParams.toString();
   };
 
   const handlePageChange = (newPage: number) => {
@@ -242,53 +287,60 @@ export default function Listings() {
               </p>
             )}
           </div>
-          <div className="flex items-center mt-4 sm:mt-0">
-            <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-              <button
-                onClick={() => handleViewModeChange("list")}
-                className={`p-2 rounded-l-lg ${
-                  viewMode === "list"
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:text-orange-500"
-                }`}
-                aria-label="List View"
-              >
-                <List className="w-5 h-5" />
-              </button>
-              {viewMode === "list" && showMapAnimation ? (
-                <PulseAnimation persistKey="map-view">
-                  <button
-                    onClick={() => handleViewModeChange("map")}
-                    className={`p-2 rounded-r-lg text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors`}
-                    aria-label="Map View"
-                  >
-                    <MapIcon className="w-5 h-5" />
-                  </button>
-                </PulseAnimation>
-              ) : (
-                <button
-                  onClick={() => handleViewModeChange("map")}
-                  className={`p-2 rounded-r-lg ${
-                    viewMode === "map"
-                      ? "bg-orange-500 text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:text-orange-500"
-                  } transition-colors`}
-                  aria-label="Map View"
-                >
-                  <MapIcon className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-          </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-1 lg:sticky lg:top-24 lg:self-start">
+          <div className="lg:col-span-1">
             <ListingsFilter
               onFilterChange={handleFilterChange}
               initialFilters={filters}
             />
           </div>
           <div className="lg:col-span-3">
+            {/* View toggle and sort controls in a single row */}
+            <div className="flex justify-between items-center mb-4">
+              <ListingsSortToggle 
+                currentSort={sortOption} 
+                onSortChange={handleSortChange} 
+              />
+              
+              <div className="flex items-center">
+                <button
+                  onClick={() => handleViewModeChange("list")}
+                  className={`p-2 rounded-l-lg ${
+                    viewMode === "list"
+                      ? "bg-orange-500 text-white"
+                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-orange-500"
+                  }`}
+                  aria-label="List View"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+                {viewMode === "list" && showMapAnimation ? (
+                  <PulseAnimation persistKey="map-view">
+                    <button
+                      onClick={() => handleViewModeChange("map")}
+                      className={`p-2 rounded-r-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-orange-500 transition-colors`}
+                      aria-label="Map View"
+                    >
+                      <MapIcon className="w-5 h-5" />
+                    </button>
+                  </PulseAnimation>
+                ) : (
+                  <button
+                    onClick={() => handleViewModeChange("map")}
+                    className={`p-2 rounded-r-lg ${
+                      viewMode === "map"
+                        ? "bg-orange-500 text-white"
+                        : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-orange-500"
+                    } transition-colors`}
+                    aria-label="Map View"
+                  >
+                    <MapIcon className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg mb-6">
                 {error}

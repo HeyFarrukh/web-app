@@ -1,6 +1,10 @@
 import supabase from '@/config/supabase';
 import { ListingType, SupabaseListing } from '@/types/listing';
 import { Analytics } from '@/services/analytics/analytics';
+import logger, { createLogger } from '@/services/logger/logger';
+
+// Create a dedicated logger for the vacancy service
+const vacancyLogger = createLogger({ module: 'VacancyService' });
 
 class VacancyService {
   private readonly TABLE_NAME = 'vacancies';
@@ -114,7 +118,7 @@ class VacancyService {
     }
   }
 
-  async getVacancies({ page = 1, pageSize = 10, filters = {} }: {
+  async getVacancies({ page = 1, pageSize = 10, filters = {}, sortBy = 'recommended' }: {
     page: number;
     pageSize: number;
     filters: {
@@ -123,66 +127,134 @@ class VacancyService {
       level?: string;
       category?: string;
     };
+    sortBy?: 'recommended' | 'latest' | 'expiring';
   }) {
     try {
-      console.log("[VacancyService] getVacancies called with filters:", filters);
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize - 1;
+      vacancyLogger.info(`Fetching vacancies with page: ${page}, pageSize: ${pageSize}, filters: ${JSON.stringify(filters)}, sortBy: ${sortBy}`);
       const now = new Date().toISOString();
+      
+      // Calculate pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
 
+      // Start building the query
       let query = supabase
         .from(this.TABLE_NAME)
-        .select('*', { count: 'exact' })
+        .select(`
+          *,
+          quality_scores:vacancy_quality_scores(total_score, employer_reputation_score, listing_completeness_score, quality_indicators_score, time_factors_score, engagement_score, manual_boost_score)
+        `, { count: 'exact' })
         .eq('is_active', true)
         .gt('closing_date', now);
 
-      // Apply filters
+      // Apply filters using Supabase's built-in methods which handle escaping
       if (filters.search?.trim()) {
         query = query.or(
-          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,employer_name.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,` +
+          `description.ilike.%${filters.search}%,` +
+          `employer_name.ilike.%${filters.search}%`
         );
+        vacancyLogger.debug(`Applied search filter: ${filters.search}`);
       }
 
       if (filters.location?.trim()) {
-        const locationFilter = [
-          `postcode.ilike.%${filters.location}%`,
-          `address_line1.ilike.%${filters.location}%`,
-          `address_line2.ilike.%${filters.location}%`,
-          `address_line3.ilike.%${filters.location}%`
-        ].join(',');
-        query = query.or(locationFilter);
+        query = query.ilike('address_line3', `%${filters.location}%`);
+        vacancyLogger.debug(`Applied location filter: ${filters.location}`);
       }
 
       if (filters.level?.trim()) {
-        // Ensure level is a valid number
         const levelNumber = parseInt(filters.level, 10);
         if (!isNaN(levelNumber) && levelNumber > 0) {
           query = query.eq('course_level', levelNumber);
+          vacancyLogger.debug(`Applied level filter: ${levelNumber}`);
         }
       }
 
-      if (filters.category) {
-        query = query.eq('course_route', filters.category);
+      if (filters.category?.trim()) {
+        query = query.eq('course_route', filters.category.trim());
+        vacancyLogger.debug(`Applied category filter: ${filters.category}`);
       }
 
-      // Apply ordering and pagination after all filters
-      query = query
-        .order('posted_date', { ascending: false })
-        .range(start, end);
+      // Apply sorting based on the sortBy parameter
+      switch (sortBy) {
+        case 'latest':
+          vacancyLogger.info('Ordering results by posted_date DESC (latest first)');
+          query = query.order('posted_date', { ascending: false });
+          break;
+        case 'expiring':
+          vacancyLogger.info('Ordering results by closing_date ASC (expiring soon first)');
+          query = query.order('closing_date', { ascending: true });
+          break;
+        case 'recommended':
+        default:
+          vacancyLogger.info('Ordering results by quality_scores(total_score) DESC (recommended first)');
+          query = query.order('quality_scores(total_score)', { ascending: false, nullsFirst: false });
+          break;
+      }
 
-      const { data: listings, count, error } = await query;
+      // Add pagination
+      query = query.range(from, to);
+
+      const { data, count, error } = await query;
 
       if (error) {
-        console.error("[VacancyService] Error fetching vacancies:", error);
-        throw new Error('Failed to fetch vacancies');
+        vacancyLogger.error(`Error fetching vacancies: ${error.message}`, error);
+        throw error;
+      }
+
+      vacancyLogger.info(`Found ${count || 0} total vacancies matching criteria`);
+      
+      // Track quality scores for analysis
+      const qualityScores: { id: string, employer: string, score: number, components: any }[] = [];
+      
+      // Transform the data
+      const vacancies = data?.map(vacancy => {
+        // Extract the quality score from the joined data
+        const qualityData = vacancy.quality_scores?.[0];
+        const totalScore = qualityData?.total_score || 0;
+        
+        // Store quality score info for logging
+        qualityScores.push({
+          id: vacancy.id,
+          employer: vacancy.employer_name,
+          score: totalScore,
+          components: {
+            employer_reputation: qualityData?.employer_reputation_score || 0,
+            listing_completeness: qualityData?.listing_completeness_score || 0,
+            quality_indicators: qualityData?.quality_indicators_score || 0,
+            time_factors: qualityData?.time_factors_score || 0,
+            engagement: qualityData?.engagement_score || 0,
+            manual_boost: qualityData?.manual_boost_score || 0
+          }
+        });
+        
+        delete vacancy.quality_scores; // Remove from the object before transformation
+        return this.transformListing(vacancy);
+      }) || [];
+
+      // Log detailed information about top apprenticeships
+      if (qualityScores.length > 0 && sortBy === 'recommended') {
+        vacancyLogger.info(`Top ${Math.min(5, qualityScores.length)} apprenticeships by quality score:`);
+        qualityScores.slice(0, 5).forEach((item, index) => {
+          vacancyLogger.info(`#${index + 1}: ${item.employer} (ID: ${item.id}) - Score: ${item.score}`);
+          vacancyLogger.debug(`Score components for ${item.id}: ${JSON.stringify(item.components)}`);
+        });
+        
+        // Calculate and log score distribution
+        const totalScores = qualityScores.map(item => item.score);
+        const avgScore = totalScores.reduce((sum, score) => sum + score, 0) / totalScores.length;
+        const maxScore = Math.max(...totalScores);
+        const minScore = Math.min(...totalScores);
+        
+        vacancyLogger.info(`Quality score stats - Avg: ${avgScore.toFixed(2)}, Min: ${minScore}, Max: ${maxScore}`);
       }
 
       return {
-        vacancies: listings?.map(listing => this.transformListing(listing)) || [],
+        vacancies,
         total: count || 0
       };
-    } catch (error) {
-      console.error("[VacancyService] Error in getVacancies:", error);
+    } catch (error: any) {
+      vacancyLogger.error(`Error in getVacancies: ${error.message}`, error);
       throw error;
     }
   }
