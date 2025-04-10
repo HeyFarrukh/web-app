@@ -2,31 +2,42 @@
 
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Award, Users, Briefcase, Cpu, ArrowRight } from 'lucide-react';
+import { Award, Users, Briefcase, Cpu, ArrowRight, Star, FlaskConicalIcon } from 'lucide-react';
 import { Analytics } from '@/services/analytics/analytics';
 
 const benefits = [
   {
     icon: Award,
-    title: 'Earn a Certificate',
-    description: 'Receive an official ApprenticeWatch Ambassador certificate to improve your LinkedIn Profile and CV!',
+    title: 'Earn an Official Certificate',
+    description: 'Boost your CV and LinkedIn with an ApprenticeWatch Ambassador certificate',
+  },
+  {
+    icon: Star,
+    title: 'Get Featured Publicly',
+    description: 'Be showcased on our team page and across our social media platforms to thousands of users.',
+  },
+  {
+    icon: FlaskConicalIcon,
+    title: 'Exclusive Early Access',
+    description: 'Try out our newest features before anyone else and help shape how they work.',
   },
   {
     icon: Cpu,
-    title: 'Shape the Future',
-    description: 'Share your ideas and help us make ApprenticeWatch even better for everyone!',
+    title: 'Influence the Platform',
+    description: 'Your feedback matters. Share your insights directly with the team to help shape ApprenticeWatch’s future.',
   },
   {
     icon: Users,
-    title: 'Drive Community Change',
-    description: 'Join meetings with fellow ambassadors and industry leaders to shape the future of apprenticeships.',
+    title: 'Join a Powerful Network',
+    description: 'Collaborate with other ambassadors and connect with professionals driving change in the apprenticeship space.',
   },
   {
     icon: Briefcase,
-    title: 'Boost Your CV',
-    description: 'Gain valuable experience in community leadership, event organisation, and digital marketing.',
+    title: 'Level Up Your Experience',
+    description: 'Gain real-world skills in community leadership, marketing, event planning, and strategy – great for any future career.',
   },
 ];
+
 
 export const JoinUs = () => {
   useEffect(() => {
