@@ -58,32 +58,35 @@ export default function Listings() {
 
   // Track view mode changes
   const handleViewModeChange = (mode: "list" | "map") => {
-    // Clear current listings immediately when switching views to prevent flash of wrong data
-    setListings([]);
-    setLoading(true);
+    // Only proceed if the selected view mode is different from the current one
+    if (mode !== viewMode) {
+      // Clear current listings immediately when switching views to prevent flash of wrong data
+      setListings([]);
+      setLoading(true);
 
-    // Update the URL with the new view mode
-    const queryString = createQueryString({
-      ...filters,
-      page: currentPage.toString(),
-      view: mode,
-    });
-    router.push(`${pathname}?${queryString}`, { scroll: false });
+      // Update the URL with the new view mode
+      const queryString = createQueryString({
+        ...filters,
+        page: currentPage.toString(),
+        view: mode,
+      });
+      router.push(`${pathname}?${queryString}`, { scroll: false });
 
-    // Track the view mode change
-    if (typeof window !== "undefined") {
-      Analytics.event("ui_interaction", "view_mode_change", mode);
-    }
-
-    // Update the view mode state
-    setViewMode(mode);
-
-    // If user switches to map view, don't show the animation anymore
-    if (mode === "map") {
-      setShowMapAnimation(false);
-      // Mark as seen in localStorage to prevent showing again
+      // Track the view mode change
       if (typeof window !== "undefined") {
-        localStorage.setItem("feature-hint-map-view", "true");
+        Analytics.event("ui_interaction", "view_mode_change", mode);
+      }
+
+      // Update the view mode state
+      setViewMode(mode);
+
+      // If user switches to map view, don't show the animation anymore
+      if (mode === "map") {
+        setShowMapAnimation(false);
+        // Mark as seen in localStorage to prevent showing again
+        if (typeof window !== "undefined") {
+          localStorage.setItem("feature-hint-map-view", "true");
+        }
       }
     }
   };
@@ -125,23 +128,26 @@ export default function Listings() {
 
   // Handle sort option change
   const handleSortChange = (sort: SortOption) => {
-    // Clear current listings immediately when changing sort to prevent flash of wrong data
-    setListings([]);
-    setLoading(true);
-    setSortOption(sort);
-    
-    // Update the URL with the new sort option
-    const queryString = createQueryString({
-      ...filters,
-      page: currentPage.toString(),
-      view: viewMode,
-      sort: sort,
-    });
-    router.push(`${pathname}?${queryString}`, { scroll: false });
-    
-    // Track the sort change
-    if (typeof window !== "undefined") {
-      Analytics.event("ui_interaction", "sort_change", sort);
+    // Only proceed if the selected sort option is different from the current one
+    if (sort !== sortOption) {
+      // Clear current listings immediately when changing sort to prevent flash of wrong data
+      setListings([]);
+      setLoading(true);
+      setSortOption(sort);
+      
+      // Update the URL with the new sort option
+      const queryString = createQueryString({
+        ...filters,
+        page: currentPage.toString(),
+        view: viewMode,
+        sort: sort,
+      });
+      router.push(`${pathname}?${queryString}`, { scroll: false });
+      
+      // Track the sort change
+      if (typeof window !== "undefined") {
+        Analytics.event("ui_interaction", "sort_change", sort);
+      }
     }
   };
 
