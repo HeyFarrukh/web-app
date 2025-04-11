@@ -107,9 +107,9 @@ const teamMembers: TeamMember[] = [
     name: "Poppy Element",
     role: "Ambassador",
     type: "ambassador",
-    image: "https://media.licdn.com/dms/image/v2/D4D03AQFaCaoG4XG6_A/profile-displayphoto-shrink_800_800/B4DZXKeqmcGkAg-/0/1742858793009?e=1749686400&v=beta&t=pWqO_37rwN4DBwpl0j5PHZyYiKxPnQwek8xn58rpUY8",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/poppy-av.jpg",
     description:
-      "As a Computer Science student at Manchester University, I'm passionate about helping my peers discover great apprenticeship opportunities in tech. I joined ApprenticeWatch to bridge the gap between students and employers.",
+      "Becoming an ambassador for ApprenticeWatch has given me the opportunity to broaden my network and provide guidance and support to individuals pursuing apprenticeships for career success.",
     links: {
       linkedin: "https://www.linkedin.com/in/poppy-element-0b68b4331?utm_source=apprentice-watch",
     },
@@ -118,31 +118,75 @@ const teamMembers: TeamMember[] = [
     name: "Malachi Boateng",
     role: "Ambassador",
     type: "ambassador",
-    image: "https://media.licdn.com/dms/image/v2/D4D03AQEC6WGwOtCqRA/profile-displayphoto-shrink_800_800/B4DZUZC5sNG4Ag-/0/1739881946503?e=1749686400&v=beta&t=i4vkT-cKhGwT4IXsVVw__a26lyTSyyluCTA4RC61bR4",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/malachi-av.jpg",
     description:
-      "Studying Business Management at UCL, I've seen how many students struggle to find quality apprenticeships. I'm here to help spread awareness about the amazing opportunities available through ApprenticeWatch.",
+      "I became an Ambassador for ApprenticeWatch as I believed everyone should be able to have access to an apprenticeship as it is hard to find one. Also because I really believe this has the potential to help people like me get access to missed opportunities",
     links: {
       linkedin: "https://www.linkedin.com/in/malachi-boateng?utm_source=apprentice-watch",
     },
   },
-  {
-    name: "Leo Bytyci",
-    role: "Ambassador",
-    type: "ambassador",
-    image: "https://media.licdn.com/dms/image/v2/D4E03AQEO8nSI0nfM2g/profile-displayphoto-shrink_800_800/B4EZPEg8WjHwAc-/0/1734168791100?e=1749686400&v=beta&t=t68BQOSqMZxkDUnwnOeFKq89j9DlpPbx8I29xXkX31U",
-    description:
-      "As a sixth form student interested in engineering, I want to help my classmates discover alternatives to traditional university paths. ApprenticeWatch has been a game-changer for me and my peers.",
-    links: {
-      linkedin: "https://www.linkedin.com/in/leo-bytyci-97a30132b?utm_source=apprentice-watch",
-    },
-  },
+  // {
+  //   name: "Leo Bytyci",
+  //   role: "Ambassador",
+  //   type: "ambassador",
+  //   image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/leo-av.jpg",
+  //   description:
+  //     "As a sixth form student interested in engineering, I want to help my classmates discover alternatives to traditional university paths. ApprenticeWatch has been a game-changer for me and my peers.",
+  //   links: {
+  //     linkedin: "https://www.linkedin.com/in/leo-bytyci-97a30132b?utm_source=apprentice-watch",
+  //   },
+  // },
   {
     name: "Resul Tota",
     role: "Ambassador",
     type: "ambassador",
-    image: "https://media.licdn.com/dms/image/v2/D4D03AQFfpPiyXreNQA/profile-displayphoto-shrink_200_200/B4DZT7iOPYGkAc-/0/1739386840648?e=1749686400&v=beta&t=sKulrtfmGtErHc6KoyCYMzlCyACCxTj0WgpCL_9tagk",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/resul-av.jpg",
     description:
-      "I'm a Law student at Bristol University passionate about helping students find legal apprenticeships. Having gone through the process myself, I know how valuable the right guidance can be.",
+      "I deeply support ApprenticeWatch’s mission to simplify and improve access to apprenticeship opportunities, as I believe that making these programs more accessible can greatly empower individuals in their career paths. This is why I’m proud to serve as an ambassador for ApprenticeWatch.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Adam Gomes",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/adam-av.jpg",
+    description:
+      "I became an ambassador because ApprenticeWatch is something that will most definitely transform the lives of many future apprentices out there, and I want to be there to help build ApprenticeWatch.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Zoraez Imran",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/zoraez-av.jpg",
+    description:
+      "One of my passions is about helping students and young professionals navigate their career journeys. I believe in, and see great potential in, ApprenticeWatch's mission and products. Providing the right guidance, support, and resources in one well-structured platform for those exploring alternative career routes is crucial, and ApprenticeWatch is already excelling at this unlike most. With my extensive background and being a student myself, I’ve seen how beneficial and impactful these types of initiatives can be. I am excited to be part of a company that empowers students like me and makes a massive difference in their professional development journey.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Mihai lulian",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/lulian-av.jpg",
+    description:
+      "ApprenticeWatch stands out from other similar websites by actively engaging with users for feedback and also have a map-view feature to see all apprenticeships across UK in a different format. That's why I decided to become an Ambassador. They're unique and simply better.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Georgi Georgiev",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/georgi-av.jpg",
+    description:
+      "As someone interested in tech and personal development, I joined ApprenticeWatch to support others in finding the right opportunities - and to keep growing my own skills through real impact and collaboration.",
     links: {
       linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
     },
