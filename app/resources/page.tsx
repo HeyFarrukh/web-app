@@ -5,9 +5,8 @@ import { getAllArticlesMetadata } from "@/lib/articles";
 import { Metadata } from "next";
 import { Star, Clock, ChevronRight, Search } from "lucide-react";
 
-// This makes the page static at build time for optimal performance and SEO
+// This makes the page completely static at build time with no revalidation
 export const dynamic = "force-static";
-export const revalidate = 3600; // Revalidate every hour
 
 // Generate metadata for the resources page
 export const metadata: Metadata = {
