@@ -5,42 +5,42 @@ import React from 'react';
 const companyLogos = [
   { 
     name: 'Accenture', 
-    url: '/assets/logos/accenture.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/accenture.svg',
     width: 120
   },
   { 
     name: 'Microsoft', 
-    url: '/assets/logos/microsoft.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/microsoft.svg',
     width: 120 
   },
   { 
     name: 'Google', 
-    url: '/assets/logos/google.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/google.svg',
     width: 120 
   },
   { 
     name: 'Amazon', 
-    url: '/assets/logos/amazon.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/amazon.svg',
     width: 120 
   },
   { 
     name: 'Lloyds Banking Group', 
-    url: '/assets/logos/lloyds.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/lloyds.svg',
     width: 120 
   },
   { 
     name: 'Deloitte', 
-    url: '/assets/logos/deloitte.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/deloitte.svg',
     width: 120 
   },
   { 
     name: 'IBM', 
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/IBM_logo.svg.png',
     width: 80 
   },
   { 
     name: 'BBC', 
-    url: '/assets/logos/bbc.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/bbc.svg',
     width: 80 
   }
 ];

@@ -26,7 +26,7 @@ const teamMembers: TeamMember[] = [
     name: "Farrukh Ahmad",
     role: "Founder & CEO",
     type: "founder",
-    image: "/media/farrukh-av.png",
+    image: "https://cdn.apprenticewatch.com/Team-Member-Images/farrukh-av.png",
     description:
       "I got tired of the endless search for apprenticeships — scattered websites, outdated listings, and zero clarity. So I built ApprenticeWatch with an incredible team that shares the same vision. Our goal? To make finding opportunities simple and stress-free. If something’s broken, you fix it — and that’s exactly what we’re doing. This isn’t just another platform; it’s a game-changer for anyone serious about kickstarting their career.",
     links: {
@@ -42,7 +42,7 @@ const teamMembers: TeamMember[] = [
     name: "Jamal Mitchell",
     role: "Co-Founder",
     type: "founder",
-    image: "/media/jamal-av.png",
+    image: "https://cdn.apprenticewatch.com/Team-Member-Images/jamal-av.png",
     description:
       "As friends with similar career goals, I often shared my frustration that many attempts to inform and empower aspiring apprentices were lacking. So, when Farrukh came to me with his vision, I saw an opportunity for change. I'm focused on expanding the platform's presence and ensuring that every young professional has access to the opportunities they need to succeed — because no one should miss out due to a lack of visibility. ",    
       links: {
@@ -58,7 +58,7 @@ const teamMembers: TeamMember[] = [
     name: "Humza",
     role: "Chief Technical Officer",
     type: "senior-lead",
-    image: "/media/humza-av.png",
+    image: "https://cdn.apprenticewatch.com/Team-Member-Images/humza-av.png",
     description:
       "As a friend of both founders, I really connected with their vision and saw firsthand how challenging the apprenticeship application process can be. I joined the team because I genuinely believe in what they're building, and I wanted to use my experience in development and operations to help turn that vision into reality.",
     links: {
@@ -73,7 +73,7 @@ const teamMembers: TeamMember[] = [
     name: "Ezra Baldwin",
     role: "Security Architect",
     type: "senior-lead",
-    image: "/media/ezra-av.png",
+    image: "https://cdn.apprenticewatch.com/Team-Member-Images/ezra-av.png",
     description:
       "Having been through the apprenticeship application process, I know how frustrating and unclear it can be. I joined ApprenticeWatch to help fix that. I’ve secured degree apprenticeships with Siemens, Airbus and HSBC, so I understand what applicants are up against. I’m glad to help build something that supports students at every step.",
     links: {
@@ -89,7 +89,7 @@ const teamMembers: TeamMember[] = [
     name: "Onur Arslan",
     role: "Ambassador Lead",
     type: "senior-lead",
-    image: "/media/onur-av.png",
+    image: "https://cdn.apprenticewatch.com/Team-Member-Images/onur-av.png",
     description:
       "Having been through ambassador programmes that felt more like box-ticking exercises than real opportunities, I’ve seen where things often go wrong — poor communication, limited support, and a lack of real purpose. I joined ApprenticeWatch because I know what needs to change, and I’m passionate about building a programme that genuinely empowers students and delivers real value at every step.",
     links: {

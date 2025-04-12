@@ -24,7 +24,7 @@ export const GoogleSignIn = ({ redirect }: GoogleSignInProps) => {
       className="bg-white border rounded-md px-6 py-2 shadow-md hover:shadow-lg transition flex items-center"
     >
       <img
-        src="/assets/google.svg"
+        src="https://cdn.apprenticewatch.com/assets/google.svg"
         alt="Google Logo"
         className="w-5 h-5 mr-2"
       />

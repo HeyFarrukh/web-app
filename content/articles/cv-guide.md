@@ -2,7 +2,7 @@
 title: "Learn How to Write a CV That Gets You Hired"
 description: "Struggling to get interviews? Learn how to write a CV that stands out to recruiters. Reviewed by Accenture, IBM & more, this guide helps you land the apprenticeship you want."
 category: "Guides"
-image: "/resources/articles/cv-guide.png"
+image: "https://cdn.apprenticewatch.com/resources/articles/cv-guide.png"
 author: "Jamal"
 date: "2025-03-23T15:18:37Z"
 lastModified: "2025-03-23T15:18:37Z"
@@ -43,7 +43,7 @@ partnerships:
 
 > Think of it as the chance to strategically <a href="https://online.hbs.edu/blog/post/personal-branding-at-work">brand</a> yourself: Highlight the skills, experiences, and achievements that speak directly to the role and its requirements. Whether it’s adjusting the emphasis on your education or tweaking the wording in your personal statement, building and customising a quality CV shows recruiters that you’ve put in the effort to align your experience with their needs.
 
-Here's a template from an award-winning recruitment agency, from which many template examples throughout this guide are sourced from: <a href="/cv-guide-resources/dartmouth.pdf" target="_blank" rel="noopener noreferrer">Dartmouth CV</a>
+Here's a template from an award-winning recruitment agency, from which many template examples throughout this guide are sourced from: <a href="https://cdn.apprenticewatch.com/cv-guide-resources/dartmouth.pdf" target="_blank" rel="noopener noreferrer">Dartmouth CV</a>
 
 <br/>
 
@@ -236,8 +236,8 @@ Mixed Martial Arts, Technology, Business, Music. *Currently Reading: Anna Kareni
 
 ## :icon[lucide-files] Compare & Improve: CV Examples
 
-- <a href="/cv-guide-resources/original-cv.pdf" target="_blank" rel="noopener noreferrer">Original CV</a>
-- <a href="/cv-guide-resources/guide-example.pdf" target="_blank" rel="noopener noreferrer">Improved CV (After following this guide)</a>
+- <a href="https://cdn.apprenticewatch.com/cv-guide-resources/original-cv.pdf" target="_blank" rel="noopener noreferrer">Original CV</a>
+- <a href="https://cdn.apprenticewatch.com/cv-guide-resources/guide-example.pdf" target="_blank" rel="noopener noreferrer">Improved CV (After following this guide)</a>
 
 ## :icon[lucide-book-open] Overview: CV Tips & Best Practices
 

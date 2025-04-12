@@ -2,7 +2,7 @@
 title: "How to Apply for Work Experience: Complete Student Guide 2025"
 description: "Discover how to successfully apply for work experience in 2025 with our complete student guide. Learn CV preparation, find opportunities, nail your application, and maximise your placement for future career success."
 category: "Career Development"
-image: "/resources/articles/work-experience.png"
+image: "https://cdn.apprenticewatch.com/resources/articles/work-experience.png"
 author: "Jamal"
 date: "2025-03-23T12:18:37Z"
 lastModified: "2025-03-23T12:18:37Z"

@@ -14,17 +14,17 @@ import ArticleContentEnhancer from '@/components/ui/ArticleContentEnhancer';
 const partnerLogos = [
   {
     name: 'Accenture',
-    url: '/assets/logos/accenture.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/accenture.svg',
     width: 120
   },
   {
     name: 'Digital Catapult',
-    url: '/assets/logos/Digital_Catapult.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/Digital_Catapult.svg',
     width: 110
   },
   {
     name: 'IBM',
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/IBM_logo.svg.png',
     width: 100
   }
 ];
@@ -116,7 +116,7 @@ export async function generateMetadata(
       name: 'ApprenticeWatch',
       logo: {
         '@type': 'ImageObject',
-        url: `${baseUrl}/assets/apprenticewatch-logo.png`,
+        url: `https://cdn.apprenticewatch.com/assets/apprenticewatch-logo.png`,
       },
     },
     mainEntityOfPage: {
@@ -427,7 +427,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           name: 'ApprenticeWatch',
           logo: {
             '@type': 'ImageObject',
-            url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk'}/assets/apprenticewatch-logo.png`,
+            url: `https://cdn.apprenticewatch.com/assets/apprenticewatch-logo.png`,
           },
         },
         mainEntityOfPage: {

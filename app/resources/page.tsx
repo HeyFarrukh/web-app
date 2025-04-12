@@ -29,13 +29,13 @@ export const metadata: Metadata = {
       "Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.",
     type: "website",
     url: "https://apprenticewatch.com/resources",
-    images: ["/media/meta/resource-hub.png"],
+    images: ["https://cdn.apprenticewatch.com/meta/resource-hub.png"],
   },
   twitter: {
     title: "Apprenticeship Resources: Guides & Career Advice | ApprenticeWatch",
     description:
       "Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.",
-    images: ["/media/meta/resource-hub.png"],
+    images: ["https://cdn.apprenticewatch.com/meta/resource-hub.png"],
   },
 };
 
@@ -96,17 +96,17 @@ const ArticleCard = ({
 const partnerLogos = [
   {
     name: "Accenture",
-    url: "/assets/logos/accenture.svg",
+    url: "https://cdn.apprenticewatch.com/assets/logos/accenture.svg",
     width: 120,
   },
   {
     name: "Digital Catapult",
-    url: "/assets/logos/Digital_Catapult.svg",
+    url: "https://cdn.apprenticewatch.com/assets/logos/Digital_Catapult.svg",
     width: 160,
   },
   {
     name: "IBM",
-    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png",
+    url: "https://cdn.apprenticewatch.com/assets/logos/IBM_logo.svg.png",
     width: 100,
   },
   // {

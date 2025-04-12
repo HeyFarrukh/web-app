@@ -139,7 +139,7 @@ export const JoinUs = () => {
                 style={{ width: '90%', height: 'auto' }}
               >
                 <Image
-                  src="/assets/pages/join/Ambassador-Certificate-White.png"
+                  src="https://cdn.apprenticewatch.com/assets/pages/join/Ambassador-Certificate-White.png"
                   alt="ApprenticeWatch Ambassador Certificate - White"
                   width={500}
                   height={350}
@@ -169,7 +169,7 @@ export const JoinUs = () => {
                 style={{ width: '90%', height: 'auto', marginLeft: 'auto' }}
               >
                 <Image
-                  src="/assets/pages/join/Ambassador-Certificate-Themed.png"
+                  src="https://cdn.apprenticewatch.com/assets/pages/join/Ambassador-Certificate-Themed.png"
                   alt="ApprenticeWatch Ambassador Certificate - Themed"
                   width={500}
                   height={350}
