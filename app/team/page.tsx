@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Github, Linkedin, Twitter, Mail } from "lucide-react";
 import { Analytics } from "@/services/analytics/analytics";
 
@@ -155,7 +155,7 @@ const teamMembers: TeamMember[] = [
     description:
       "I became an ambassador because ApprenticeWatch is something that will most definitely transform the lives of many future apprentices out there, and I want to be there to help build ApprenticeWatch.",
     links: {
-      linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
+      linkedin: "https://www.linkedin.com/in/adam-gomes-a68535314?utm_source=apprentice-watch",
     },
   },
   {
@@ -164,9 +164,9 @@ const teamMembers: TeamMember[] = [
     type: "ambassador",
     image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/zoraez-av.jpg",
     description:
-      "One of my passions is about helping students and young professionals navigate their career journeys. I believe in, and see great potential in, ApprenticeWatch's mission and products. Providing the right guidance, support, and resources in one well-structured platform for those exploring alternative career routes is crucial, and ApprenticeWatch is already excelling at this unlike most. With my extensive background and being a student myself, I’ve seen how beneficial and impactful these types of initiatives can be. I am excited to be part of a company that empowers students like me and makes a massive difference in their professional development journey.",
+      "One of my passions is helping students and young professionals navigate their career journeys successfully. I believe in, and see great potential in, ApprenticeWatch's mission and products. Providing the right guidance, support, and resources in one well-structured platform for those exploring alternative career routes is crucial, and ApprenticeWatch is already excelling at this unlike most. With my extensive background and being a student myself, I’ve seen how beneficial and impactful these types of initiatives can be. I am excited to be part of a company that empowers students like me and makes a massive difference in their professional development journey.",
     links: {
-      linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
+      linkedin: "https://www.linkedin.com/in/zoraezimran?utm_source=apprentice-watch",
     },
   },
   {
@@ -177,7 +177,7 @@ const teamMembers: TeamMember[] = [
     description:
       "ApprenticeWatch stands out from other similar websites by actively engaging with users for feedback and also have a map-view feature to see all apprenticeships across UK in a different format. That's why I decided to become an Ambassador. They're unique and simply better.",
     links: {
-      linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
+      linkedin: "https://www.linkedin.com/in/iulian-mihai/?utm_source=apprentice-watch",
     },
   },
   {
@@ -188,7 +188,18 @@ const teamMembers: TeamMember[] = [
     description:
       "As someone interested in tech and personal development, I joined ApprenticeWatch to support others in finding the right opportunities - and to keep growing my own skills through real impact and collaboration.",
     links: {
-      linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
+      linkedin: "https://www.linkedin.com/in/georgi-georgiev-bba957314/?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Ivan Ivanov",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/ivan-av.jpg",
+    description:
+      "I joined ApprenticeWatch because it will help me add more to my CV, showing employers that I supported a project such as this, supporting aspiring apprentices. Additionally, I joined because I wanted to support the cause.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/ivan-ivanov-3b34b6335/?utm_source=apprentice-watch",
     },
   },
 ];
@@ -342,65 +353,186 @@ const SeniorLeadCard: React.FC<{ member: TeamMember }> = ({ member }) => (
   </motion.div>
 );
 
-const AmbassadorCard: React.FC<{ member: TeamMember }> = ({ member }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    whileHover={{ y: -5 }}
-    className="relative group flex-shrink-0 w-64 mx-2"
-  >
-    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 rounded-xl transform -rotate-1 group-hover:rotate-0 transition-transform duration-300" />
+const AmbassadorCard: React.FC<{ member: TeamMember }> = ({ member }) => {
+  const [showModal, setShowModal] = useState(false);
+  
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [showModal]);
+  
+  return (
+    <>
+      {/* Regular card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -5 }}
+        className="relative group flex-shrink-0 w-64 mx-2"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 rounded-xl transform -rotate-1 group-hover:rotate-0 transition-transform duration-300" />
 
-    <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-5 shadow-lg group-hover:shadow-xl transition-all duration-300 h-full flex flex-col">
-      <div className="flex flex-col items-center">
-        <div className="relative mb-4">
-          <div className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-orange-500">
-            <img
-              src={member.image}
-              alt={member.name}
-              className="w-full h-full object-cover"
-            />
+        <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-5 shadow-lg group-hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+          <div className="flex flex-col items-center">
+            <div className="relative mb-4">
+              <div className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-orange-500">
+                <img
+                  src={member.image}
+                  alt={member.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 text-center">
+              {member.name}
+            </h3>
+
+            <div className="mb-4">
+              <p className="text-gray-600 dark:text-gray-300 text-sm text-center line-clamp-3">
+                {member.description}
+              </p>
+              {member.description.length > 100 && (
+                <button 
+                  onClick={() => setShowModal(true)}
+                  className="text-orange-500 hover:text-orange-600 text-xs font-medium mt-1 block mx-auto focus:outline-none transition-colors"
+                >
+                  Read more
+                </button>
+              )}
+            </div>
+
+            <div className="flex justify-center space-x-3 mt-auto">
+              {member.links.github && (
+                <motion.a
+                  href={member.links.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
+                >
+                  <Github className="w-4 h-4" />
+                </motion.a>
+              )}
+              {member.links.linkedin && (
+                <motion.a
+                  href={member.links.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
+                >
+                  <Linkedin className="w-4 h-4" />
+                </motion.a>
+              )}
+            </div>
           </div>
         </div>
+      </motion.div>
 
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 text-center">
-          {member.name}
-        </h3>
-
-        <p className="text-gray-600 dark:text-gray-300 text-sm text-center mb-4 line-clamp-3">
-          {member.description}
-        </p>
-
-        <div className="flex justify-center space-x-3 mt-auto">
-          {member.links.github && (
-            <motion.a
-              href={member.links.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
+      {/* Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+              onClick={() => setShowModal(false)}
             >
-              <Github className="w-4 h-4" />
-            </motion.a>
-          )}
-          {member.links.linkedin && (
-            <motion.a
-              href={member.links.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors"
-            >
-              <Linkedin className="w-4 h-4" />
-            </motion.a>
-          )}
-        </div>
-      </div>
-    </div>
-  </motion.div>
-);
+              {/* Modal content */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="w-[90%] max-w-md z-50 max-h-[90vh] overflow-auto m-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden relative">
+                  {/* Close button */}
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="absolute top-4 right-4 text-white hover:text-gray-200 z-10 bg-orange-500 hover:bg-orange-600 rounded-full p-1.5 shadow-md transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  
+                  {/* Header with gradient */}
+                  <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 pb-24 relative">
+                    <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
+                      <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-orange-500 bg-white dark:bg-gray-800">
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="p-6 pt-20">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+                      {member.name}
+                    </h3>
+                    
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 text-center">
+                      Ambassador
+                    </p>
+                    
+                    <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4 mb-6">
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {member.description}
+                      </p>
+                    </div>
+                    
+                    <div className="flex justify-center space-x-4">
+                      {member.links.github && (
+                        <a
+                          href={member.links.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors p-2"
+                        >
+                          <Github className="w-5 h-5" />
+                        </a>
+                      )}
+                      {member.links.linkedin && (
+                        <a
+                          href={member.links.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 transition-colors p-2"
+                        >
+                          <Linkedin className="w-5 h-5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
 
 export default function Team() {
   const founders = teamMembers.filter((member) => member.type === "founder");
