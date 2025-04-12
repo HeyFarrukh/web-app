@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { getAllArticlesMetadata } from "@/lib/articles";
 import { Metadata } from "next";
 import { Star, Clock, ChevronRight, Search } from "lucide-react";
@@ -49,11 +48,10 @@ const ArticleCard = ({
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg overflow-hidden transition-all duration-300 border border-gray-100 dark:border-gray-700">
       {article.image && (
         <div className="relative h-48 w-full">
-          <Image
+          <img
             src={article.image}
             alt={article.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
           />
           {article.featured && (
             <div className="absolute top-3 right-3 bg-orange-500 text-white rounded-full p-1.5 shadow-md">

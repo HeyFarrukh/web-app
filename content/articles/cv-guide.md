@@ -6,7 +6,7 @@ image: "https://cdn.apprenticewatch.com/resources/articles/cv-guide.png"
 author: "Jamal"
 date: "2025-03-23T15:18:37Z"
 lastModified: "2025-03-23T15:18:37Z"
-authorImage: "/media/jamal-av.png"
+authorImage: "https://cdn.apprenticewatch.com/Team-Member-Images/jamal-av.png"
 keywords: ["CV tips", "apprenticeship CV", "CV guide", "resume tips", "how to write a CV", "job application help", "career guide", "ATS-friendly CV", "best CV format"]
 featured: true
 partnerships:

@@ -6,7 +6,7 @@ image: "https://cdn.apprenticewatch.com/resources/articles/research-companies.pn
 author: "Jamal"
 date: "2025-03-23T15:18:37Z"
 lastModified: "2025-03-23T15:18:37Z"
-authorImage: "/media/jamal-av.png"
+authorImage: "https://cdn.apprenticewatch.com/Team-Member-Images/jamal-av.png"
 keywords: [
   "apprenticeship research", 
   "company research for apprenticeships", 

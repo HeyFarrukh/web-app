@@ -6,7 +6,7 @@ image: "https://cdn.apprenticewatch.com/resources/articles/work-experience.png"
 author: "Jamal"
 date: "2025-03-23T12:18:37Z"
 lastModified: "2025-03-23T12:18:37Z"
-authorImage: "/media/jamal-av.png"
+authorImage: "https://cdn.apprenticewatch.com/Team-Member-Images/jamal-av.png"
 keywords: ["work experience", "apply for work experience", "student work experience", "work experience placement", "work experience application", "find work experience", "virtual work experience"]
 featured: true
 ---
