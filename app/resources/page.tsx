@@ -1,13 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { getAllArticlesMetadata } from "@/lib/articles";
 import { Metadata } from "next";
 import { Star, Clock, ChevronRight, Search } from "lucide-react";
 
-// This makes the page static at build time for optimal performance and SEO
+// This makes the page completely static at build time with no revalidation
 export const dynamic = "force-static";
-export const revalidate = 3600; // Revalidate every hour
 
 // Generate metadata for the resources page
 export const metadata: Metadata = {
@@ -30,13 +28,13 @@ export const metadata: Metadata = {
       "Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.",
     type: "website",
     url: "https://apprenticewatch.com/resources",
-    images: ["/media/meta/resource-hub.png"],
+    images: ["https://cdn.apprenticewatch.com/meta/resource-hub.png"],
   },
   twitter: {
     title: "Apprenticeship Resources: Guides & Career Advice | ApprenticeWatch",
     description:
       "Explore expert-crafted apprenticeship resources, guides, and career advice from top companies like Accenture, IBM, and PwC. Boost your skills and career prospects today.",
-    images: ["/media/meta/resource-hub.png"],
+    images: ["https://cdn.apprenticewatch.com/meta/resource-hub.png"],
   },
 };
 
@@ -50,11 +48,10 @@ const ArticleCard = ({
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg overflow-hidden transition-all duration-300 border border-gray-100 dark:border-gray-700">
       {article.image && (
         <div className="relative h-48 w-full">
-          <Image
+          <img
             src={article.image}
             alt={article.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
           />
           {article.featured && (
             <div className="absolute top-3 right-3 bg-orange-500 text-white rounded-full p-1.5 shadow-md">
@@ -97,17 +94,17 @@ const ArticleCard = ({
 const partnerLogos = [
   {
     name: "Accenture",
-    url: "/assets/logos/accenture.svg",
+    url: "https://cdn.apprenticewatch.com/assets/logos/accenture.svg",
     width: 120,
   },
   {
     name: "Digital Catapult",
-    url: "/assets/logos/Digital_Catapult.svg",
+    url: "https://cdn.apprenticewatch.com/assets/logos/Digital_Catapult.svg",
     width: 160,
   },
   {
     name: "IBM",
-    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png",
+    url: "https://cdn.apprenticewatch.com/assets/logos/IBM_logo.svg.png",
     width: 100,
   },
   // {

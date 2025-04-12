@@ -92,6 +92,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const scrollToId = searchParams?.get("scrollToId");
   const fromSavedPage = searchParams?.get("fromSaved") === "true";
   const isMapView = searchParams?.get("view") === "map";
+  const sortOption = searchParams?.get("sort") || "recommended";
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -571,6 +572,9 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
                 }
                 if (isMapView) {
                   url.searchParams.set("view", "map");
+                }
+                if (sortOption) {
+                  url.searchParams.set("sort", sortOption);
                 }
                 // Preserve all filter parameters
                 const search = searchParams?.get("search");

@@ -2,11 +2,11 @@
 title: "How to Research Companies for Apprenticeships"
 description: "Discover expert tips on researching companies for apprenticeships. Learn how to tailor applications, prepare for interviews, and secure your dream role."
 category: "Apprenticeship Preparation"
-image: "/resources/articles/research-companies.png"
+image: "https://cdn.apprenticewatch.com/resources/articles/research-companies.png"
 author: "Jamal"
 date: "2025-03-23T15:18:37Z"
 lastModified: "2025-03-23T15:18:37Z"
-authorImage: "/media/jamal-av.png"
+authorImage: "https://cdn.apprenticewatch.com/Team-Member-Images/jamal-av.png"
 keywords: [
   "apprenticeship research", 
   "company research for apprenticeships", 

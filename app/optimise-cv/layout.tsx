@@ -10,13 +10,13 @@ export const metadata: Metadata = {
     title: 'AI-Powered CV Optimisation for Apprenticeships | ApprenticeWatch',
     description: 'Stand out in apprenticeship applications with AI-analysed CV feedback. Get tailored optimisation tips instantly.',
     url: 'https://apprenticewatch.com/optimise-cv',
-    images: ['/media/meta/cv-optimise-page.png'],
+    images: ['https://cdn.apprenticewatch.com/meta/cv-optimise-page.png'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Free AI CV Optimiser for Apprentice Applications',
     description: 'AI-powered analysis helps tailor your CV to apprenticeship job descriptions. Get interview-ready in minutes.',
-    images: ['/media/meta/cv-optimise-page.png'],
+    images: ['https://cdn.apprenticewatch.com/meta/cv-optimise-page.png'],
   }
 };
 

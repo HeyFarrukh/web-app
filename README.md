@@ -1,6 +1,6 @@
 # ApprenticeWatch
 
-![ApprenticeWatch Branding](https://apprenticewatch.com/media/meta/apprentice-watch.png)
+![ApprenticeWatch Branding](https://cdn.apprenticewatch.com/meta/apprentice-watch.png)
 
 **ApprenticeWatch** is a platform designed to make it easy for users to discover apprenticeships in one place, save time, and access valuable features like AI-powered CV optimisation. Our mission is to help you find the right apprenticeship opportunities quickly and efficiently.
 

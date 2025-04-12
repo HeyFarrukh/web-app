@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeft, Calendar, Tag, Clock, User, Share2, Bookmark } from 'lucide-react';
 import { getArticleBySlug, getAllArticlesMetadata } from '@/lib/articles';
 import { Metadata, ResolvingMetadata } from 'next';
@@ -14,17 +13,17 @@ import ArticleContentEnhancer from '@/components/ui/ArticleContentEnhancer';
 const partnerLogos = [
   {
     name: 'Accenture',
-    url: '/assets/logos/accenture.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/accenture.svg',
     width: 120
   },
   {
     name: 'Digital Catapult',
-    url: '/assets/logos/Digital_Catapult.svg',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/Digital_Catapult.svg',
     width: 110
   },
   {
     name: 'IBM',
-    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/2560px-IBM_logo.svg.png',
+    url: 'https://cdn.apprenticewatch.com/assets/logos/IBM_logo.svg.png',
     width: 100
   }
 ];
@@ -59,9 +58,10 @@ type SchemaOrg = {
   wordCount?: number;
 };
 
-// This makes the page static at build time for optimal performance and SEO
+// This makes the page completely static at build time with no revalidation
 export const dynamic = 'force-static';
-export const revalidate = 3600; // Revalidate every hour
+// Remove revalidation to make it fully static
+// export const revalidate = 3600; // Revalidate every hour
 
 // Generate static paths for all articles at build time
 export async function generateStaticParams() {
@@ -115,7 +115,7 @@ export async function generateMetadata(
       name: 'ApprenticeWatch',
       logo: {
         '@type': 'ImageObject',
-        url: `${baseUrl}/assets/apprenticewatch-logo.png`,
+        url: `https://cdn.apprenticewatch.com/assets/apprenticewatch-logo.png`,
       },
     },
     mainEntityOfPage: {
@@ -190,12 +190,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         {article.image && (
   <div className="relative h-[60vh] w-full overflow-hidden">  {/* Add overflow-hidden */}
     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900/90 z-10" />
-    <Image
+    <img
       src={article.image}
       alt={article.title}
-      fill
-      className="object-cover blur-md"
-      priority
+      className="object-cover blur-md h-full w-full"
     />
 
             <div className="absolute bottom-0 left-0 right-0 z-20 p-8">
@@ -219,7 +217,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                       {article.authorImage ? (
                         <div className="relative w-8 h-8 mr-2.5">
                           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 blur-[1px]" />
-                          <Image
+                          <img
                             src={article.authorImage}
                             alt={article.author}
                             width={32}
@@ -275,7 +273,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                     {article.authorImage ? (
                       <div className="relative w-8 h-8 mr-2.5">
                         <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 blur-[1px]" />
-                        <Image
+                        <img
                           src={article.authorImage}
                           alt={article.author}
                           width={32}
@@ -426,7 +424,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           name: 'ApprenticeWatch',
           logo: {
             '@type': 'ImageObject',
-            url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://apprenticewatch.co.uk'}/assets/apprenticewatch-logo.png`,
+            url: `https://cdn.apprenticewatch.com/assets/apprenticewatch-logo.png`,
           },
         },
         mainEntityOfPage: {

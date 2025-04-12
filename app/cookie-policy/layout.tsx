@@ -10,12 +10,12 @@ export const metadata: Metadata = {
     title: 'Cookie Policy - ApprenticeWatch',
     description: 'Learn how ApprenticeWatch uses cookies to enhance your experience, improve our services, and ensure website functionality.',
     url: 'https://apprenticewatch.com/cookie-policy',
-    images: ['/media/meta/cookie-policy.png'],
+    images: ['https://cdn.apprenticewatch.com/meta/cookie-policy.png'],
   },
   twitter: {
     title: 'Cookie Policy - ApprenticeWatch',
     description: 'Learn how ApprenticeWatch uses cookies to enhance your experience, improve our services, and ensure website functionality.',
-    images: ['/media/meta/cookie-policy.png'],
+    images: ['https://cdn.apprenticewatch.com/meta/cookie-policy.png'],
   }
 };
 

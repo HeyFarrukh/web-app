@@ -20,6 +20,12 @@ import { calculateReadingTime } from './utils/readingTime';
 // Get the articles directory path
 const articlesDirectory = path.join(process.cwd(), 'content/articles');
 
+// Helper to log errors in production
+function logError(message: string, error: any) {
+  console.error(`[Articles Service Error] ${message}:`, error);
+  // You could add more sophisticated logging here if needed
+}
+
 // Function to validate and format ISO date
 function validateAndFormatDate(dateStr: string | undefined): string {
   if (!dateStr) {
@@ -100,7 +106,7 @@ export function getArticleSlugs() {
       .filter(file => file.endsWith('.md') || file.endsWith('.mdx'))
       .map(file => file.replace(/\.mdx?$/, ''));
   } catch (error) {
-    console.error('Error reading article slugs:', error);
+    logError('Error reading article slugs:', error);
     return [];
   }
 }
@@ -130,7 +136,7 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
     
     // Validate required fields
     if (!data.title || !data.description || !data.category) {
-      console.error(`Missing required metadata in article: ${slug}`);
+      logError(`Missing required metadata in article: ${slug}`, null);
       return null;
     }
     
@@ -154,7 +160,7 @@ export function getArticleMetadata(slug: string): ArticleMetadata | null {
       partnerships: data.partnerships ?? undefined
     };
   } catch (error) {
-    console.error(`Error reading article metadata ${slug}:`, error);
+    logError(`Error reading article metadata ${slug}:`, error);
     return null;
   }
 }
@@ -238,7 +244,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
     
     // Validate required fields
     if (!data.title || !data.description || !data.category) {
-      console.error(`Missing required metadata in article: ${slug}`);
+      logError(`Missing required metadata in article: ${slug}`, null);
       return null;
     }
     
@@ -267,7 +273,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       contentHtml: contentHtml
     };
   } catch (error) {
-    console.error(`Error reading article ${slug}:`, error);
+    logError(`Error reading article ${slug}:`, error);
     return null;
   }
 }
