@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Award, Users, Briefcase, Cpu, ArrowRight, Star, FlaskConicalIcon } from 'lucide-react';
 import { Analytics } from '@/services/analytics/analytics';
-import Image from 'next/image';
 
 const benefits = [
   {
@@ -138,13 +137,12 @@ export const JoinUs = () => {
                 className="absolute cursor-pointer shadow-xl rounded-lg overflow-hidden"
                 style={{ width: '90%', height: 'auto' }}
               >
-                <Image
+                <img
                   src="https://cdn.apprenticewatch.com/assets/pages/join/Ambassador-Certificate-White.png"
                   alt="ApprenticeWatch Ambassador Certificate - White"
                   width={500}
                   height={350}
                   className="w-full h-auto"
-                  priority
                 />
               </motion.div>
               
@@ -168,13 +166,12 @@ export const JoinUs = () => {
                 className="absolute cursor-pointer shadow-xl rounded-lg overflow-hidden"
                 style={{ width: '90%', height: 'auto', marginLeft: 'auto' }}
               >
-                <Image
+                <img
                   src="https://cdn.apprenticewatch.com/assets/pages/join/Ambassador-Certificate-Themed.png"
                   alt="ApprenticeWatch Ambassador Certificate - Themed"
                   width={500}
                   height={350}
                   className="w-full h-auto"
-                  priority
                 />
               </motion.div>
             </div>

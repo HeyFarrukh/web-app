@@ -9,6 +9,7 @@ import { LucideIconRenderer } from '@/components/LucideIconRenderer';
 import { ShareButton } from '../../../components/ShareButton';
 import TableWrapper from '@/components/ui/TableWrapper';
 import ArticleContentEnhancer from '@/components/ui/ArticleContentEnhancer';
+import RawImageRenderer from '@/components/ui/RawImageRenderer';
 
 // Company logos mapping
 const partnerLogos = [
@@ -368,6 +369,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <LucideIconRenderer />
               <TableWrapper />
               <ArticleContentEnhancer />
+              <RawImageRenderer />
             </article>
           </div>
 
