@@ -318,7 +318,7 @@ export function OnboardingFlow() {
                       : "border-gray-300 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/10"
                   }`}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <Icon className="w-6 h-6 text-gray-600 dark:text-white" />
                   <span className="text-left dark:text-white">{sector}</span>
                 </button>
               );
@@ -491,7 +491,7 @@ export function OnboardingFlow() {
               {/* Step icon */}
               <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-r from-orange-500 to-orange-400">
                 {React.createElement(steps[currentStep].icon, {
-                  className: "w-6 h-6 text-white",
+                  className: "w-6 h-6 text-white dark:text-white",
                 })}
               </div>
 
