@@ -115,17 +115,6 @@ const teamMembers: TeamMember[] = [
     },
   },
   {
-    name: "Malachi Boateng",
-    role: "Ambassador",
-    type: "ambassador",
-    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/malachi-av.jpg",
-    description:
-      "I became an Ambassador for ApprenticeWatch as I believed everyone should be able to have access to an apprenticeship as it is hard to find one. Also because I really believe this has the potential to help people like me get access to missed opportunities",
-    links: {
-      linkedin: "https://www.linkedin.com/in/malachi-boateng?utm_source=apprentice-watch",
-    },
-  },
-  {
     name: "Tami Okubote",
     role: "Ambassador",
     type: "ambassador",
@@ -148,17 +137,6 @@ const teamMembers: TeamMember[] = [
     },
   },
   {
-    name: "Adam Gomes",
-    role: "Ambassador",
-    type: "ambassador",
-    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/adam-av.jpg",
-    description:
-      "I became an ambassador because ApprenticeWatch is something that will most definitely transform the lives of many future apprentices out there, and I want to be there to help build ApprenticeWatch.",
-    links: {
-      linkedin: "https://www.linkedin.com/in/adam-gomes-a68535314?utm_source=apprentice-watch",
-    },
-  },
-  {
     name: "Zoraez Imran",
     role: "Ambassador",
     type: "ambassador",
@@ -167,6 +145,39 @@ const teamMembers: TeamMember[] = [
       "One of my passions is helping students and young professionals navigate their career journeys successfully. I believe in, and see great potential in, ApprenticeWatch's mission and products. Providing the right guidance, support, and resources in one well-structured platform for those exploring alternative career routes is crucial, and ApprenticeWatch is already excelling at this unlike most. With my extensive background and being a student myself, I’ve seen how beneficial and impactful these types of initiatives can be. I am excited to be part of a company that empowers students like me and makes a massive difference in their professional development journey.",
     links: {
       linkedin: "https://www.linkedin.com/in/zoraezimran?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Angel Benny",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/angel-av.jpg",
+    description:
+      "I’m an aspiring apprentice who chose to become an ApprenticeWatch Ambassador to share my journey, inspire others, and showcase the valuable opportunities that apprenticeships can provide.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/angel-benny-25ba64359/?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Malachi Boateng",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/malachi-av.jpg",
+    description:
+      "I became an Ambassador for ApprenticeWatch as I believed everyone should be able to have access to an apprenticeship as it is hard to find one. Also because I really believe this has the potential to help people like me get access to missed opportunities",
+    links: {
+      linkedin: "https://www.linkedin.com/in/malachi-boateng?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Adam Gomes",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/adam-av.jpg",
+    description:
+      "I became an ambassador because ApprenticeWatch is something that will most definitely transform the lives of many future apprentices out there, and I want to be there to help build ApprenticeWatch.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/adam-gomes-a68535314?utm_source=apprentice-watch",
     },
   },
   {
