@@ -121,6 +121,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                     icon: Sparkles,
                     special: true,
                   },
+                  { to: "/team", label: "Team" },
                   { to: "/join", label: "Join Us" },
                 ].map(({ to, label, icon: Icon, special }) => (
                   <motion.div
@@ -175,6 +176,14 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
                   </div>
 
                   <div className="space-y-2">
+                    <Link
+                      href="/profile/dashboard"
+                      className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl flex items-center space-x-3 transition-colors block"
+                      onClick={onClose}
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">My Dashboard</span>
+                    </Link>
                     <Link
                       href="/saved-apprenticeships"
                       className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl flex items-center space-x-3 transition-colors block"
