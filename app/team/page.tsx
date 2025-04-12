@@ -125,17 +125,17 @@ const teamMembers: TeamMember[] = [
       linkedin: "https://www.linkedin.com/in/malachi-boateng?utm_source=apprentice-watch",
     },
   },
-  // {
-  //   name: "Leo Bytyci",
-  //   role: "Ambassador",
-  //   type: "ambassador",
-  //   image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/leo-av.jpg",
-  //   description:
-  //     "As a sixth form student interested in engineering, I want to help my classmates discover alternatives to traditional university paths. ApprenticeWatch has been a game-changer for me and my peers.",
-  //   links: {
-  //     linkedin: "https://www.linkedin.com/in/leo-bytyci-97a30132b?utm_source=apprentice-watch",
-  //   },
-  // },
+  {
+    name: "Tami Okubote",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/tami-v2-av.jpg",
+    description:
+      "I applied due to how ApprenticeWatch had helped me become aware of several more apprenticeships and even companies in general, which had helped me expand my search, and deepen my research and aims itself",
+    links: {
+      linkedin: "https://www.linkedin.com/in/tami-okubote-8b3087281/?utm_source=apprentice-watch",
+    },
+  },
   {
     name: "Resul Tota",
     role: "Ambassador",
