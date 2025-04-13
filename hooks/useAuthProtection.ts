@@ -13,7 +13,7 @@ export const useAuthProtection = (
   redirectIfUnauthenticated: boolean = true,
   customRedirectPath?: string
 ) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, userData } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   
@@ -38,5 +38,5 @@ export const useAuthProtection = (
   }, [isAuthenticated, isLoading, redirectIfUnauthenticated, router, pathname, customRedirectPath]);
 
   // Return auth state for components to use
-  return { isAuthenticated, isLoading };
+  return { isAuthenticated, isLoading, userData };
 };
