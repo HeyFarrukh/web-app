@@ -51,27 +51,27 @@ const sampleSavedApprenticeships = [
 const recommendedArticles = [
   {
     id: 'art-1',
-    title: 'How to Ace Your Apprenticeship Interview',
-    category: 'INTERVIEW GUIDE',
-    image: '/media/articles/interview.jpg',
+    title: 'How to Research Companies for Apprenticeships',
+    category: 'Apprenticeship Preparation',
+    image: 'https://cdn.apprenticewatch.com/resources/articles/research-companies.png',
     readTime: '7 min',
     date: '20 March 2025',
     slug: '/resources/ace-your-apprenticeship-interview'
   },
   {
     id: 'art-2',
-    title: 'CV Writing Guide: Make a Lasting First Impression',
+    title: 'Learn How to Write a CV That Gets You Hired',
     category: 'CV GUIDE',
-    image: '/media/articles/cv-guide.jpg',
+    image: 'https://cdn.apprenticewatch.com/resources/articles/cv-guide.png',
     readTime: '10 min',
     date: '15 March 2025',
     slug: '/resources/cv-guide'
   },
   {
     id: 'art-3',
-    title: 'Navigating Online Assessments with Confidence',
-    category: 'ASSESSMENT TIPS',
-    image: '/media/articles/assessment.jpg',
+    title: 'How to Apply for Work Experience: Complete Student Guide 2025',
+    category: 'Career Development',
+    image: 'https://cdn.apprenticewatch.com/resources/articles/work-experience.png',
     readTime: '5 min',
     date: '10 March 2025',
     slug: '/resources/online-assessments'
