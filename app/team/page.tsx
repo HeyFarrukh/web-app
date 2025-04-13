@@ -192,6 +192,17 @@ const teamMembers: TeamMember[] = [
     },
   },
   {
+    name: "Benjamin Omokoko",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/benjamin-av.jpg",
+    description:
+      "I chose ApprenticeWatch because it offered a more personalized and transparent approach to finding apprenticeships compared to other platforms. What made it stand out was its detailed reviews from past apprentices, giving real insight into company culture, expectations, and growth opportunities. Unlike generic job boards, ApprenticeWatch felt tailored to people genuinely seeking to learn and grow, not just fill a role. It gave me the confidence to apply to programs that truly matched my goals and values.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/https://www.linkedin.com/in/aspiring-apprentice-automotive-engineer-benjaminomokoko/?utm_source=apprentice-watch",
+    },
+  },
+  {
     name: "Georgi Georgiev",
     role: "Ambassador",
     type: "ambassador",

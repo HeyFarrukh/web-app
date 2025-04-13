@@ -10,12 +10,12 @@ export const metadata: Metadata = {
     title: 'Our Team - ApprenticeWatch',
     description: 'Meet the talented team driving ApprenticeWatch forward, committed to transforming how apprenticeships are discovered and accessed across the UK.',
     url: 'https://apprenticewatch.com/team',
-    images: ['https://cdn.apprenticewatch.com/meta/ourteam.png'],
+    images: ['https://cdn.apprenticewatch.com/meta/our-team.png'],
   },
   twitter: {
     title: 'Our Team - ApprenticeWatch',
     description: 'Meet the talented team driving ApprenticeWatch forward, committed to transforming how apprenticeships are discovered and accessed across the UK.',
-    images: ['https://cdn.apprenticewatch.com/meta/ourteam.png'],
+    images: ['https://cdn.apprenticewatch.com/meta/our-team.png'],
   }
 };
 
