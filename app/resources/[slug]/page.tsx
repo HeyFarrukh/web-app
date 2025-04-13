@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeft, Calendar, Tag, Clock, User, Share2, Bookmark } from 'lucide-react';
 import { getArticleBySlug, getAllArticlesMetadata } from '@/lib/articles';
 import { Metadata, ResolvingMetadata } from 'next';
@@ -191,12 +190,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         {article.image && (
   <div className="relative h-[60vh] w-full overflow-hidden">  {/* Add overflow-hidden */}
     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900/90 z-10" />
-    <Image
+    <img
       src={article.image}
       alt={article.title}
-      fill
-      className="object-cover blur-md"
-      priority
+      className="object-cover blur-md h-full w-full"
     />
 
             <div className="absolute bottom-0 left-0 right-0 z-20 p-8">
@@ -220,7 +217,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                       {article.authorImage ? (
                         <div className="relative w-8 h-8 mr-2.5">
                           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 blur-[1px]" />
-                          <Image
+                          <img
                             src={article.authorImage}
                             alt={article.author}
                             width={32}
@@ -276,7 +273,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                     {article.authorImage ? (
                       <div className="relative w-8 h-8 mr-2.5">
                         <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 blur-[1px]" />
-                        <Image
+                        <img
                           src={article.authorImage}
                           alt={article.author}
                           width={32}

@@ -115,27 +115,16 @@ const teamMembers: TeamMember[] = [
     },
   },
   {
-    name: "Malachi Boateng",
+    name: "Tami Okubote",
     role: "Ambassador",
     type: "ambassador",
-    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/malachi-av.jpg",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/tami-v2-av.jpg",
     description:
-      "I became an Ambassador for ApprenticeWatch as I believed everyone should be able to have access to an apprenticeship as it is hard to find one. Also because I really believe this has the potential to help people like me get access to missed opportunities",
+      "I applied due to how ApprenticeWatch had helped me become aware of several more apprenticeships and even companies in general, which had helped me expand my search, and deepen my research and aims itself",
     links: {
-      linkedin: "https://www.linkedin.com/in/malachi-boateng?utm_source=apprentice-watch",
+      linkedin: "https://www.linkedin.com/in/tami-okubote-8b3087281/?utm_source=apprentice-watch",
     },
   },
-  // {
-  //   name: "Leo Bytyci",
-  //   role: "Ambassador",
-  //   type: "ambassador",
-  //   image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/leo-av.jpg",
-  //   description:
-  //     "As a sixth form student interested in engineering, I want to help my classmates discover alternatives to traditional university paths. ApprenticeWatch has been a game-changer for me and my peers.",
-  //   links: {
-  //     linkedin: "https://www.linkedin.com/in/leo-bytyci-97a30132b?utm_source=apprentice-watch",
-  //   },
-  // },
   {
     name: "Resul Tota",
     role: "Ambassador",
@@ -145,17 +134,6 @@ const teamMembers: TeamMember[] = [
       "I deeply support ApprenticeWatch’s mission to simplify and improve access to apprenticeship opportunities, as I believe that making these programs more accessible can greatly empower individuals in their career paths. This is why I’m proud to serve as an ambassador for ApprenticeWatch.",
     links: {
       linkedin: "https://www.linkedin.com/in/resul-tota-aa1a1b329?utm_source=apprentice-watch",
-    },
-  },
-  {
-    name: "Adam Gomes",
-    role: "Ambassador",
-    type: "ambassador",
-    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/adam-av.jpg",
-    description:
-      "I became an ambassador because ApprenticeWatch is something that will most definitely transform the lives of many future apprentices out there, and I want to be there to help build ApprenticeWatch.",
-    links: {
-      linkedin: "https://www.linkedin.com/in/adam-gomes-a68535314?utm_source=apprentice-watch",
     },
   },
   {
@@ -170,6 +148,39 @@ const teamMembers: TeamMember[] = [
     },
   },
   {
+    name: "Angel Benny",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/angel-av.jpg",
+    description:
+      "I’m an aspiring apprentice who chose to become an ApprenticeWatch Ambassador to share my journey, inspire others, and showcase the valuable opportunities that apprenticeships can provide.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/angel-benny-25ba64359/?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Malachi Boateng",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/malachi-av.jpg",
+    description:
+      "I became an Ambassador for ApprenticeWatch as I believed everyone should be able to have access to an apprenticeship as it is hard to find one. Also because I really believe this has the potential to help people like me get access to missed opportunities",
+    links: {
+      linkedin: "https://www.linkedin.com/in/malachi-boateng?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Adam Gomes",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/adam-av.jpg",
+    description:
+      "I became an ambassador because ApprenticeWatch is something that will most definitely transform the lives of many future apprentices out there, and I want to be there to help build ApprenticeWatch.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/adam-gomes-a68535314?utm_source=apprentice-watch",
+    },
+  },
+  {
     name: "Mihai lulian",
     role: "Ambassador",
     type: "ambassador",
@@ -178,6 +189,17 @@ const teamMembers: TeamMember[] = [
       "ApprenticeWatch stands out from other similar websites by actively engaging with users for feedback and also have a map-view feature to see all apprenticeships across UK in a different format. That's why I decided to become an Ambassador. They're unique and simply better.",
     links: {
       linkedin: "https://www.linkedin.com/in/iulian-mihai/?utm_source=apprentice-watch",
+    },
+  },
+  {
+    name: "Benjamin Omokoko",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/benjamin-av.jpg",
+    description:
+      "I chose ApprenticeWatch because it offered a more personalized and transparent approach to finding apprenticeships compared to other platforms. What made it stand out was its detailed reviews from past apprentices, giving real insight into company culture, expectations, and growth opportunities. Unlike generic job boards, ApprenticeWatch felt tailored to people genuinely seeking to learn and grow, not just fill a role. It gave me the confidence to apply to programs that truly matched my goals and values.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/https://www.linkedin.com/in/aspiring-apprentice-automotive-engineer-benjaminomokoko/?utm_source=apprentice-watch",
     },
   },
   {
