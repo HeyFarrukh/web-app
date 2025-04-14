@@ -133,7 +133,6 @@ const GreetingSection: React.FC<{ name: string | null }> = ({ name }) => {
 const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) => {
   const [apprenticeships, setApprenticeships] = useState<TrackedApprenticeship[]>([]);
   const [activeApprenticeship, setActiveApprenticeship] = useState<string | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -243,18 +242,12 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
   };
   
   const handleStatusUpdate = (apprenticeshipId: string, newStatus: ApprenticeshipStatus) => {
-    setUpdatingStatus(true);
-    
-    setTimeout(() => {
-      setApprenticeships(prev => 
-        prev.map(app => 
-          app.id === apprenticeshipId ? { ...app, status: newStatus } : app
-        )
-      );
-      
-      setUpdatingStatus(false);
-      Analytics.event('apprenticeship_tracker', 'update_status', newStatus);
-    }, 800);
+    setApprenticeships(prev => 
+      prev.map(app => 
+        app.id === apprenticeshipId ? { ...app, status: newStatus } : app
+      )
+    );
+    Analytics.event('apprenticeship_tracker', 'update_status', newStatus);
   };
 
   const handleAddApprenticeship = () => {
@@ -596,7 +589,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
               <>
                 <div className="relative py-8">
                   {/* Line that goes through all status steps */}
-                  <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 dark:bg-gray-700 -translate-y-1/2 rounded-full"></div>
+                  <div className="absolute top-20 left-0 w-full h-1 bg-gray-200 dark:bg-gray-700 -translate-y-1/2 rounded-full z-0"></div>
                   
                   <div className="relative flex justify-between">
                     {statusSteps.map((status, index) => {
@@ -608,6 +601,9 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                       
                       return (
                         <div key={status} className="flex flex-col items-center">
+                          <span className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {status}
+                          </span>
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
@@ -636,25 +632,10 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                               </span>
                             )}
                           </motion.button>
-                          
-                          <span className="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {status}
-                          </span>
                         </div>
                       );
                     })}
                   </div>
-                  
-                  {updatingStatus && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="absolute top-full left-1/2 transform -translate-x-1/2 mt-6 bg-orange-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center"
-                    >
-                      <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Updating status...
-                    </motion.div>
-                  )}
                 </div>
               </>
             )}
@@ -1106,6 +1087,9 @@ const RecommendedResourcesSection: React.FC<{ articles: typeof recommendedArticl
 export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) => {
   const [cvOptimizations, setCvOptimizations] = useState<CVOptimization[]>([]);
   const [isLoadingOptimizations, setIsLoadingOptimizations] = useState(false);
+  const [visibleOptimizations, setVisibleOptimizations] = useState(3);
+  const [hasMoreOptimizations, setHasMoreOptimizations] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
     const fetchCvOptimizations = async () => {
@@ -1113,10 +1097,11 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) 
 
       try {
         setIsLoadingOptimizations(true);
-        const optimizations = await cvTrackingService.getUserOptimisations(userData.id, 5); // Limit to 5 most recent
+        const optimizations = await cvTrackingService.getUserOptimisations(userData.id); // Get all optimizations
 
         if (optimizations && optimizations.length > 0) {
           setCvOptimizations(optimizations);
+          setHasMoreOptimizations(optimizations.length > visibleOptimizations);
         }
       } catch (error) {
         logger.error('Failed to fetch CV optimizations history:', error);
@@ -1126,7 +1111,17 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) 
     };
 
     fetchCvOptimizations();
-  }, [userData?.id]);
+  }, [userData?.id, visibleOptimizations]);
+
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    // Add a small delay to show the loading state
+    setTimeout(() => {
+      setVisibleOptimizations(prev => prev + 3);
+      setHasMoreOptimizations(cvOptimizations.length > visibleOptimizations + 3);
+      setIsLoadingMore(false);
+    }, 500);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1167,7 +1162,7 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) 
           </div>
 
           <div className="space-y-4">
-            {[...cvOptimizations].map((cv) => (
+            {[...cvOptimizations].slice(0, visibleOptimizations).map((cv) => (
               <div 
                 key={cv.id}
                 className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-center justify-between"
@@ -1272,6 +1267,25 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) 
               </div>
             )}
           </div>
+
+          {hasMoreOptimizations && (
+            <div className="text-center mt-6">
+              <button
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg"
+              >
+                {isLoadingMore ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Loading...
+                  </div>
+                ) : (
+                  'Load More'
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
 
