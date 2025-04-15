@@ -16,6 +16,8 @@ import { createLogger } from '@/services/logger/logger';
 import { ListingType } from '@/types/listing';
 import { vacancyService } from '@/services/supabase/vacancyService';
 import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
+import { ListingsFilter } from "@/components/listings/ListingsFilter";
+import { apprenticeshipProgressService } from '@/services/supabase/apprenticeshipProgressService';
 
 const logger = createLogger({ module: 'ProfileDashboard' });
 
@@ -35,7 +37,7 @@ interface ProfileDashboardProps {
 }
 
 // Interface for tracked apprenticeship
-interface TrackedApprenticeship {
+export interface TrackedApprenticeship {
   id: string;
   title: string;
   company: string;
@@ -140,59 +142,42 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
   const [isSearching, setIsSearching] = useState(false);
   const [savedApprenticeships, setSavedApprenticeships] = useState<ListingType[]>([]);
   const [isLoadingSaved, setIsLoadingSaved] = useState(true);
-  const [newApprenticeshipData, setNewApprenticeshipData] = useState({
-    title: '',
-    company: '',
-    location: '',
-    date: new Date().toISOString().split('T')[0],
-    status: 'Applied' as ApprenticeshipStatus
-  });
   const [notification, setNotification] = useState<NotificationState>({
     show: false,
     message: '',
     type: 'info'
   });
 
-  // Load tracked apprenticeships from localStorage
+  const [modalFilters, setModalFilters] = useState({
+    search: "",
+    location: "",
+    level: "",
+    category: "",
+  });
+  const [modalVacancies, setModalVacancies] = useState<ListingType[]>([]);
+  const [modalTotal, setModalTotal] = useState(0);
+  const [modalPage, setModalPage] = useState(1);
+  const [modalLoading, setModalLoading] = useState(false);
+  const MODAL_ITEMS_PER_PAGE = 5;
+
+  // Fetch tracked apprenticeships from Supabase
   useEffect(() => {
-    const loadTrackedApprenticeships = () => {
+    if (!userId) return;
+    const fetchProgress = async () => {
       try {
-        if (typeof window !== "undefined") {
-          const stored = localStorage.getItem(`apprenticeships_${userId}`);
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed)) {
-              setApprenticeships(parsed);
-              if (parsed.length > 0 && !activeApprenticeship) {
-                setActiveApprenticeship(parsed[0].id);
-              }
-            }
-          }
+        const data = await apprenticeshipProgressService.getUserProgress(userId);
+        setApprenticeships(data);
+        if (data.length > 0) {
+          setActiveApprenticeship(data[0].id);
+        } else {
+          setActiveApprenticeship(null);
         }
       } catch (error) {
-        console.error('Error loading tracked apprenticeships from localStorage:', error);
+        console.error('Error loading tracked apprenticeships from Supabase:', error);
       }
     };
-    loadTrackedApprenticeships();
+    fetchProgress();
   }, [userId]);
-
-  // Save tracked apprenticeships to localStorage whenever they change
-  useEffect(() => {
-    try {
-      if (typeof window !== "undefined") {
-        localStorage.setItem(`apprenticeships_${userId}`, JSON.stringify(apprenticeships));
-        if (apprenticeships.length === 0) {
-          setActiveApprenticeship(null);
-        } else if (!activeApprenticeship && apprenticeships.length > 0) {
-          setActiveApprenticeship(apprenticeships[0].id);
-        } else if (activeApprenticeship && !apprenticeships.some(app => app.id === activeApprenticeship)) {
-          setActiveApprenticeship(apprenticeships[0]?.id || null);
-        }
-      }
-    } catch (error) {
-      console.error('Error saving tracked apprenticeships to localStorage:', error);
-    }
-  }, [apprenticeships, userId]);
 
   // Fetch saved apprenticeships from the database
   useEffect(() => {
@@ -213,6 +198,27 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     }
   }, [userId]);
 
+  // Fetch vacancies for modal when filters/page change
+  useEffect(() => {
+    if (!showAddModal) return;
+    setModalLoading(true);
+    vacancyService
+      .getVacancies({
+        page: modalPage,
+        pageSize: MODAL_ITEMS_PER_PAGE,
+        filters: modalFilters,
+      })
+      .then((result) => {
+        setModalVacancies(result.vacancies || []);
+        setModalTotal(result.total || 0);
+      })
+      .catch(() => {
+        setModalVacancies([]);
+        setModalTotal(0);
+      })
+      .finally(() => setModalLoading(false));
+  }, [modalFilters, modalPage, showAddModal]);
+
   // Hide notification after timeout
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -231,39 +237,16 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     setNotification({ show: true, message, type });
   };
 
-  const handleStatusUpdate = (apprenticeshipId: string, newStatus: ApprenticeshipStatus) => {
-    setApprenticeships(prev =>
-      prev.map(app =>
-        app.id === apprenticeshipId ? { ...app, status: newStatus } : app
-      )
-    );
-    Analytics.event('apprenticeship_tracker', 'update_status', newStatus);
-  };
-
-  const handleAddApprenticeship = () => {
-    if (!newApprenticeshipData.title || !newApprenticeshipData.company || !newApprenticeshipData.location) {
-      showNotification('Please fill in all required fields', 'error');
-      return;
+  const handleStatusUpdate = async (apprenticeshipId: string, newStatus: ApprenticeshipStatus) => {
+    const app = apprenticeships.find(a => a.id === apprenticeshipId);
+    if (!app) return;
+    try {
+      await apprenticeshipProgressService.updateProgress(apprenticeshipId, { status: newStatus });
+      setApprenticeships(prev => prev.map(a => a.id === apprenticeshipId ? { ...a, status: newStatus } : a));
+      Analytics.event('apprenticeship_tracker', 'update_status', newStatus);
+    } catch (error) {
+      showNotification('Failed to update status', 'error');
     }
-    const newApp = {
-      id: `app-${Date.now()}`,
-      title: newApprenticeshipData.title,
-      company: newApprenticeshipData.company,
-      logo: `/assets/logos/default.svg`,
-      location: newApprenticeshipData.location,
-      status: newApprenticeshipData.status,
-      date: newApprenticeshipData.date,
-    };
-    setApprenticeships(prev => [...prev, newApp]);
-    setActiveApprenticeship(newApp.id);
-    showNotification(`Added ${newApp.title} to your tracker!`, 'success');
-    setNewApprenticeshipData({
-      title: '', company: '', location: '',
-      date: new Date().toISOString().split('T')[0],
-      status: 'Applied'
-    });
-    setShowAddModal(false);
-    Analytics.event('apprenticeship_tracker', 'add_apprenticeship_manual');
   };
 
   const handleSearch = async (query: string) => {
@@ -294,13 +277,12 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     );
   };
 
-  const addFromSearch = (apprenticeship: ListingType) => {
+  const addFromSearch = async (apprenticeship: ListingType) => {
     if (isApprenticeshipTracked(apprenticeship)) {
       showNotification('This apprenticeship is already in your tracker', 'info');
       return;
     }
     const newApp = {
-      id: `app-${Date.now()}`,
       title: apprenticeship.title,
       company: apprenticeship.employerName,
       logo: apprenticeship.logo || `/assets/logos/default.svg`,
@@ -309,20 +291,26 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       date: new Date().toISOString().split('T')[0],
       vacancyId: apprenticeship.slug || apprenticeship.id,
     };
-    setApprenticeships(prev => [...prev, newApp]);
-    setActiveApprenticeship(newApp.id);
-    setShowAddModal(false);
-    showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
-    Analytics.event('apprenticeship_tracker', 'add_from_search', apprenticeship.title);
+    try {
+      const created = await apprenticeshipProgressService.addProgress(userId, newApp);
+      if (created) {
+        setApprenticeships(prev => [created, ...prev]);
+        setActiveApprenticeship(created.id);
+        setShowAddModal(false);
+        showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
+        Analytics.event('apprenticeship_tracker', 'add_from_search', apprenticeship.title);
+      }
+    } catch (error) {
+      showNotification('Failed to add apprenticeship', 'error');
+    }
   };
 
-  const addFromSaved = (apprenticeship: ListingType) => {
+  const addFromSaved = async (apprenticeship: ListingType) => {
     if (isApprenticeshipTracked(apprenticeship)) {
       showNotification('This apprenticeship is already in your tracker', 'info');
       return;
     }
     const newApp = {
-      id: `app-${Date.now()}`,
       title: apprenticeship.title,
       company: apprenticeship.employerName,
       logo: apprenticeship.logo || `/assets/logos/default.svg`,
@@ -331,22 +319,39 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       date: new Date().toISOString().split('T')[0],
       vacancyId: apprenticeship.slug || apprenticeship.id,
     };
-    setApprenticeships(prev => [...prev, newApp]);
-    setActiveApprenticeship(newApp.id);
-    showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
-    Analytics.event('apprenticeship_tracker', 'add_from_saved', apprenticeship.title);
+    try {
+      const created = await apprenticeshipProgressService.addProgress(userId, newApp);
+      if (created) {
+        setApprenticeships(prev => [created, ...prev]);
+        setActiveApprenticeship(created.id);
+        showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
+        Analytics.event('apprenticeship_tracker', 'add_from_saved', apprenticeship.title);
+      }
+    } catch (error) {
+      showNotification('Failed to add apprenticeship', 'error');
+    }
   };
 
-  const handleDeleteApprenticeship = () => {
+  const handleDeleteApprenticeship = async () => {
     if (!activeApprenticeship) return;
     const appToDelete = apprenticeships.find(app => app.id === activeApprenticeship);
-    const updatedApps = apprenticeships.filter(app => app.id !== activeApprenticeship);
-    setApprenticeships(updatedApps);
-    setShowDeleteConfirm(false);
-    if (appToDelete) {
-      showNotification(`Removed ${appToDelete.title} from your tracker`, 'info');
+    try {
+      await apprenticeshipProgressService.deleteProgress(activeApprenticeship);
+      const updatedApps = apprenticeships.filter(app => app.id !== activeApprenticeship);
+      setApprenticeships(updatedApps);
+      setShowDeleteConfirm(false);
+      if (updatedApps.length > 0) {
+        setActiveApprenticeship(updatedApps[0].id);
+      } else {
+        setActiveApprenticeship(null);
+      }
+      if (appToDelete) {
+        showNotification(`Removed ${appToDelete.title} from your tracker`, 'info');
+      }
+      Analytics.event('apprenticeship_tracker', 'delete_apprenticeship');
+    } catch (error) {
+      showNotification('Failed to remove apprenticeship', 'error');
     }
-    Analytics.event('apprenticeship_tracker', 'delete_apprenticeship');
   };
 
   return (
@@ -592,39 +597,36 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                 </button>
               </div>
 
-              {/* Search Section */}
+              {/* Filters copied from listings page */}
               <div className="mb-6">
-                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
-                  Add from Search or Saved
-                </h4>
-                <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-                  <input
-                    type="search"
-                    value={searchQuery}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="w-full pl-10 p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                    placeholder="Search by title or company..."
-                  />
-                </div>
+                <ListingsFilter
+                  onFilterChange={(filters) => {
+                    setModalFilters(filters);
+                    setModalPage(1);
+                  }}
+                  initialFilters={modalFilters}
+                />
+              </div>
 
-                {isSearching ? (
-                  <div className="flex justify-center py-4">
-                    <div className="w-6 h-6 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+              {/* Vacancy list */}
+              <div className="mb-6">
+                {modalLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
-                ) : searchResults.length > 0 ? (
-                  <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-2 mb-4 bg-gray-50 dark:bg-gray-700/30">
-                    {searchResults.map((app) => (
+                ) : modalVacancies.length > 0 ? (
+                  <div className="space-y-2">
+                    {modalVacancies.map((app) => (
                       <div
                         key={app.id}
                         className="p-3 border-b border-gray-200 dark:border-gray-600 last:border-b-0 flex justify-between items-center gap-2"
                       >
                         <div className="min-w-0 overflow-hidden">
                           <div className="font-medium text-gray-900 dark:text-white truncate overflow-hidden">
-                            {app.title.length > 47 ? app.title.slice(0, 47) + '...' : app.title}
+                            {app.title.length > 47 ? app.title.slice(0, 47) + "..." : app.title}
                           </div>
                           <div className="text-xs text-gray-600 dark:text-gray-400 truncate overflow-hidden">
-                            {app.employerName} • {app.address?.addressLine3 || 'N/A'}
+                            {app.employerName} • {app.address?.addressLine3 || "N/A"}
                           </div>
                         </div>
                         <button
@@ -632,82 +634,80 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                           disabled={isApprenticeshipTracked(app)}
                           className={`p-2 rounded-lg transition-colors ${
                             isApprenticeshipTracked(app)
-                              ? 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                              : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30'
+                              ? "bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                              : "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30"
                           }`}
-                          title={isApprenticeshipTracked(app) ? 'Already in tracker' : 'Add to tracker'}
+                          title={isApprenticeshipTracked(app) ? "Already in tracker" : "Add to tracker"}
+                        >
+                          <Plus className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ))}
+                    {/* Pagination controls */}
+                    {modalTotal > MODAL_ITEMS_PER_PAGE && (
+                      <div className="flex justify-center gap-2 mt-4">
+                        <button
+                          onClick={() => setModalPage((p) => Math.max(1, p - 1))}
+                          disabled={modalPage === 1}
+                          className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 disabled:opacity-50"
+                        >
+                          Prev
+                        </button>
+                        <span className="px-2 py-1 text-sm">
+                          Page {modalPage} of {Math.ceil(modalTotal / MODAL_ITEMS_PER_PAGE)}
+                        </span>
+                        <button
+                          onClick={() => setModalPage((p) => p + 1)}
+                          disabled={modalPage >= Math.ceil(modalTotal / MODAL_ITEMS_PER_PAGE)}
+                          className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 disabled:opacity-50"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    No apprenticeships found matching your filters.
+                  </div>
+                )}
+              </div>
+
+              {/* Saved apprenticeships section (unchanged) */}
+              {savedApprenticeships.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+                    Saved Apprenticeships
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {savedApprenticeships.map((app) => (
+                      <div
+                        key={app.id}
+                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30 flex flex-col items-start"
+                      >
+                        <h5 className="text-sm font-semibold text-gray-900 dark:text-white truncate overflow-hidden">
+                          {app.title.length > 47 ? app.title.slice(0, 47) + "..." : app.title}
+                        </h5>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate overflow-hidden">
+                          {app.employerName} • {app.address?.addressLine3 || "N/A"}
+                        </p>
+                        <button
+                          onClick={() => addFromSaved(app)}
+                          disabled={isApprenticeshipTracked(app)}
+                          className={`mt-2 p-2 rounded-lg transition-colors ${
+                            isApprenticeshipTracked(app)
+                              ? "bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                              : "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30"
+                          }`}
+                          title={isApprenticeshipTracked(app) ? "Already in tracker" : "Add to tracker"}
                         >
                           <Plus className="w-5 h-5" />
                         </button>
                       </div>
                     ))}
                   </div>
-                ) : searchQuery.length > 0 ? (
-                  <div className="text-center py-3 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg mb-4">
-                    No apprenticeships found matching "{searchQuery}"
-                  </div>
-                ) : null}
-              </div>
-
-              {/* Manual Entry Section */}
-              <div className="mb-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
-                  Manual Entry
-                </h4>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Apprenticeship Title <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
-                      value={newApprenticeshipData.title}
-                      onChange={(e) => setNewApprenticeshipData({ ...newApprenticeshipData, title: e.target.value })}
-                      className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                      placeholder="e.g. Software Engineer Apprentice"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Company <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      value={newApprenticeshipData.company}
-                      onChange={(e) => setNewApprenticeshipData({ ...newApprenticeshipData, company: e.target.value })}
-                      className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                      placeholder="e.g. TechCorp Ltd."
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Location <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="location"
-                      value={newApprenticeshipData.location}
-                      onChange={(e) => setNewApprenticeshipData({ ...newApprenticeshipData, location: e.target.value })}
-                      className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                      placeholder="e.g. London, UK"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Date Applied
-                    </label>
-                    <input
-                      type="date"
-                      id="date"
-                      value={newApprenticeshipData.date}
-                      onChange={(e) => setNewApprenticeshipData({ ...newApprenticeshipData, date: e.target.value })}
-                      className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-                    />
-                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex justify-end gap-4">
                 <button
@@ -715,12 +715,6 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                   className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   Cancel
-                </button>
-                <button
-                  onClick={handleAddApprenticeship}
-                  className="px-4 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors"
-                >
-                  Add Apprenticeship
                 </button>
               </div>
             </motion.div>
