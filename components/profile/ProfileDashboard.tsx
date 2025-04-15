@@ -39,13 +39,17 @@ interface ProfileDashboardProps {
 // Interface for tracked apprenticeship
 export interface TrackedApprenticeship {
   id: string;
-  title: string;
-  company: string;
+  vacancy_title: string;
+  vacancy_company: string;
   logo?: string;
   location: string;
   status: ApprenticeshipStatus;
   date: string;
-  vacancyId?: string; // Reference to the original apprenticeship if from the platform
+  vacancy_id?: string; // Reference to the original apprenticeship if from the platform
+  notes?: string;
+  applied_to: string;
+  started_at: string;
+  updated_at: string;
 }
 
 // Interface for notification state
@@ -237,6 +241,49 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     setNotification({ show: true, message, type });
   };
 
+  const handleAddProgress = async (vacancyId: string, title: string, company: string, location: string, notes: string) => {
+    try {
+      const created = await apprenticeshipProgressService.addProgress(userId, {
+        vacancy_id: vacancyId,
+        vacancy_title: title,
+        vacancy_company: company,
+        location,
+        applied_to: new Date().toISOString(),
+        status: 'Applied',
+        notes,
+      });
+      if (created) {
+        setApprenticeships((prev) => [created, ...prev]);
+        setActiveApprenticeship(created.id);
+        setShowAddModal(false);
+        showNotification('Apprenticeship added successfully!', 'success');
+      }
+    } catch (error) {
+      showNotification('Failed to add apprenticeship', 'error');
+    }
+  };
+
+  const handleUpdateProgress = async (id: string, updates: Partial<{ status: string; notes: string }>) => {
+    try {
+      await apprenticeshipProgressService.updateProgress(id, updates);
+      setApprenticeships((prev) =>
+        prev.map((app) =>
+          app.id === id
+            ? {
+                ...app,
+                ...updates,
+                status: updates.status as ApprenticeshipStatus,
+                updated_at: new Date().toISOString(),
+              }
+            : app
+        )
+      );
+      showNotification('Apprenticeship updated successfully!', 'success');
+    } catch (error) {
+      showNotification('Failed to update apprenticeship', 'error');
+    }
+  };
+
   const handleStatusUpdate = async (apprenticeshipId: string, newStatus: ApprenticeshipStatus) => {
     const app = apprenticeships.find(a => a.id === apprenticeshipId);
     if (!app) return;
@@ -272,8 +319,8 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
 
   const isApprenticeshipTracked = (apprenticeship: ListingType) => {
     return apprenticeships.some(
-      app => (app.vacancyId && app.vacancyId === (apprenticeship.slug || apprenticeship.id)) ||
-        (app.title === apprenticeship.title && app.company === apprenticeship.employerName)
+      app => (app.vacancy_id && app.vacancy_id === (apprenticeship.slug || apprenticeship.id)) ||
+        (app.vacancy_title === apprenticeship.title && app.vacancy_company === apprenticeship.employerName)
     );
   };
 
@@ -283,13 +330,13 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       return;
     }
     const newApp = {
-      title: apprenticeship.title,
-      company: apprenticeship.employerName,
-      logo: apprenticeship.logo || `/assets/logos/default.svg`,
+      vacancy_id: apprenticeship.slug || apprenticeship.id,
+      vacancy_title: apprenticeship.title,
+      vacancy_company: apprenticeship.employerName,
       location: apprenticeship.address?.addressLine3 || 'Unknown location',
-      status: 'Applied' as ApprenticeshipStatus,
-      date: new Date().toISOString().split('T')[0],
-      vacancyId: apprenticeship.slug || apprenticeship.id,
+      applied_to: new Date().toISOString(),
+      status: 'Applied',
+      notes: '',
     };
     try {
       const created = await apprenticeshipProgressService.addProgress(userId, newApp);
@@ -311,13 +358,13 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       return;
     }
     const newApp = {
-      title: apprenticeship.title,
-      company: apprenticeship.employerName,
-      logo: apprenticeship.logo || `/assets/logos/default.svg`,
+      vacancy_id: apprenticeship.slug || apprenticeship.id,
+      vacancy_title: apprenticeship.title,
+      vacancy_company: apprenticeship.employerName,
       location: apprenticeship.address?.addressLine3 || 'Unknown location',
-      status: 'Applied' as ApprenticeshipStatus,
-      date: new Date().toISOString().split('T')[0],
-      vacancyId: apprenticeship.slug || apprenticeship.id,
+      applied_to: new Date().toISOString(),
+      status: 'Applied',
+      notes: '',
     };
     try {
       const created = await apprenticeshipProgressService.addProgress(userId, newApp);
@@ -336,9 +383,9 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     if (!activeApprenticeship) return;
     const appToDelete = apprenticeships.find(app => app.id === activeApprenticeship);
     try {
-      await apprenticeshipProgressService.deleteProgress(activeApprenticeship);
+      await apprenticeshipProgressService.deleteProgress(activeApprenticeship); // Delete from database
       const updatedApps = apprenticeships.filter(app => app.id !== activeApprenticeship);
-      setApprenticeships(updatedApps);
+      setApprenticeships(updatedApps); // Update state
       setShowDeleteConfirm(false);
       if (updatedApps.length > 0) {
         setActiveApprenticeship(updatedApps[0].id);
@@ -346,7 +393,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
         setActiveApprenticeship(null);
       }
       if (appToDelete) {
-        showNotification(`Removed ${appToDelete.title} from your tracker`, 'info');
+        showNotification(`Removed ${appToDelete.vacancy_title} from your tracker`, 'info');
       }
       Analytics.event('apprenticeship_tracker', 'delete_apprenticeship');
     } catch (error) {
@@ -408,18 +455,23 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                   }`}
                 >
                   <div className="w-6 h-6 bg-white rounded-full flex-shrink-0 overflow-hidden">
-                    <img src={app.logo || '/assets/logos/default.svg'} alt={app.company} className="w-full h-full object-contain"
+                    <img
+                      src={app.logo || '/assets/logos/default.svg'}
+                      alt={app.vacancy_company || 'Company Logo'}
+                      className="w-full h-full object-contain"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.onerror = null;
                         target.style.display = 'none';
                         const fallback = target.parentElement!.appendChild(document.createElement('div'));
                         fallback.className = "w-full h-full flex items-center justify-center bg-orange-500 text-white font-bold text-xs";
-                        fallback.textContent = app.company ? app.company.charAt(0).toUpperCase() : '?';
+                        fallback.textContent = app.vacancy_company
+                          ? app.vacancy_company.charAt(0).toUpperCase()
+                          : '-';
                       }}
                     />
                   </div>
-                  <span className="font-medium text-sm">{app.title}</span>
+                  <span className="font-medium text-sm">{app.vacancy_title || 'Untitled Apprenticeship'}</span>
                 </button>
               ))}
             </div>
@@ -432,20 +484,29 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                     <div key={app.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div className="flex-grow min-w-0">
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 truncate">
-                          {app.title}
+                          {app.vacancy_title || 'Untitled Apprenticeship'}
                         </h3>
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-600 dark:text-gray-400">
                           <div className="flex items-center truncate">
                             <Building className="w-4 h-4 mr-1.5 flex-shrink-0" />
-                            <span className="truncate">{app.company}</span>
+                            <span className="truncate">{app.vacancy_company || 'Unknown Company'}</span>
                           </div>
                           <div className="flex items-center truncate">
                             <MapPin className="w-4 h-4 mr-1.5 flex-shrink-0" />
-                            <span className="truncate">{app.location}</span>
+                            <span className="truncate">{app.location || 'Unknown Location'}</span>
                           </div>
                           <div className="flex items-center">
                             <Calendar className="w-4 h-4 mr-1.5 flex-shrink-0" />
-                            <span>Applied: {new Date(app.date).toLocaleDateString('en-GB')}</span>
+                            <span>Applied To: {new Date(app.applied_to).toLocaleDateString('en-GB')}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span>Notes: {app.notes || 'No notes added'}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span>Started: {new Date(app.started_at).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span>Last Updated: {new Date(app.updated_at).toLocaleDateString()}</span>
                           </div>
                         </div>
                       </div>
@@ -464,6 +525,31 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                       </div>
                     </div>
                   ))}
+              </div>
+            )}
+
+            {showDeleteConfirm && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg max-w-sm w-full">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Confirm Deletion</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                    Are you sure you want to delete this apprenticeship? This action cannot be undone.
+                  </p>
+                  <div className="flex justify-end gap-4">
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteApprenticeship}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -565,162 +651,86 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
             </div>
           </div>
         )}
-      </div>
 
-      {/* Add Apprenticeship Modal */}
-      <AnimatePresence>
         {showAddModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowAddModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Add Apprenticeship to Tracker
-                </h3>
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400"
-                  aria-label="Close modal"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Filters copied from listings page */}
-              <div className="mb-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg max-w-3xl w-full">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Apprenticeship</h3>
+              <div className="mb-4">
                 <ListingsFilter
-                  onFilterChange={(filters) => {
-                    setModalFilters(filters);
-                    setModalPage(1);
-                  }}
+                  onFilterChange={(filters) => setModalFilters(filters)}
                   initialFilters={modalFilters}
                 />
               </div>
-
-              {/* Vacancy list */}
-              <div className="mb-6">
+              <div className="overflow-y-auto max-h-96 custom-scrollbar">
                 {modalLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="text-center py-6">
+                    <Loader className="w-6 h-6 animate-spin text-orange-500 mx-auto" />
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">Loading apprenticeships...</p>
                   </div>
                 ) : modalVacancies.length > 0 ? (
-                  <div className="space-y-2">
-                    {modalVacancies.map((app) => (
-                      <div
-                        key={app.id}
-                        className="p-3 border-b border-gray-200 dark:border-gray-600 last:border-b-0 flex justify-between items-center gap-2"
+                  modalVacancies.map((vacancy) => (
+                    <div
+                      key={vacancy.id}
+                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-4 flex items-start justify-between"
+                    >
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                          {vacancy.title}
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {vacancy.employerName} • {vacancy.address?.addressLine3 || 'N/A'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => addFromSearch(vacancy)}
+                        disabled={isApprenticeshipTracked(vacancy)}
+                        className={`ml-4 p-2 rounded-lg transition-colors ${
+                          isApprenticeshipTracked(vacancy)
+                            ? 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                            : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30'
+                        }`}
+                        title={isApprenticeshipTracked(vacancy) ? 'Already in tracker' : 'Add to tracker'}
                       >
-                        <div className="min-w-0 overflow-hidden">
-                          <div className="font-medium text-gray-900 dark:text-white truncate overflow-hidden">
-                            {app.title.length > 47 ? app.title.slice(0, 47) + "..." : app.title}
-                          </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400 truncate overflow-hidden">
-                            {app.employerName} • {app.address?.addressLine3 || "N/A"}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => addFromSearch(app)}
-                          disabled={isApprenticeshipTracked(app)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            isApprenticeshipTracked(app)
-                              ? "bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                              : "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30"
-                          }`}
-                          title={isApprenticeshipTracked(app) ? "Already in tracker" : "Add to tracker"}
-                        >
-                          <Plus className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ))}
-                    {/* Pagination controls */}
-                    {modalTotal > MODAL_ITEMS_PER_PAGE && (
-                      <div className="flex justify-center gap-2 mt-4">
-                        <button
-                          onClick={() => setModalPage((p) => Math.max(1, p - 1))}
-                          disabled={modalPage === 1}
-                          className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 disabled:opacity-50"
-                        >
-                          Prev
-                        </button>
-                        <span className="px-2 py-1 text-sm">
-                          Page {modalPage} of {Math.ceil(modalTotal / MODAL_ITEMS_PER_PAGE)}
-                        </span>
-                        <button
-                          onClick={() => setModalPage((p) => p + 1)}
-                          disabled={modalPage >= Math.ceil(modalTotal / MODAL_ITEMS_PER_PAGE)}
-                          className="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 disabled:opacity-50"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                        <Plus className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    No apprenticeships found matching your filters.
+                  <div className="text-center py-6">
+                    <AlertCircle className="w-6 h-6 text-gray-500 mx-auto" />
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">No apprenticeships found.</p>
                   </div>
                 )}
               </div>
-
-              {/* Saved apprenticeships section (unchanged) */}
-              {savedApprenticeships.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
-                    Saved Apprenticeships
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {savedApprenticeships.map((app) => (
-                      <div
-                        key={app.id}
-                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30 flex flex-col items-start"
-                      >
-                        <h5 className="text-sm font-semibold text-gray-900 dark:text-white truncate overflow-hidden">
-                          {app.title.length > 47 ? app.title.slice(0, 47) + "..." : app.title}
-                        </h5>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate overflow-hidden">
-                          {app.employerName} • {app.address?.addressLine3 || "N/A"}
-                        </p>
-                        <button
-                          onClick={() => addFromSaved(app)}
-                          disabled={isApprenticeshipTracked(app)}
-                          className={`mt-2 p-2 rounded-lg transition-colors ${
-                            isApprenticeshipTracked(app)
-                              ? "bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                              : "bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30"
-                          }`}
-                          title={isApprenticeshipTracked(app) ? "Already in tracker" : "Add to tracker"}
-                        >
-                          <Plus className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-end gap-4">
+              <div className="flex justify-between items-center mt-4">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 >
                   Cancel
                 </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    disabled={modalPage === 1}
+                    onClick={() => setModalPage((prev) => Math.max(prev - 1, 1))}
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={modalPage * MODAL_ITEMS_PER_PAGE >= modalTotal}
+                    onClick={() => setModalPage((prev) => prev + 1)}
+                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     </motion.div>
   );
 };
