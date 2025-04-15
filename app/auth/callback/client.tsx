@@ -10,8 +10,7 @@ export function AuthCallbackClient() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    console.log("[AuthCallbackClient] Component mounted");
-    const checkSessionAndRedirect = async () => {
+    const callBackRedirect = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -23,15 +22,12 @@ export function AuthCallbackClient() {
 
     const handleRedirect = async () => {
       const redirectTo = searchParams?.get("redirect") || "/";
-      console.log("[AuthCallbackClient] Redirecting to:", redirectTo);
       Analytics.event("auth", "callback_redirect");
       router.replace(decodeURIComponent(redirectTo));
     };
 
-    // Check session immediately when component mounts
-    checkSessionAndRedirect();
+    callBackRedirect();
 
-    // Subscribe to auth state changes to handle SIGNED_IN event
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
