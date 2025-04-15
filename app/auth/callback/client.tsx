@@ -11,13 +11,8 @@ export function AuthCallbackClient() {
 
   useEffect(() => {
     const callBackRedirect = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        router.replace("/");
-        return;
-      }
+      router.replace("/");
+      return;
     };
 
     const handleRedirect = async () => {
@@ -31,11 +26,7 @@ export function AuthCallbackClient() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("[AuthCallbackClient] Auth state change:", event, session);
       if (event === "SIGNED_IN" && session) {
-        console.log(
-          "[AuthCallbackClient] SIGNED_IN detected, handling redirect"
-        );
         handleRedirect();
       }
     });
@@ -43,7 +34,6 @@ export function AuthCallbackClient() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [router, searchParams]);
-
+  }, [router, searchParams]); // Correct dependencies
   return null;
 }
