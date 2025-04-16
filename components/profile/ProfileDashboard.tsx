@@ -72,7 +72,7 @@ const statusSteps: ApprenticeshipStatus[] = [
 
 // Sample article recommendations
 const recommendedArticles = [
-  {
+    {
     id: 'art-1',
     title: 'How to Research Companies for Apprenticeships',
     category: 'Apprenticeship Preparation',
@@ -126,12 +126,14 @@ const GreetingSection: React.FC<{ name: string | null }> = ({ name }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-10 text-left"
+      className="mb-8 md:mb-10 text-left" // Adjusted margin
     >
-      <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+      {/* Responsive Font Size */}
+      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
         {greeting}, <span className="font-playfair italic text-orange-500">{firstName}</span>
       </h1>
-      <p className="mt-3 text-lg text-gray-600 dark:text-gray-300">
+      {/* Responsive Font Size */}
+      <p className="mt-2 sm:mt-3 text-base sm:text-lg text-gray-600 dark:text-gray-300">
         Track your CV optimisations, apprenticeship progress and more.
       </p>
     </motion.div>
@@ -188,7 +190,13 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
         const data = await apprenticeshipProgressService.getUserProgress(userId);
         setApprenticeships(data);
         if (data.length > 0) {
-          setActiveApprenticeship(data[0].id);
+          // Sort by update time descending, then created time descending
+          const sortedData = data.sort((a, b) => {
+              const dateA = a.updated_at ? new Date(a.updated_at) : new Date(a.started_at);
+              const dateB = b.updated_at ? new Date(b.updated_at) : new Date(b.started_at);
+              return dateB.getTime() - dateA.getTime();
+          });
+          setActiveApprenticeship(sortedData[0].id);
         } else {
           setActiveApprenticeship(null);
         }
@@ -220,13 +228,21 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
 
   // Fetch vacancies for modal when filters/page change
   useEffect(() => {
-    if (!showAddModal) return;
+    if (!showAddModal || showManualEntryForm) return; // Don't fetch if manual form is open
+
     setModalLoading(true);
+    setIsDirectSearching(true); // Use same loading state for consistency
+
+    const filtersToUse = directSearchQuery ? { search: directSearchQuery } : modalFilters;
+    const pageToUse = directSearchQuery ? 1 : modalPage; // Reset page for direct search
+    const pageSizeToUse = directSearchQuery ? 10 : MODAL_ITEMS_PER_PAGE; // Show more results for direct search
+
+
     vacancyService
       .getVacancies({
-        page: modalPage,
-        pageSize: MODAL_ITEMS_PER_PAGE,
-        filters: modalFilters,
+        page: pageToUse,
+        pageSize: pageSizeToUse,
+        filters: filtersToUse,
       })
       .then((result) => {
         setModalVacancies(result.vacancies || []);
@@ -236,8 +252,12 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
         setModalVacancies([]);
         setModalTotal(0);
       })
-      .finally(() => setModalLoading(false));
-  }, [modalFilters, modalPage, showAddModal]);
+      .finally(() => {
+          setModalLoading(false);
+          setIsDirectSearching(false);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalFilters, modalPage, showAddModal, directSearchQuery, showManualEntryForm]); // Added dependencies
 
   // Hide notification after timeout
   useEffect(() => {
@@ -263,6 +283,8 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
         notes: ''
       });
       setDirectSearchQuery('');
+      setModalVacancies([]); // Clear modal vacancies when closing
+      setModalTotal(0);
     }
   }, [showAddModal]);
 
@@ -283,7 +305,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
         notes,
       });
       if (created) {
-        setApprenticeships((prev) => [created, ...prev]);
+        setApprenticeships((prev) => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
         setShowAddModal(false);
         showNotification('Apprenticeship added successfully!', 'success');
@@ -306,7 +328,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                 updated_at: new Date().toISOString(),
               }
             : app
-        )
+        ).sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()) // Re-sort after update
       );
       showNotification('Apprenticeship updated successfully!', 'success');
     } catch (error) {
@@ -318,33 +340,19 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     const app = apprenticeships.find(a => a.id === apprenticeshipId);
     if (!app) return;
     try {
-      await apprenticeshipProgressService.updateProgress(apprenticeshipId, { status: newStatus });
-      setApprenticeships(prev => prev.map(a => a.id === apprenticeshipId ? { ...a, status: newStatus } : a));
+      // Use the update function which handles DB and state updates
+      await handleUpdateProgress(apprenticeshipId, { status: newStatus });
       Analytics.event('apprenticeship_tracker', 'update_status', newStatus);
     } catch (error) {
-      showNotification('Failed to update status', 'error');
+      // Notification handled within handleUpdateProgress
+      logger.error('Failed to update status', error);
     }
   };
 
+  // DEPRECATED: No longer used directly for searching inside tracker section
   const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-    setIsSearching(true);
-    try {
-      const { vacancies } = await vacancyService.getVacancies({
-        page: 1, pageSize: 5, filters: { search: query }
-      });
-      setSearchResults(vacancies && Array.isArray(vacancies) ? vacancies : []);
-      Analytics.event('apprenticeship_tracker', 'search_apprenticeships', query);
-    } catch (error) {
-      console.error('Error searching apprenticeships:', error);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
+      setSearchQuery(query);
+      // ... rest of the function (can be removed if not used elsewhere)
   };
 
   const isApprenticeshipTracked = (apprenticeship: ListingType) => {
@@ -371,9 +379,9 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     try {
       const created = await apprenticeshipProgressService.addProgress(userId, newApp);
       if (created) {
-        setApprenticeships(prev => [created, ...prev]);
+        setApprenticeships(prev => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
-        setShowAddModal(false);
+        setShowAddModal(false); // Close modal after adding
         showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
         Analytics.event('apprenticeship_tracker', 'add_from_search', apprenticeship.title);
       }
@@ -399,8 +407,9 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     try {
       const created = await apprenticeshipProgressService.addProgress(userId, newApp);
       if (created) {
-        setApprenticeships(prev => [created, ...prev]);
+        setApprenticeships(prev => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
+        // Maybe remove from saved list visually here if desired
         showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
         Analytics.event('apprenticeship_tracker', 'add_from_saved', apprenticeship.title);
       }
@@ -418,7 +427,8 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       setApprenticeships(updatedApps); // Update state
       setShowDeleteConfirm(false);
       if (updatedApps.length > 0) {
-        setActiveApprenticeship(updatedApps[0].id);
+        // Find the next logical active apprenticeship (e.g., the first one in the sorted list)
+        setActiveApprenticeship(updatedApps.sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime())[0].id);
       } else {
         setActiveApprenticeship(null);
       }
@@ -431,37 +441,40 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     }
   };
 
-  // New function to handle direct search
-  const handleDirectSearch = async () => {
-    if (!directSearchQuery.trim()) {
-      setModalVacancies([]);
-      setModalTotal(0);
-      return;
-    }
-
-    setIsDirectSearching(true);
-    setModalLoading(true);
-
-    try {
-      const { vacancies, total } = await vacancyService.getVacancies({
-        page: 1,
-        pageSize: 10,
-        filters: { search: directSearchQuery }
-      });
-
-      setModalVacancies(vacancies || []);
-      setModalTotal(total || 0);
-      Analytics.event('apprenticeship_tracker', 'direct_search', directSearchQuery);
-    } catch (error) {
-      console.error('Error searching apprenticeships:', error);
-      setModalVacancies([]);
-      setModalTotal(0);
-      showNotification('Failed to search apprenticeships', 'error');
-    } finally {
-      setIsDirectSearching(false);
-      setModalLoading(false);
-    }
+  // Function to handle direct search (triggers useEffect)
+  const handleDirectSearch = () => {
+      // This function just triggers the effect by updating directSearchQuery
+      // The actual API call happens in the useEffect hook
+      // We can add instant feedback if needed, but useEffect handles the core logic
+      if(directSearchQuery.trim()) {
+          setModalPage(1); // Reset page when initiating a new search
+          // The useEffect hook listening to directSearchQuery will handle the rest
+          Analytics.event('apprenticeship_tracker', 'direct_search', directSearchQuery);
+      } else {
+           // If search is cleared, reset results
+           setModalVacancies([]);
+           setModalTotal(0);
+      }
   };
+
+   // Debounce direct search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (directSearchQuery) {
+        handleDirectSearch();
+      } else {
+        // Clear results if search query is empty
+        setModalVacancies([]);
+        setModalTotal(0);
+      }
+    }, 500); // 500ms delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [directSearchQuery]); // Only re-run if directSearchQuery changes
+
 
   // New function to handle manual entry submission
   const handleManualEntrySubmit = async () => {
@@ -482,9 +495,9 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       });
 
       if (created) {
-        setApprenticeships(prev => [created, ...prev]);
+        setApprenticeships(prev => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
-        setShowAddModal(false);
+        setShowAddModal(false); // Close modal after adding
         setShowManualEntryForm(false);
         setManualEntryData({
           title: '',
@@ -505,36 +518,37 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="mb-10"
+      className="mb-8 md:mb-10" // Adjusted margin
     >
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase">
+      {/* Responsive Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 sm:gap-0">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white uppercase">
           YOUR APPRENTICESHIP PROGRESS
         </h2>
         <button
           onClick={() => setShowAddModal(true)}
-          className="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg flex items-center space-x-2 text-sm font-medium transition-colors shadow-sm"
+          className="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg flex items-center justify-center sm:justify-start space-x-2 text-sm font-medium transition-colors shadow-sm w-full sm:w-auto" // Full width on mobile
         >
           <Plus className="w-4 h-4" />
           <span>Add Apprenticeship</span>
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 mb-4"> {/* Adjusted padding */}
         {apprenticeships.length === 0 && !isLoadingSaved ? (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-orange-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Briefcase className="w-8 h-8 text-orange-500" />
+          <div className="text-center py-6 sm:py-8">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Briefcase className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
               No Apprenticeships Added
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto px-4 sm:px-0">
               Add your first apprenticeship to track your progress!
             </p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center mx-auto"
+              className="px-5 py-2.5 sm:px-6 sm:py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center mx-auto text-sm sm:text-base"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Apprenticeship to Tracker
@@ -542,18 +556,19 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
           </div>
         ) : apprenticeships.length > 0 ? (
           <>
-            <div className="mb-6 flex flex-wrap gap-3">
+            {/* Responsive Apprenticeship Selection Tabs - allow wrapping */}
+            <div className="mb-6 flex flex-wrap gap-2 sm:gap-3">
               {apprenticeships.map((app) => (
                 <button
                   key={app.id}
                   onClick={() => setActiveApprenticeship(app.id)}
-                  className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-2 sm:space-x-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm ${ // Smaller padding/text on mobile
                     activeApprenticeship === app.id
                       ? 'bg-orange-500 text-white shadow-md'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/20'
                   }`}
                 >
-                  <div className="w-6 h-6 bg-white rounded-full flex-shrink-0 overflow-hidden">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full flex-shrink-0 overflow-hidden"> {/* Slightly smaller logo */}
                     <img
                       src={app.logo || '/assets/logos/default.svg'}
                       alt={app.vacancy_company || 'Company Logo'}
@@ -563,63 +578,69 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                         target.onerror = null;
                         target.style.display = 'none';
                         const fallback = target.parentElement!.appendChild(document.createElement('div'));
-                        fallback.className = "w-full h-full flex items-center justify-center bg-orange-500 text-white font-bold text-xs";
+                        fallback.className = "w-full h-full flex items-center justify-center bg-orange-500 text-white font-bold text-xs sm:text-xs"; // Keep text small
                         fallback.textContent = app.vacancy_company
                           ? app.vacancy_company.charAt(0).toUpperCase()
                           : '-';
                       }}
                     />
                   </div>
-                  <span className="font-medium text-sm">{app.vacancy_title || 'Untitled Apprenticeship'}</span>
+                  <span className="font-medium truncate max-w-[150px] sm:max-w-[200px]">{app.vacancy_title || 'Untitled Apprenticeship'}</span> {/* Limit width */}
                 </button>
               ))}
             </div>
 
             {activeApprenticeship && (
-              <div className="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/30">
+              <div className="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/30"> {/* Adjusted padding */}
                 {apprenticeships
                   .filter(app => app.id === activeApprenticeship)
                   .map(app => (
-                    <div key={app.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    // Responsive Layout for Details
+                    <div key={app.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                       <div className="flex-grow min-w-0">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 truncate">
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 truncate">
                           {app.vacancy_title || 'Untitled Apprenticeship'}
                         </h3>
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-600 dark:text-gray-400">
-                          <div className="flex items-center truncate">
-                            <Building className="w-4 h-4 mr-1.5 flex-shrink-0" />
-                            <span className="truncate">{app.vacancy_company || 'Unknown Company'}</span>
-                          </div>
-                          <div className="flex items-center truncate">
-                            <MapPin className="w-4 h-4 mr-1.5 flex-shrink-0" />
-                            <span className="truncate">{app.location || 'Unknown Location'}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-1.5 flex-shrink-0" />
-                            <span>Applied To: {new Date(app.applied_to).toLocaleDateString('en-GB')}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <span>Notes: {app.notes || 'No notes added'}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <span>Started: {new Date(app.started_at).toLocaleDateString()}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <span>Last Updated: {new Date(app.updated_at).toLocaleDateString()}</span>
-                          </div>
+                        {/* Responsive Info Items - wrap on small screens */}
+                        <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                           <div className="flex items-center min-w-0"> {/* Added min-w-0 for truncation */}
+                                <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 flex-shrink-0" />
+                                <span className="truncate">{app.vacancy_company || 'Unknown Company'}</span>
+                            </div>
+                            <div className="flex items-center min-w-0"> {/* Added min-w-0 for truncation */}
+                                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 flex-shrink-0" />
+                                <span className="truncate">{app.location || 'Unknown Location'}</span>
+                            </div>
+                            <div className="flex items-center">
+                                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 flex-shrink-0" />
+                                <span>Applied: {new Date(app.applied_to).toLocaleDateString('en-GB')}</span>
+                            </div>
+                             <div className="flex items-center min-w-0"> {/* Added min-w-0 for truncation */}
+                                <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 flex-shrink-0" />
+                                <span className="truncate">Notes: {app.notes || 'N/A'}</span>
+                            </div>
+                            <div className="flex items-center">
+                               <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 flex-shrink-0" />
+                               <span>Started: {new Date(app.started_at).toLocaleDateString('en-GB')}</span>
+                            </div>
+                            <div className="flex items-center">
+                                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 flex-shrink-0" />
+                                <span>Updated: {new Date(app.updated_at).toLocaleDateString('en-GB')}</span>
+                            </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-end flex-shrink-0 gap-2 md:gap-4">
-                        <div className="text-right md:text-left">
-                          <span className="block text-xs text-gray-500 dark:text-gray-400">Current Stage</span>
-                          <span className="font-semibold text-orange-500">{app.status}</span>
+                      {/* Responsive Controls */}
+                      <div className="flex items-center justify-end flex-shrink-0 gap-2 sm:gap-4 mt-3 sm:mt-0">
+                        <div className="text-right">
+                          <span className="block text-xs text-gray-500 dark:text-gray-400">Stage</span>
+                          <span className="font-semibold text-orange-500 text-sm sm:text-base">{app.status}</span>
                         </div>
                         <button
                           onClick={() => setShowDeleteConfirm(true)}
-                          className="p-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors"
+                          className="p-1.5 sm:p-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors"
                           title="Delete apprenticeship"
                         >
-                          <Trash2 className="w-5 h-5" />
+                          <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" /> {/* Slightly smaller icon */}
                         </button>
                       </div>
                     </div>
@@ -628,22 +649,23 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
             )}
 
             {showDeleteConfirm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              // Keep modal as is, generally okay on mobile unless content is very large
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg max-w-sm w-full">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Confirm Deletion</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
                     Are you sure you want to delete this apprenticeship? This action cannot be undone.
                   </p>
-                  <div className="flex justify-end gap-4">
+                  <div className="flex justify-end gap-3 sm:gap-4">
                     <button
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                      className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm sm:text-base"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleDeleteApprenticeship}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm sm:text-base"
                     >
                       Delete
                     </button>
@@ -652,20 +674,23 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
               </div>
             )}
 
+            {/* Responsive Timeline */}
             {activeApprenticeship && (
-              <div className="relative pt-2 pb-4">
-                <div className="flex justify-between items-center mb-3 px-1">
+               <div className="relative pt-2 pb-4 overflow-x-auto sm:overflow-x-visible"> {/* Allow horizontal scroll on very small screens */}
+                 <div className="flex justify-between items-center mb-3 px-1 min-w-[600px] sm:min-w-0"> {/* Min width for scrollable labels */}
                   {statusSteps.map((status) => (
                     <div key={status + '-label'} className="flex-1 text-center px-1">
-                      <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                      {/* Smaller text on mobile */}
+                      <span className="text-[10px] sm:text-xs font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap">
                         {status}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <div className="relative flex justify-between items-center h-10">
-                  <div className="absolute top-1/2 left-5 right-5 h-1 bg-gray-200 dark:bg-gray-700 transform -translate-y-1/2 rounded-full z-0"></div>
+                 <div className="relative flex justify-between items-center h-8 sm:h-10 min-w-[600px] sm:min-w-0"> {/* Min width for scrollable circles */}
+                   {/* Adjusted line positioning */}
+                   <div className="absolute top-1/2 left-3 right-3 sm:left-5 sm:right-5 h-0.5 sm:h-1 bg-gray-200 dark:bg-gray-700 transform -translate-y-1/2 rounded-full z-0"></div>
 
                   {statusSteps.map((status, index) => {
                     const activeApp = apprenticeships.find(app => app.id === activeApprenticeship);
@@ -684,11 +709,12 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                               handleStatusUpdate(activeApp.id, status);
                             }
                           }}
-                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-in-out relative z-10 ${
+                           // Responsive Circle Size
+                          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ease-in-out relative z-10 ${
                             isActive
                               ? isRejection
-                                ? 'bg-red-500 shadow-lg shadow-red-500/30 scale-110 ring-2 ring-white dark:ring-gray-800'
-                                : 'bg-orange-500 shadow-lg shadow-orange-500/30 scale-110 ring-2 ring-white dark:ring-gray-800'
+                                ? 'bg-red-500 shadow-lg shadow-red-500/30 scale-110 ring-1 sm:ring-2 ring-white dark:ring-gray-800' // Adjusted ring
+                                : 'bg-orange-500 shadow-lg shadow-orange-500/30 scale-110 ring-1 sm:ring-2 ring-white dark:ring-gray-800' // Adjusted ring
                               : isCompleted
                               ? 'bg-green-500 shadow-md shadow-green-500/20'
                               : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
@@ -696,11 +722,12 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                           title={`Set status to: ${status}`}
                         >
                           {isCompleted ? (
-                            <Check className="w-5 h-5 text-white" />
+                             <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" /> // Adjusted icon size
                           ) : isRejection && isActive ? (
-                            <X className="w-5 h-5 text-white" />
+                             <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" /> // Adjusted icon size
                           ) : (
-                            <span className={`text-sm font-bold ${
+                            // Responsive Font Size
+                            <span className={`text-xs sm:text-sm font-bold ${
                               isActive ? 'text-white' : isCompleted ? 'text-white' : 'text-gray-700 dark:text-gray-300'
                             }`}>
                               {index + 1}
@@ -716,34 +743,39 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
           </>
         ) : null}
 
+        {/* Saved Apprenticeships - Responsive Grid */}
         {savedApprenticeships.length > 0 && (
-          <div className="mb-6">
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+          <div className="mt-6 sm:mt-8 pt-4 border-t border-gray-200 dark:border-gray-700"> {/* Added top margin/border */}
+            <h4 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-3">
               Saved Apprenticeships
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Responsive Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {savedApprenticeships.map((app) => (
                 <div
                   key={app.id}
-                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30 flex flex-col items-start"
+                  className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30 flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start" // Adjusted flex for mobile
                 >
-                  <h5 className="text-sm font-semibold text-gray-900 dark:text-white truncate overflow-hidden">
-                    {app.title.length > 47 ? app.title.slice(0, 47) + '...' : app.title}
-                  </h5>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate overflow-hidden">
-                    {app.employerName} • {app.address?.addressLine3 || 'N/A'}
-                  </p>
+                  <div className="flex-grow min-w-0 mr-2 sm:mr-0 sm:mb-2"> {/* Margin right on mobile */}
+                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                      {app.title} {/* Let truncate handle length */}
+                    </h5>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                      {app.employerName} • {app.address?.addressLine3 || 'N/A'}
+                    </p>
+                  </div>
                   <button
                     onClick={() => addFromSaved(app)}
                     disabled={isApprenticeshipTracked(app)}
-                    className={`mt-2 p-2 rounded-lg transition-colors ${
+                     // Adjusted padding/margin for mobile tap target
+                    className={`flex-shrink-0 mt-0 sm:mt-2 p-1.5 sm:p-2 rounded-lg transition-colors ${
                       isApprenticeshipTracked(app)
                         ? 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                         : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30'
                     }`}
                     title={isApprenticeshipTracked(app) ? 'Already in tracker' : 'Add to tracker'}
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" /> {/* Adjusted icon size */}
                   </button>
                 </div>
               ))}
@@ -751,24 +783,25 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
           </div>
         )}
 
+        {/* Add Modal - Optimizations for Mobile */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Apprenticeship</h3>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"> {/* Added padding for modal */}
+             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 shadow-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"> {/* Adjusted padding */}
+               <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4 flex-shrink-0">Add Apprenticeship</h3>
 
               {!showManualEntryForm ? (
                 <>
-                  {/* Direct search input */}
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2">
+                  {/* Responsive Search Input */}
+                  <div className="mb-4 flex-shrink-0">
+                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                       <div className="relative flex-1">
                         <input
                           type="text"
                           placeholder="Search for an apprenticeship..."
                           value={directSearchQuery}
                           onChange={(e) => setDirectSearchQuery(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleDirectSearch()}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white"
+                          // onKeyDown={(e) => e.key === 'Enter' && handleDirectSearch()} // Debounced now
+                          className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white text-sm sm:text-base" // Adjusted padding/text size
                         />
                         {isDirectSearching && (
                           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -776,123 +809,148 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                           </div>
                         )}
                       </div>
-                      <button
+                      {/* Removed explicit search button, search is debounced */}
+                      {/* <button
                         onClick={handleDirectSearch}
-                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors flex items-center"
+                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center w-full sm:w-auto text-sm sm:text-base" // Full width on mobile
                       >
                         <Search className="w-4 h-4 mr-1" />
                         Search
-                      </button>
+                      </button> */}
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-1">
-                      Enter the exact name of the apprenticeship you're looking for
+                      Start typing the name of the apprenticeship...
                     </p>
                   </div>
 
-                  {/* Search results */}
-                  <div className="overflow-y-auto flex-1 custom-scrollbar mb-4">
+                  {/* Search results - ensure scrollable */}
+                  <div className="overflow-y-auto flex-1 custom-scrollbar mb-4 min-h-[150px]"> {/* Added min-height */}
                     {modalLoading ? (
                       <div className="text-center py-6">
-                        <Loader className="w-6 h-6 animate-spin text-orange-500 mx-auto" />
-                        <p className="text-gray-600 dark:text-gray-400 mt-2">Searching apprenticeships...</p>
+                        <Loader className="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-orange-500 mx-auto" />
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Searching...</p>
                       </div>
                     ) : directSearchQuery && modalVacancies.length > 0 ? (
                       <div>
-                        <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Search Results</h4>
+                        <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2 px-1">Search Results</h4>
                         {modalVacancies.map((vacancy) => (
-                          <div
-                            key={vacancy.id}
-                            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-4 flex items-start justify-between"
+                           <div
+                             key={vacancy.id}
+                              className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-3 sm:mb-4 flex items-center justify-between gap-2" // Adjusted padding/gap
                           >
-                            <div>
+                            <div className="flex-grow min-w-0"> {/* Added min-w-0 */}
                               <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                                 {vacancy.title}
                               </h4>
-                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                              <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                                 {vacancy.employerName} • {vacancy.address?.addressLine3 || 'N/A'}
                               </p>
                             </div>
                             <button
                               onClick={() => addFromSearch(vacancy)}
                               disabled={isApprenticeshipTracked(vacancy)}
-                              className={`ml-4 p-2 rounded-lg transition-colors ${
+                               className={`ml-2 sm:ml-4 p-1.5 sm:p-2 rounded-lg transition-colors flex-shrink-0 ${ // Adjusted padding/margin
                                 isApprenticeshipTracked(vacancy)
                                   ? 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                                   : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30'
                               }`}
                               title={isApprenticeshipTracked(vacancy) ? 'Already in tracker' : 'Add to tracker'}
                             >
-                              <Plus className="w-5 h-5" />
+                              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                             </button>
                           </div>
                         ))}
+                        {/* Basic Pagination (Optional for Modal) */}
+                        {modalTotal > MODAL_ITEMS_PER_PAGE && !directSearchQuery && (
+                            <div className="flex justify-center mt-4 text-sm">
+                                <button
+                                    onClick={() => setModalPage(p => Math.max(1, p - 1))}
+                                    disabled={modalPage === 1}
+                                    className="px-3 py-1 border rounded-l disabled:opacity-50"
+                                >Prev</button>
+                                <span className="px-3 py-1 border-t border-b">Page {modalPage} of {Math.ceil(modalTotal / MODAL_ITEMS_PER_PAGE)}</span>
+                                <button
+                                    onClick={() => setModalPage(p => Math.min(Math.ceil(modalTotal / MODAL_ITEMS_PER_PAGE), p + 1))}
+                                    disabled={modalPage * MODAL_ITEMS_PER_PAGE >= modalTotal}
+                                    className="px-3 py-1 border rounded-r disabled:opacity-50"
+                                >Next</button>
+                            </div>
+                        )}
                       </div>
                     ) : directSearchQuery ? (
-                      <div className="text-center py-8 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30">
-                        <AlertCircle className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-                        <p className="text-gray-700 dark:text-gray-300 font-medium">No apprenticeships found</p>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 max-w-md mx-auto">
-                          We couldn't find any apprenticeships matching "{directSearchQuery}"
+                      <div className="text-center py-6 sm:py-8 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30">
+                        <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-gray-500 mx-auto mb-2" />
+                        <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-medium">No results found</p>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs sm:max-w-md mx-auto">
+                          Try adjusting your search or add manually.
                         </p>
                         <button
                           onClick={() => setShowManualEntryForm(true)}
-                          className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors"
+                          className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors text-sm"
                         >
                           Add Manually
                         </button>
                       </div>
                     ) : (
-                      <div className="text-center py-8 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-                        <Search className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-gray-500 dark:text-gray-400">
-                          Search for an apprenticeship by name
+                      <div className="text-center py-6 sm:py-8 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                        <Search className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Search by name or add manually
                         </p>
+                         <button
+                          onClick={() => setShowManualEntryForm(true)}
+                          className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors text-sm"
+                        >
+                          <Plus className="w-4 h-4 mr-1 inline"/> Add Manually
+                        </button>
                       </div>
                     )}
                   </div>
 
-                  {/* "Not finding what you're looking for" section - only show when search has results */}
-                  {!modalLoading && directSearchQuery && modalVacancies.length > 0 && (
-                    <div className="mt-2 mb-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <p className="text-gray-700 dark:text-gray-300 text-center font-medium">
-                        Not finding what you're looking for?
-                      </p>
-                      <button
-                        onClick={() => setShowManualEntryForm(true)}
-                        className="mt-2 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors flex items-center justify-center"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Manually
-                      </button>
-                    </div>
-                  )}
+                   {/* "Not finding what you're looking for" section */}
+                  {/* Removed condition: !modalLoading && directSearchQuery && modalVacancies.length > 0 */}
+                  {/* Show always if not in manual mode */}
+                   {!showManualEntryForm && (
+                        <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+                            <p className="text-gray-700 dark:text-gray-300 text-center text-sm font-medium mb-2">
+                                Can't find it?
+                            </p>
+                            <button
+                                onClick={() => setShowManualEntryForm(true)}
+                                className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors flex items-center justify-center text-sm"
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add Manually
+                            </button>
+                        </div>
+                    )}
                 </>
               ) : (
                 <>
-                  {/* Manual entry form */}
-                  <div className="mb-4">
-                    <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  {/* Manual entry form - Ensure scroll */}
+                  <div className="mb-4 overflow-y-auto flex-1 custom-scrollbar">
+                    <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-3">
                       Enter Apprenticeship Details
                     </h4>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       <div>
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Apprenticeship Title <span className="text-red-500">*</span>
+                         <label htmlFor="title" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Title <span className="text-red-500">*</span>
                         </label>
                         <input
                           id="title"
                           type="text"
                           value={manualEntryData.title}
                           onChange={(e) => setManualEntryData({...manualEntryData, title: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white"
-                          placeholder="e.g. Software Development Apprenticeship"
+                           className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white text-sm sm:text-base"
+                          placeholder="e.g. Software Dev Apprenticeship"
                           required
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                         <label htmlFor="company" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Company <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -900,14 +958,14 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                           type="text"
                           value={manualEntryData.company}
                           onChange={(e) => setManualEntryData({...manualEntryData, company: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white"
+                           className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white text-sm sm:text-base"
                           placeholder="e.g. Tech Solutions Ltd"
                           required
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                         <label htmlFor="location" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Location
                         </label>
                         <input
@@ -915,13 +973,13 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                           type="text"
                           value={manualEntryData.location}
                           onChange={(e) => setManualEntryData({...manualEntryData, location: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white"
-                          placeholder="e.g. London"
+                          className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white text-sm sm:text-base"
+                          placeholder="e.g. London / Remote"
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                         <label htmlFor="notes" className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Notes
                         </label>
                         <textarea
@@ -929,8 +987,8 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                           rows={3}
                           value={manualEntryData.notes}
                           onChange={(e) => setManualEntryData({...manualEntryData, notes: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white resize-none"
-                          placeholder="Any additional information about this apprenticeship"
+                           className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white resize-none text-sm sm:text-base"
+                          placeholder="e.g., Application deadline, contact person..."
                         />
                       </div>
                     </div>
@@ -938,17 +996,20 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                 </>
               )}
 
-              {/* Footer buttons */}
-              <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+              {/* Responsive Footer Buttons */}
+              <div className={`flex flex-col sm:flex-row ${showManualEntryForm ? 'justify-between' : 'justify-end'} items-center mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0 gap-3`}>
                 <button
                   onClick={() => {
                     if (showManualEntryForm) {
                       setShowManualEntryForm(false);
+                      // Reset search results when going back? Optional.
+                      // setDirectSearchQuery('');
+                      // setModalVacancies([]);
                     } else {
                       setShowAddModal(false);
                     }
                   }}
-                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors w-full sm:w-auto text-sm" // Full width on mobile
                 >
                   {showManualEntryForm ? 'Back to Search' : 'Cancel'}
                 </button>
@@ -956,10 +1017,10 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                 {showManualEntryForm && (
                   <button
                     onClick={handleManualEntrySubmit}
-                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors"
+                     className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors w-full sm:w-auto flex items-center justify-center text-sm" // Full width on mobile
                   >
                     <Save className="w-4 h-4 mr-2 inline-block" />
-                    Save Apprenticeship
+                    Save Manually
                   </button>
                 )}
               </div>
@@ -967,6 +1028,29 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
           </div>
         )}
       </div>
+        {/* Notification Area */}
+      <AnimatePresence>
+        {notification.show && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            className="fixed bottom-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm w-full"
+            style={{
+              backgroundColor: notification.type === 'success' ? '#10B981' : notification.type === 'error' ? '#EF4444' : '#3B82F6', // Green, Red, Blue
+              color: 'white',
+            }}
+          >
+             <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">{notification.message}</span>
+                <button onClick={() => setNotification(prev => ({ ...prev, show: false }))} className="ml-2 p-1 rounded-full hover:bg-black/10">
+                    <X className="w-4 h-4" />
+                </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
@@ -984,15 +1068,17 @@ const CVOptimizerSection: React.FC<CVOptimizerSectionProps> = ({ score }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="mb-10"
+      className="mb-8 md:mb-10" // Adjusted margin
     >
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase mb-4">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white uppercase mb-4">
         YOUR LATEST CV SCORE
       </h2>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-6">
-          <div className="relative w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0">
+       {/* Responsive Layout */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6"> {/* Adjusted padding/gap */}
+         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full md:w-auto"> {/* Stack vertically on mobile */}
+           {/* Responsive SVG Size */}
+           <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 flex-shrink-0"> {/* Adjusted size */}
             <svg className="w-full h-full" viewBox="0 0 100 100">
               <defs>
                 <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -1021,12 +1107,13 @@ const CVOptimizerSection: React.FC<CVOptimizerSectionProps> = ({ score }) => {
                 animate={{ strokeDashoffset: 100 - cvScore }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
               />
+               {/* Responsive Text Size */}
               <motion.text
                 x="50"
                 y="50"
                 textAnchor="middle"
                 dy="0.3em"
-                className="text-2xl sm:text-3xl font-bold fill-gray-900 dark:fill-white"
+                className="text-2xl sm:text-3xl font-bold fill-gray-900 dark:fill-white" // Adjusted size
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
@@ -1035,7 +1122,7 @@ const CVOptimizerSection: React.FC<CVOptimizerSectionProps> = ({ score }) => {
                 <tspan
                   x="50"
                   dy="1.2em"
-                  className="text-sm sm:text-base font-medium fill-gray-500 dark:fill-gray-400"
+                  className="text-xs sm:text-sm md:text-base font-medium fill-gray-500 dark:fill-gray-400" // Adjusted size
                 >
                   /100
                 </tspan>
@@ -1043,30 +1130,31 @@ const CVOptimizerSection: React.FC<CVOptimizerSectionProps> = ({ score }) => {
             </svg>
           </div>
 
-          <div className="flex-grow">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">
+          <div className="flex-grow text-center sm:text-left">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">
               Improve Your CV Score
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Get AI-powered recommendations to optimize your CV for specific apprenticeships.
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Get AI recommendations to optimize your CV.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+         {/* Responsive Buttons - Stack on mobile */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
           <Link
             href="/optimise-cv/history"
-            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center whitespace-nowrap w-full md:w-auto"
+            className="px-5 py-2.5 sm:px-6 sm:py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center whitespace-nowrap w-full md:w-auto text-sm sm:text-base" // Full width on mobile
           >
-            <FileText className="w-5 h-5 mr-2" />
-            View Past Optimisations
+            <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2" /> {/* Adjusted icon size */}
+            View History
           </Link>
           <Link
             href="/optimise-cv"
-            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center whitespace-nowrap w-full md:w-auto"
+            className="px-5 py-2.5 sm:px-6 sm:py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center whitespace-nowrap w-full md:w-auto text-sm sm:text-base" // Full width on mobile
           >
-            <Upload className="w-5 h-5 mr-2" />
-            Optimise CV
+            <Upload className="w-4 h-4 sm:w-5 sm:h-5 mr-2" /> {/* Adjusted icon size */}
+            Optimise Now
           </Link>
         </div>
       </div>
@@ -1076,43 +1164,44 @@ const CVOptimizerSection: React.FC<CVOptimizerSectionProps> = ({ score }) => {
 
 // Article card component to display recommended resources
 const ArticleCard = ({ article }: { article: any }) => (
-  <Link key={article.id} href={article.slug} className="group">
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg overflow-hidden transition-all duration-300 border border-gray-100 dark:border-gray-700">
+  <Link key={article.id} href={article.slug} className="group block"> {/* Ensure block for layout */}
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg overflow-hidden transition-all duration-300 border border-gray-100 dark:border-gray-700 h-full flex flex-col"> {/* Ensure full height */}
       {article.image && (
-        <div className="relative h-48 w-full">
+        <div className="relative h-40 sm:h-48 w-full flex-shrink-0"> {/* Adjusted height */}
           <img
             src={article.image}
             alt={article.title}
             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
           />
           {article.featured && (
-            <div className="absolute top-3 right-3 bg-orange-500 text-white rounded-full p-1.5 shadow-md">
-              <Star className="w-4 h-4" />
+            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-orange-500 text-white rounded-full p-1 sm:p-1.5 shadow-md"> {/* Adjusted position/padding */}
+              <Star className="w-3 h-3 sm:w-4 sm:h-4" /> {/* Adjusted icon size */}
             </div>
           )}
         </div>
       )}
-      <div className="p-6">
+      <div className="p-4 sm:p-6 flex flex-col flex-grow"> {/* Adjusted padding, flex-grow */}
         <div className="flex flex-wrap gap-2 mb-3">
-          <span className="inline-block px-3 py-1 text-sm font-medium text-orange-700 bg-orange-50 dark:bg-orange-900/30 dark:text-orange-300 rounded-full">
+          <span className="inline-block px-2.5 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm font-medium text-orange-700 bg-orange-50 dark:bg-orange-900/30 dark:text-orange-300 rounded-full"> {/* Adjusted padding/text size */}
             {article.category}
           </span>
-          <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full">
-            <Clock className="w-3.5 h-3.5 mr-1" />
-            {article.readTime || "5 min read"}
+          <span className="inline-flex items-center px-2.5 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm font-medium text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full"> {/* Adjusted padding/text size */}
+            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1" /> {/* Adjusted icon size */}
+            {article.readTime || "5 min"} {/* Shorter text */}
           </span>
         </div>
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-orange-500 transition-colors line-clamp-2">
+         {/* Responsive Title Size */}
+        <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-orange-500 transition-colors line-clamp-2 flex-grow"> {/* Adjusted size, flex-grow */}
           {article.title}
         </h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
           {article.description || `Gain insights and tips about ${article.category.toLowerCase()} to enhance your apprenticeship journey.`}
         </p>
-        <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-auto pt-2 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center"> {/* mt-auto pushes to bottom */}
+          <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
             {article.date}
           </span>
-          <span className="inline-flex items-center text-orange-500 font-medium group-hover:translate-x-1 transition-transform">
+          <span className="inline-flex items-center text-orange-500 font-medium group-hover:translate-x-1 transition-transform text-sm">
             Read more
             <ChevronRight className="w-4 h-4 ml-1" />
           </span>
@@ -1136,32 +1225,34 @@ const RecommendedArticlesSection = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
-      className="mb-10"
+      className="mb-8 md:mb-10" // Adjusted margin
     >
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase mb-4">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white uppercase mb-4">
         RECOMMENDED RESOURCES
       </h2>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          <div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
-              Curated Content for Your Journey
+       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6"> {/* Adjusted padding */}
+         {/* Responsive Header */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-3 md:gap-4">
+          <div className="flex-grow">
+             <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-1">
+              Curated For Your Journey
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Explore resources to help you succeed in your apprenticeship path.
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Explore resources to help you succeed.
             </p>
           </div>
           <Link
             href="/resources"
-            className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center flex-shrink-0"
+             className="px-4 py-2 sm:px-5 sm:py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center flex-shrink-0 w-full md:w-auto text-sm sm:text-base" // Full width on mobile
           >
             View All Resources
             <ChevronRight className="w-4 h-4 ml-1" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+         {/* Responsive Grid */}
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"> {/* Adjusted gap */}
           {articlesWithFeatures.map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}
@@ -1211,8 +1302,9 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) 
   }, [userData?.id]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-      <div className="mb-10">
+    // Adjusted padding for overall container
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+      <div className="mb-8 md:mb-10"> {/* Adjusted margin */}
         <GreetingSection name={userData.name} />
       </div>
 
