@@ -7,7 +7,7 @@ import {
   User, Edit2, Settings, Award, BookOpen, Bell, Clock, ExternalLink,
   Check, X, Save, ChevronRight, ToggleLeft, ToggleRight, Upload,
   MapPin, Calendar, Briefcase, Building, GraduationCap, Plus, Trash2, FileText,
-  Loader, Search, AlertCircle
+  Loader, Search, AlertCircle, Star,
 } from 'lucide-react';
 import { SupabaseUserProfile } from '@/types/auth';
 import { Analytics } from '@/services/analytics/analytics';
@@ -79,7 +79,8 @@ const recommendedArticles = [
     image: 'https://cdn.apprenticewatch.com/resources/articles/research-companies.png',
     readTime: '7 min',
     date: '20 March 2025',
-    slug: '/resources/ace-your-apprenticeship-interview'
+    slug: '/resources/ace-your-apprenticeship-interview',
+    description: 'Learn how to effectively research companies to find the best apprenticeship opportunities.'
   },
   {
     id: 'art-2',
@@ -88,7 +89,8 @@ const recommendedArticles = [
     image: 'https://cdn.apprenticewatch.com/resources/articles/cv-guide.png',
     readTime: '10 min',
     date: '15 March 2025',
-    slug: '/resources/cv-guide'
+    slug: '/resources/cv-guide',
+    description: 'Discover tips and tricks to craft a CV that stands out to employers.'
   },
   {
     id: 'art-3',
@@ -97,7 +99,8 @@ const recommendedArticles = [
     image: 'https://cdn.apprenticewatch.com/resources/articles/work-experience.png',
     readTime: '5 min',
     date: '10 March 2025',
-    slug: '/resources/online-assessments'
+    slug: '/resources/online-assessments',
+    description: 'A comprehensive guide to applying for work experience as a student.'
   }
 ];
 
@@ -163,6 +166,19 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
   const [modalPage, setModalPage] = useState(1);
   const [modalLoading, setModalLoading] = useState(false);
   const MODAL_ITEMS_PER_PAGE = 5;
+
+  // New state for manual entry
+  const [showManualEntryForm, setShowManualEntryForm] = useState(false);
+  const [manualEntryData, setManualEntryData] = useState({
+    title: '',
+    company: '',
+    location: '',
+    notes: ''
+  });
+
+  // New state for direct search
+  const [directSearchQuery, setDirectSearchQuery] = useState('');
+  const [isDirectSearching, setIsDirectSearching] = useState(false);
 
   // Fetch tracked apprenticeships from Supabase
   useEffect(() => {
@@ -235,6 +251,20 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       if (timeout) clearTimeout(timeout);
     };
   }, [notification.show]);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!showAddModal) {
+      setShowManualEntryForm(false);
+      setManualEntryData({
+        title: '',
+        company: '',
+        location: '',
+        notes: ''
+      });
+      setDirectSearchQuery('');
+    }
+  }, [showAddModal]);
 
   // Show notification helper
   const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -398,6 +428,75 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       Analytics.event('apprenticeship_tracker', 'delete_apprenticeship');
     } catch (error) {
       showNotification('Failed to remove apprenticeship', 'error');
+    }
+  };
+
+  // New function to handle direct search
+  const handleDirectSearch = async () => {
+    if (!directSearchQuery.trim()) {
+      setModalVacancies([]);
+      setModalTotal(0);
+      return;
+    }
+
+    setIsDirectSearching(true);
+    setModalLoading(true);
+
+    try {
+      const { vacancies, total } = await vacancyService.getVacancies({
+        page: 1,
+        pageSize: 10,
+        filters: { search: directSearchQuery }
+      });
+
+      setModalVacancies(vacancies || []);
+      setModalTotal(total || 0);
+      Analytics.event('apprenticeship_tracker', 'direct_search', directSearchQuery);
+    } catch (error) {
+      console.error('Error searching apprenticeships:', error);
+      setModalVacancies([]);
+      setModalTotal(0);
+      showNotification('Failed to search apprenticeships', 'error');
+    } finally {
+      setIsDirectSearching(false);
+      setModalLoading(false);
+    }
+  };
+
+  // New function to handle manual entry submission
+  const handleManualEntrySubmit = async () => {
+    if (!manualEntryData.title || !manualEntryData.company) {
+      showNotification('Title and company are required', 'error');
+      return;
+    }
+
+    try {
+      const created = await apprenticeshipProgressService.addProgress(userId, {
+        vacancy_id: `manual-${Date.now()}`, // Add a generated vacancy_id for manual entries
+        vacancy_title: manualEntryData.title,
+        vacancy_company: manualEntryData.company,
+        location: manualEntryData.location || 'Not specified',
+        applied_to: new Date().toISOString(),
+        status: 'Applied',
+        notes: manualEntryData.notes,
+      });
+
+      if (created) {
+        setApprenticeships(prev => [created, ...prev]);
+        setActiveApprenticeship(created.id);
+        setShowAddModal(false);
+        setShowManualEntryForm(false);
+        setManualEntryData({
+          title: '',
+          company: '',
+          location: '',
+          notes: ''
+        });
+        showNotification('Apprenticeship added successfully!', 'success');
+        Analytics.event('apprenticeship_tracker', 'add_manual_entry');
+      }
+    } catch (error) {
+      showNotification('Failed to add apprenticeship', 'error');
     }
   };
 
@@ -654,78 +753,215 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
 
         {showAddModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg max-w-3xl w-full">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Apprenticeship</h3>
-              <div className="mb-4">
-                <ListingsFilter
-                  onFilterChange={(filters) => setModalFilters(filters)}
-                  initialFilters={modalFilters}
-                />
-              </div>
-              <div className="overflow-y-auto max-h-96 custom-scrollbar">
-                {modalLoading ? (
-                  <div className="text-center py-6">
-                    <Loader className="w-6 h-6 animate-spin text-orange-500 mx-auto" />
-                    <p className="text-gray-600 dark:text-gray-400 mt-2">Loading apprenticeships...</p>
-                  </div>
-                ) : modalVacancies.length > 0 ? (
-                  modalVacancies.map((vacancy) => (
-                    <div
-                      key={vacancy.id}
-                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-4 flex items-start justify-between"
-                    >
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                          {vacancy.title}
-                        </h4>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {vacancy.employerName} • {vacancy.address?.addressLine3 || 'N/A'}
-                        </p>
+
+              {!showManualEntryForm ? (
+                <>
+                  {/* Direct search input */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          placeholder="Search for an apprenticeship..."
+                          value={directSearchQuery}
+                          onChange={(e) => setDirectSearchQuery(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleDirectSearch()}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white"
+                        />
+                        {isDirectSearching && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <Loader className="w-4 h-4 animate-spin text-orange-500" />
+                          </div>
+                        )}
                       </div>
                       <button
-                        onClick={() => addFromSearch(vacancy)}
-                        disabled={isApprenticeshipTracked(vacancy)}
-                        className={`ml-4 p-2 rounded-lg transition-colors ${
-                          isApprenticeshipTracked(vacancy)
-                            ? 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                            : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30'
-                        }`}
-                        title={isApprenticeshipTracked(vacancy) ? 'Already in tracker' : 'Add to tracker'}
+                        onClick={handleDirectSearch}
+                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors flex items-center"
                       >
-                        <Plus className="w-5 h-5" />
+                        <Search className="w-4 h-4 mr-1" />
+                        Search
                       </button>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-6">
-                    <AlertCircle className="w-6 h-6 text-gray-500 mx-auto" />
-                    <p className="text-gray-600 dark:text-gray-400 mt-2">No apprenticeships found.</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-1">
+                      Enter the exact name of the apprenticeship you're looking for
+                    </p>
                   </div>
-                )}
-              </div>
-              <div className="flex justify-between items-center mt-4">
+
+                  {/* Search results */}
+                  <div className="overflow-y-auto flex-1 custom-scrollbar mb-4">
+                    {modalLoading ? (
+                      <div className="text-center py-6">
+                        <Loader className="w-6 h-6 animate-spin text-orange-500 mx-auto" />
+                        <p className="text-gray-600 dark:text-gray-400 mt-2">Searching apprenticeships...</p>
+                      </div>
+                    ) : directSearchQuery && modalVacancies.length > 0 ? (
+                      <div>
+                        <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Search Results</h4>
+                        {modalVacancies.map((vacancy) => (
+                          <div
+                            key={vacancy.id}
+                            className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30 mb-4 flex items-start justify-between"
+                          >
+                            <div>
+                              <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                {vacancy.title}
+                              </h4>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {vacancy.employerName} • {vacancy.address?.addressLine3 || 'N/A'}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => addFromSearch(vacancy)}
+                              disabled={isApprenticeshipTracked(vacancy)}
+                              className={`ml-4 p-2 rounded-lg transition-colors ${
+                                isApprenticeshipTracked(vacancy)
+                                  ? 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                  : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/30'
+                              }`}
+                              title={isApprenticeshipTracked(vacancy) ? 'Already in tracker' : 'Add to tracker'}
+                            >
+                              <Plus className="w-5 h-5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : directSearchQuery ? (
+                      <div className="text-center py-8 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/30">
+                        <AlertCircle className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                        <p className="text-gray-700 dark:text-gray-300 font-medium">No apprenticeships found</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 max-w-md mx-auto">
+                          We couldn't find any apprenticeships matching "{directSearchQuery}"
+                        </p>
+                        <button
+                          onClick={() => setShowManualEntryForm(true)}
+                          className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors"
+                        >
+                          Add Manually
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                        <Search className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Search for an apprenticeship by name
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* "Not finding what you're looking for" section - only show when search has results */}
+                  {!modalLoading && directSearchQuery && modalVacancies.length > 0 && (
+                    <div className="mt-2 mb-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-gray-700 dark:text-gray-300 text-center font-medium">
+                        Not finding what you're looking for?
+                      </p>
+                      <button
+                        onClick={() => setShowManualEntryForm(true)}
+                        className="mt-2 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors flex items-center justify-center"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Manually
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* Manual entry form */}
+                  <div className="mb-4">
+                    <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Enter Apprenticeship Details
+                    </h4>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Apprenticeship Title <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="title"
+                          type="text"
+                          value={manualEntryData.title}
+                          onChange={(e) => setManualEntryData({...manualEntryData, title: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white"
+                          placeholder="e.g. Software Development Apprenticeship"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Company <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="company"
+                          type="text"
+                          value={manualEntryData.company}
+                          onChange={(e) => setManualEntryData({...manualEntryData, company: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white"
+                          placeholder="e.g. Tech Solutions Ltd"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Location
+                        </label>
+                        <input
+                          id="location"
+                          type="text"
+                          value={manualEntryData.location}
+                          onChange={(e) => setManualEntryData({...manualEntryData, location: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white"
+                          placeholder="e.g. London"
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Notes
+                        </label>
+                        <textarea
+                          id="notes"
+                          rows={3}
+                          value={manualEntryData.notes}
+                          onChange={(e) => setManualEntryData({...manualEntryData, notes: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-white resize-none"
+                          placeholder="Any additional information about this apprenticeship"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Footer buttons */}
+              <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => {
+                    if (showManualEntryForm) {
+                      setShowManualEntryForm(false);
+                    } else {
+                      setShowAddModal(false);
+                    }
+                  }}
                   className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 >
-                  Cancel
+                  {showManualEntryForm ? 'Back to Search' : 'Cancel'}
                 </button>
-                <div className="flex items-center space-x-2">
+
+                {showManualEntryForm && (
                   <button
-                    disabled={modalPage === 1}
-                    onClick={() => setModalPage((prev) => Math.max(prev - 1, 1))}
-                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleManualEntrySubmit}
+                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors"
                   >
-                    Previous
+                    <Save className="w-4 h-4 mr-2 inline-block" />
+                    Save Apprenticeship
                   </button>
-                  <button
-                    disabled={modalPage * MODAL_ITEMS_PER_PAGE >= modalTotal}
-                    onClick={() => setModalPage((prev) => prev + 1)}
-                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -817,13 +1053,119 @@ const CVOptimizerSection: React.FC<CVOptimizerSectionProps> = ({ score }) => {
           </div>
         </div>
 
-        <Link
-          href="/optimise-cv"
-          className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center whitespace-nowrap w-full md:w-auto"
-        >
-          <Upload className="w-5 h-5 mr-2" />
-          Optimise CV
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <Link
+            href="/optimise-cv/history"
+            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center whitespace-nowrap w-full md:w-auto"
+          >
+            <FileText className="w-5 h-5 mr-2" />
+            View Past Optimisations
+          </Link>
+          <Link
+            href="/optimise-cv"
+            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center whitespace-nowrap w-full md:w-auto"
+          >
+            <Upload className="w-5 h-5 mr-2" />
+            Optimise CV
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Article card component to display recommended resources
+const ArticleCard = ({ article }: { article: any }) => (
+  <Link key={article.id} href={article.slug} className="group">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg overflow-hidden transition-all duration-300 border border-gray-100 dark:border-gray-700">
+      {article.image && (
+        <div className="relative h-48 w-full">
+          <img
+            src={article.image}
+            alt={article.title}
+            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+          />
+          {article.featured && (
+            <div className="absolute top-3 right-3 bg-orange-500 text-white rounded-full p-1.5 shadow-md">
+              <Star className="w-4 h-4" />
+            </div>
+          )}
+        </div>
+      )}
+      <div className="p-6">
+        <div className="flex flex-wrap gap-2 mb-3">
+          <span className="inline-block px-3 py-1 text-sm font-medium text-orange-700 bg-orange-50 dark:bg-orange-900/30 dark:text-orange-300 rounded-full">
+            {article.category}
+          </span>
+          <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full">
+            <Clock className="w-3.5 h-3.5 mr-1" />
+            {article.readTime || "5 min read"}
+          </span>
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-orange-500 transition-colors line-clamp-2">
+          {article.title}
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+          {article.description || `Gain insights and tips about ${article.category.toLowerCase()} to enhance your apprenticeship journey.`}
+        </p>
+        <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {article.date}
+          </span>
+          <span className="inline-flex items-center text-orange-500 font-medium group-hover:translate-x-1 transition-transform">
+            Read more
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </span>
+        </div>
+      </div>
+    </div>
+  </Link>
+);
+
+// Section for recommended articles
+const RecommendedArticlesSection = () => {
+  // Map and enhance the existing recommendedArticles with additional properties
+  const articlesWithFeatures = recommendedArticles.map((article, index) => ({
+    ...article,
+    featured: index === 0, // Make the first article featured
+    description: article.description || `Discover valuable insights and practical advice about ${article.category.toLowerCase()} to boost your apprenticeship journey.`
+  }));
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 }}
+      className="mb-10"
+    >
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase mb-4">
+        RECOMMENDED RESOURCES
+      </h2>
+
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+              Curated Content for Your Journey
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              Explore resources to help you succeed in your apprenticeship path.
+            </p>
+          </div>
+          <Link
+            href="/resources"
+            className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center flex-shrink-0"
+          >
+            View All Resources
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {articlesWithFeatures.map((article) => (
+            <ArticleCard key={article.id} article={article} />
+          ))}
+        </div>
       </div>
     </motion.div>
   );
@@ -832,9 +1174,6 @@ const CVOptimizerSection: React.FC<CVOptimizerSectionProps> = ({ score }) => {
 export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) => {
   const [cvOptimizations, setCvOptimizations] = useState<CVOptimization[]>([]);
   const [isLoadingOptimizations, setIsLoadingOptimizations] = useState(true);
-  const [visibleOptimizations, setVisibleOptimizations] = useState(3);
-  const [hasMoreOptimizations, setHasMoreOptimizations] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [latestCvScore, setLatestCvScore] = useState<number>(0);
 
   useEffect(() => {
@@ -854,17 +1193,14 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) 
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
           setCvOptimizations(sortedOptimizations);
-          setHasMoreOptimizations(sortedOptimizations.length > visibleOptimizations);
           setLatestCvScore(sortedOptimizations[0]?.overall_score ?? 0);
         } else {
           setCvOptimizations([]);
-          setHasMoreOptimizations(false);
           setLatestCvScore(0);
         }
       } catch (error) {
         logger.error('Failed to fetch CV optimizations history:', error);
         setCvOptimizations([]);
-        setHasMoreOptimizations(false);
         setLatestCvScore(0);
       } finally {
         setIsLoadingOptimizations(false);
@@ -874,22 +1210,6 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) 
     fetchCvOptimizations();
   }, [userData?.id]);
 
-  useEffect(() => {
-    setHasMoreOptimizations(cvOptimizations.length > visibleOptimizations);
-  }, [cvOptimizations, visibleOptimizations]);
-
-  const handleLoadMore = () => {
-    setIsLoadingMore(true);
-    setTimeout(() => {
-      setVisibleOptimizations(prev => prev + 3);
-      setIsLoadingMore(false);
-    }, 300);
-  };
-
-  const displayedOptimizations = React.useMemo(() => {
-    return cvOptimizations.slice(0, visibleOptimizations);
-  }, [cvOptimizations, visibleOptimizations]);
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       <div className="mb-10">
@@ -898,141 +1218,9 @@ export const ProfileDashboard: React.FC<ProfileDashboardProps> = ({ userData }) 
 
       <CVOptimizerSection score={latestCvScore} />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="mb-10"
-      >
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white uppercase mb-4">
-          YOUR CV HISTORY
-        </h2>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">
-                Previous CV Optimisations
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">
-                Review your past CV optimisation scores and feedback.
-              </p>
-            </div>
-            <Link
-              href="/optimise-cv"
-              className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center flex-shrink-0"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Optimize New CV
-            </Link>
-          </div>
-
-          {isLoadingOptimizations && (
-            <div className="text-center py-12">
-              <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">Loading CV history...</p>
-            </div>
-          )}
-
-          {!isLoadingOptimizations && cvOptimizations.length === 0 && (
-            <div className="text-center py-12 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
-              <div className="w-16 h-16 bg-orange-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-8 h-8 text-orange-500" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                No CV Optimisations Yet
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
-                Optimize your CV with our AI tool to see your history here and improve your job prospects.
-              </p>
-              <Link
-                href="/optimise-cv"
-                className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg inline-flex items-center"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Optimize Your CV Now
-              </Link>
-            </div>
-          )}
-
-          {!isLoadingOptimizations && displayedOptimizations.length > 0 && (
-            <div className="space-y-4">
-              {displayedOptimizations.map((cv) => (
-                <div
-                  key={cv.id}
-                  className="p-4 md:p-6 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors flex flex-col sm:flex-row items-center justify-between gap-4"
-                >
-                  <div className="flex items-center gap-4 flex-grow w-full sm:w-auto">
-                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
-                      <svg className="w-full h-full" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" className="text-gray-200 dark:text-gray-700" strokeWidth="8" />
-                        <motion.circle
-                          cx="50" cy="50" r="45"
-                          fill="none"
-                          stroke={cv.overall_score >= 80 ? "#22c55e" : cv.overall_score >= 60 ? "#f97316" : "#ef4444"}
-                          strokeWidth="8" strokeLinecap="round"
-                          pathLength="100" strokeDasharray="100"
-                          strokeDashoffset={100 - cv.overall_score}
-                          transform="rotate(-90 50 50)"
-                          initial={{ strokeDashoffset: 100 }}
-                          animate={{ strokeDashoffset: 100 - cv.overall_score }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                        />
-                        <text x="50" y="50" textAnchor="middle" dy="0.3em" className="text-2xl sm:text-3xl font-bold fill-gray-900 dark:fill-white">
-                          {cv.overall_score}
-                        </text>
-                      </svg>
-                    </div>
-                    <div className="flex-grow min-w-0">
-                      <div className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        Optimised on:
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {new Date(cv.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-                        {' at '}
-                        {new Date(cv.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })}
-                      </div>
-                      {cv.job_description && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic line-clamp-1">
-                          For: {cv.job_description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <Link
-                    href={`/optimise-cv/history/${cv.id}`}
-                    className="px-4 py-2 text-sm font-medium text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/40 transition-colors flex items-center justify-center w-full sm:w-auto flex-shrink-0"
-                  >
-                    View Feedback
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Link>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!isLoadingOptimizations && hasMoreOptimizations && (
-            <div className="text-center mt-6">
-              <button
-                onClick={handleLoadMore}
-                disabled={isLoadingMore}
-                className="px-6 py-3 bg-orange-100 hover:bg-orange-200 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 text-orange-600 dark:text-orange-400 font-medium rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoadingMore ? (
-                  <div className="flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Loading...
-                  </div>
-                ) : (
-                  'Load More History'
-                )}
-              </button>
-            </div>
-          )}
-        </div>
-      </motion.div>
-
       <ApprenticeshipTrackerSection userId={userData.id} />
+
+      <RecommendedArticlesSection />
     </div>
   );
 };
