@@ -525,12 +525,29 @@ export function OnboardingFlow() {
               <div className="mt-8 flex justify-between">
                 {steps[currentStep].skippable && (
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       setError(null);
                       if (currentStep < steps.length - 1) {
                         setCurrentStep(currentStep + 1);
                       } else {
-                        setIsOpen(false);
+                        // Save all data when finishing with skip on the last step
+                        try {
+                          const dataToSave = {
+                            ...formData,
+                            preferred_sectors: formData.preferred_sectors.map(getDbCategory),
+                          };
+
+                          const { error: saveError } = await supabase
+                            .from("users")
+                            .update(dataToSave)
+                            .eq("id", userData?.id);
+
+                          if (saveError) throw saveError;
+                          setIsOpen(false);
+                        } catch (error) {
+                          console.error("Error saving preferences:", error);
+                          setError("Failed to save your preferences. Please try again.");
+                        }
                       }
                     }}
                     className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-500"

@@ -61,5 +61,8 @@
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": "20.12.2"
   }
 }
