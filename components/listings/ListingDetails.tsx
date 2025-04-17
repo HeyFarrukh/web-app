@@ -31,7 +31,7 @@ import {
 import { SiWhatsapp as WhatsApp } from "react-icons/si";
 import { ListingType } from "@/types/listing";
 import { formatDate } from "@/utils/dateUtils";
-import { companies } from "./companyData";
+import { employerService } from "@/services/supabase/employerService";
 import { Analytics } from "@/services/analytics/analytics";
 import { ListingMap } from "./ListingMap";
 import { useAuth } from "@/hooks/useAuth";
@@ -85,6 +85,7 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showDropdown, setShowDropdown] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const { isAuthenticated, userData } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -114,6 +115,18 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     };
     checkIfSaved();
   }, [userData, listing.slug]);
+
+  useEffect(() => {
+    const fetchEmployerLogo = async () => {
+      const employer = await employerService.getEmployerByName(listing.employerName);
+      if (employer?.is_verified && employer?.logo_url) {
+        setLogoUrl(employer.logo_url);
+      } else {
+        setLogoUrl(`https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`);
+      }
+    };
+    fetchEmployerLogo();
+  }, [listing.employerName]);
 
   const handleApplyClick = () => {
     if (typeof window !== "undefined") {
@@ -152,21 +165,6 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
     } catch (error) {
       console.error("Error toggling save status:", error);
     }
-  };
-
-  const getLogoUrl = (employerName: string) => {
-    const normalizedEmployerName = employerName.toLowerCase();
-    const company = companies.find(
-      (company) => company.name.toLowerCase() === normalizedEmployerName
-    );
-
-    if (company && company.domain) {
-      return `https://img.logo.dev/${company.domain}?token=${process.env.NEXT_PUBLIC_LOGODEV_KEY}`;
-    }
-
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      employerName
-    )}&background=random`;
   };
 
   const isValidString = (str: string | undefined | null): boolean => {
@@ -670,14 +668,12 @@ export const ListingDetails: React.FC<ListingDetailsProps> = ({ listing }) => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-start sm:space-x-4">
             <img
-              src={getLogoUrl(listing.employerName)}
+              src={logoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
               alt={listing.employerName}
-              className="w-16 h-16 rounded-lg object-contain bg-white mb-4 sm:mb-0"
+              className="w-24 h-24 rounded-xl object-contain bg-white"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  listing.employerName
-                )}&background=random`;
+                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`;
               }}
             />
             <div className="flex-1">
