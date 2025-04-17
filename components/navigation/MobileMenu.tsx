@@ -179,6 +179,14 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
 
                   <div className="space-y-2">
                     <Link
+                      href="/dashboard"
+                      className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl flex items-center space-x-3 transition-colors block"
+                      onClick={onClose}
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">My Dashboard</span>
+                    </Link>
+                    <Link
                       href="/saved-apprenticeships"
                       className="w-full px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl flex items-center space-x-3 transition-colors block"
                       onClick={onClose}
