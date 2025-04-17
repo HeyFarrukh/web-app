@@ -116,7 +116,7 @@ export const AuthGuard = ({
 
   if (isLoading || isCheckingAccess) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="relative bg-white/20 dark:bg-gray-800/20 backdrop-blur-md border border-white/30 dark:border-gray-700/40 p-12 rounded-2xl shadow-xl overflow-hidden">
           {/* Enhanced glass effect overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 dark:from-gray-800/10 dark:to-gray-800/5" />
@@ -152,7 +152,7 @@ export const AuthGuard = ({
 
   if (!hasAccess) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-orange-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="relative bg-white/20 dark:bg-gray-800/20 backdrop-blur-md border border-white/30 dark:border-gray-700/40 p-12 rounded-2xl shadow-xl overflow-hidden max-w-2xl">
           {/* Enhanced glass effect overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 dark:from-gray-800/10 dark:to-gray-800/5" />
