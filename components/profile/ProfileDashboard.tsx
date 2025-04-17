@@ -79,7 +79,7 @@ const recommendedArticles = [
     image: 'https://cdn.apprenticewatch.com/resources/articles/research-companies.png',
     readTime: '7 min',
     date: '20 March 2025',
-    slug: '/resources/ace-your-apprenticeship-interview',
+    slug: '/resources/how-to-research-companies',
     description: 'Learn how to effectively research companies to find the best apprenticeship opportunities.'
   },
   {
@@ -99,7 +99,7 @@ const recommendedArticles = [
     image: 'https://cdn.apprenticewatch.com/resources/articles/work-experience.png',
     readTime: '5 min',
     date: '10 March 2025',
-    slug: '/resources/online-assessments',
+    slug: '/resources/how-to-apply-for-work-experience',
     description: 'A comprehensive guide to applying for work experience as a student.'
   }
 ];
