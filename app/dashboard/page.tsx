@@ -12,7 +12,7 @@ export default function DashboardPage() {
   const { userData } = useAuth();
   
   useEffect(() => {
-    Analytics.event("page_view", "profile_dashboard");
+    Analytics.event("page_view", "user_dashboard");
   }, []);
 
   return (

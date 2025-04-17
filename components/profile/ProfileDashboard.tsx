@@ -330,7 +330,6 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
             : app
         ).sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()) // Re-sort after update
       );
-      showNotification('Apprenticeship updated successfully!', 'success');
     } catch (error) {
       showNotification('Failed to update apprenticeship', 'error');
     }
@@ -379,7 +378,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     try {
       const created = await apprenticeshipProgressService.addProgress(userId, newApp);
       if (created) {
-        setApprenticeships(prev => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
+        setApprenticeships((prev) => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
         setShowAddModal(false); // Close modal after adding
         showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
@@ -407,7 +406,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     try {
       const created = await apprenticeshipProgressService.addProgress(userId, newApp);
       if (created) {
-        setApprenticeships(prev => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
+        setApprenticeships((prev) => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
         // Maybe remove from saved list visually here if desired
         showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
@@ -927,7 +926,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                 </>
               ) : (
                 <>
-                  {/* Manual entry form - Ensure scroll */}
+                  {/* Manual entry form - Ensure scrollable */}
                   <div className="mb-4 overflow-y-auto flex-1 custom-scrollbar">
                     <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-3">
                       Enter Apprenticeship Details

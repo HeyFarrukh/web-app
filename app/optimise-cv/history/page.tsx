@@ -103,7 +103,7 @@ export default function CVHistoryPage() {
           className="mb-8"
         >
           <Link 
-            href="/profile/dashboard" 
+            href="/dashboard" 
             className="inline-flex items-center text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-orange-400 mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
