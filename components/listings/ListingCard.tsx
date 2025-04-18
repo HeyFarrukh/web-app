@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -14,6 +14,8 @@ import { ListingType } from "@/types/listing";
 import { formatDate } from "@/utils/dateUtils";
 import { employerService } from "@/services/supabase/employerService";
 import { SaveButton } from "./SaveButton";
+
+const logoCache = new Map<string, string>();
 
 interface ListingCardProps {
   listing: ListingType;
@@ -48,17 +50,40 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   };
 
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoLoading, setLogoLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEmployerLogo = async () => {
-      const employer = await employerService.getEmployerByName(listing.employerName);
-      if (employer?.is_verified && employer?.logo_url) {
-        setLogoUrl(employer.logo_url);
-      } else {
-        setLogoUrl(`https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`);
+    let isMounted = true;
+    const cacheKey = listing.employerName;
+
+    if (logoCache.has(cacheKey)) {
+      setLogoUrl(logoCache.get(cacheKey)!);
+      setLogoLoading(false);
+      return;
+    }
+
+    setLogoLoading(true);
+    (async () => {
+      try {
+        const employer = await employerService.getEmployerByName(listing.employerName);
+        let url;
+        if (employer?.is_verified && employer?.logo_url) {
+          url = employer.logo_url;
+        } else {
+          url = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`;
+        }
+        logoCache.set(cacheKey, url);
+        if (isMounted) {
+          setLogoUrl(url);
+        }
+      } finally {
+        if (isMounted) setLogoLoading(false);
       }
+    })();
+
+    return () => {
+      isMounted = false;
     };
-    fetchEmployerLogo();
   }, [listing.employerName]);
 
   const searchParams = useSearchParams();
@@ -103,15 +128,22 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       data-listing-id={listing.id}
     >
       <div className="flex items-start space-x-4">
-        <img
-          src={logoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
-          alt={listing.employerName}
-          className="w-16 h-16 rounded-lg object-contain bg-white"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`;
-          }}
-        />
+        <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center">
+          {logoLoading ? (
+            <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          ) : (
+            <img
+              src={logoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
+              alt={listing.employerName}
+              className="w-16 h-16 rounded-lg object-contain bg-white"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`;
+              }}
+            />
+          )}
+        </div>
         <div className="flex-1">
           <div className="flex justify-between items-start">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
