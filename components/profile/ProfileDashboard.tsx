@@ -18,7 +18,6 @@ import { vacancyService } from '@/services/supabase/vacancyService';
 import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
 import { ListingsFilter } from "@/components/listings/ListingsFilter";
 import { apprenticeshipProgressService } from '@/services/supabase/apprenticeshipProgressService';
-import { companies } from '../listings/companyData';
 
 const logger = createLogger({ module: 'ProfileDashboard' });
 
@@ -80,7 +79,7 @@ const recommendedArticles = [
     image: 'https://cdn.apprenticewatch.com/resources/articles/research-companies.png',
     readTime: '7 min',
     date: '20 March 2025',
-    slug: '/resources/ace-your-apprenticeship-interview',
+    slug: '/resources/how-to-research-companies',
     description: 'Learn how to effectively research companies to find the best apprenticeship opportunities.'
   },
   {
@@ -100,26 +99,10 @@ const recommendedArticles = [
     image: 'https://cdn.apprenticewatch.com/resources/articles/work-experience.png',
     readTime: '5 min',
     date: '10 March 2025',
-    slug: '/resources/online-assessments',
+    slug: '/resources/how-to-apply-for-work-experience',
     description: 'A comprehensive guide to applying for work experience as a student.'
   }
 ];
-
-// Helper function to get the company logo URL
-const getLogoUrl = (employerName: string) => {
-  const normalizedEmployerName = employerName.toLowerCase();
-  const company = companies.find(
-    (company) => company.name.toLowerCase() === normalizedEmployerName
-  );
-
-  if (company && company.domain) {
-    return `https://img.logo.dev/${company.domain}?token=${process.env.NEXT_PUBLIC_LOGODEV_KEY}`;
-  }
-
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    employerName
-  )}&background=random`;
-};
 
 // Component for the greeting section with user's name
 const GreetingSection: React.FC<{ name: string | null }> = ({ name }) => {
@@ -347,7 +330,6 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
             : app
         ).sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()) // Re-sort after update
       );
-      showNotification('Apprenticeship updated successfully!', 'success');
     } catch (error) {
       showNotification('Failed to update apprenticeship', 'error');
     }
@@ -396,7 +378,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     try {
       const created = await apprenticeshipProgressService.addProgress(userId, newApp);
       if (created) {
-        setApprenticeships(prev => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
+        setApprenticeships((prev) => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
         setShowAddModal(false); // Close modal after adding
         showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
@@ -424,7 +406,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
     try {
       const created = await apprenticeshipProgressService.addProgress(userId, newApp);
       if (created) {
-        setApprenticeships(prev => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
+        setApprenticeships((prev) => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
         // Maybe remove from saved list visually here if desired
         showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
@@ -579,15 +561,15 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                 <button
                   key={app.id}
                   onClick={() => setActiveApprenticeship(app.id)}
-                  className={`flex items-center space-x-2 sm:space-x-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm ${
+                  className={`flex items-center space-x-2 sm:space-x-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm ${ // Smaller padding/text on mobile
                     activeApprenticeship === app.id
                       ? 'bg-orange-500 text-white shadow-md'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/20'
                   }`}
                 >
-                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full flex-shrink-0 overflow-hidden">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full flex-shrink-0 overflow-hidden"> {/* Slightly smaller logo */}
                     <img
-                      src={getLogoUrl(app.vacancy_company || 'Unknown Company')}
+                      src={app.logo || '/assets/logos/default.svg'}
                       alt={app.vacancy_company || 'Company Logo'}
                       className="w-full h-full object-contain"
                       onError={(e) => {
@@ -595,14 +577,14 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                         target.onerror = null;
                         target.style.display = 'none';
                         const fallback = target.parentElement!.appendChild(document.createElement('div'));
-                        fallback.className = "w-full h-full flex items-center justify-center bg-orange-500 text-white font-bold text-xs sm:text-xs";
+                        fallback.className = "w-full h-full flex items-center justify-center bg-orange-500 text-white font-bold text-xs sm:text-xs"; // Keep text small
                         fallback.textContent = app.vacancy_company
                           ? app.vacancy_company.charAt(0).toUpperCase()
                           : '-';
                       }}
                     />
                   </div>
-                  <span className="truncate">{app.vacancy_title || 'Untitled Apprenticeship'}</span>
+                  <span className="font-medium truncate max-w-[150px] sm:max-w-[200px]">{app.vacancy_title || 'Untitled Apprenticeship'}</span> {/* Limit width */}
                 </button>
               ))}
             </div>
@@ -944,7 +926,7 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                 </>
               ) : (
                 <>
-                  {/* Manual entry form - Ensure scroll */}
+                  {/* Manual entry form - Ensure scrollable */}
                   <div className="mb-4 overflow-y-auto flex-1 custom-scrollbar">
                     <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-3">
                       Enter Apprenticeship Details

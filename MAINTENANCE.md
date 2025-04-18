@@ -88,6 +88,61 @@ Authentication is handled through Supabase Auth with Google OAuth integration.
    ```
 5. User profile is saved to Supabase and local storage
 
+### Using the AuthGuard Component
+
+The `AuthGuard` component provides role-based access control for protected pages. Here's how to use it:
+
+```typescript
+import { AuthGuard } from '@/components/auth/AuthGuard';
+
+// Basic usage with default settings
+<AuthGuard>
+  <YourProtectedComponent />
+</AuthGuard>
+
+// Advanced usage with all options
+<AuthGuard
+  allowedRoles={['admin', 'team']}           // Default: ['admin', 'team', 'beta']
+  pageTitle="Analytics Dashboard"            // Default: 'this page'
+  redirectPath="/custom-signin"              // Default: '/signin'
+  customDeniedMessage="Custom message here"  // Optional
+>
+  <YourProtectedComponent />
+</AuthGuard>
+```
+
+#### Props
+
+- `children`: React nodes to render when access is granted
+- `allowedRoles`: Array of roles that can access the content
+- `pageTitle`: Title used in the access denied message
+- `redirectPath`: Where to redirect unauthenticated users
+- `customDeniedMessage`: Override the default access denied message
+
+#### Features
+
+- Smooth loading animation with progress bar
+- Consistent gradient background matching the landing page
+- Clear access denied messages with ambassador program promotion
+- Automatic redirection for unauthenticated users
+- Dark mode support
+
+#### Example Implementation
+
+```typescript
+// In your page file
+export default function ProtectedPage() {
+  return (
+    <AuthGuard
+      allowedRoles={['admin']}
+      pageTitle="Admin Dashboard"
+    >
+      <AdminDashboard />
+    </AuthGuard>
+  );
+}
+```
+
 ## Logging System
 
 The application uses a structured logging system to ensure consistent error handling, debugging, and monitoring across all services.

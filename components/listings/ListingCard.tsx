@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { ListingType } from "@/types/listing";
 import { formatDate } from "@/utils/dateUtils";
-import { companies } from "./companyData";
+import { employerService } from "@/services/supabase/employerService";
 import { SaveButton } from "./SaveButton";
 
 interface ListingCardProps {
@@ -47,20 +47,19 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     return now > new Date(closingDate);
   };
 
-  const getLogoUrl = (employerName: string) => {
-    const normalizedEmployerName = employerName.toLowerCase();
-    const company = companies.find(
-      (company) => company.name.toLowerCase() === normalizedEmployerName
-    );
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
-    if (company && company.domain) {
-      return `https://img.logo.dev/${company.domain}?token=${process.env.NEXT_PUBLIC_LOGODEV_KEY}`;
-    }
-
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      employerName
-    )}&background=random`;
-  };
+  useEffect(() => {
+    const fetchEmployerLogo = async () => {
+      const employer = await employerService.getEmployerByName(listing.employerName);
+      if (employer?.is_verified && employer?.logo_url) {
+        setLogoUrl(employer.logo_url);
+      } else {
+        setLogoUrl(`https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`);
+      }
+    };
+    fetchEmployerLogo();
+  }, [listing.employerName]);
 
   const searchParams = useSearchParams();
   const currentPage = searchParams?.get("page") || "1";
@@ -105,14 +104,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     >
       <div className="flex items-start space-x-4">
         <img
-          src={getLogoUrl(listing.employerName)}
+          src={logoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
           alt={listing.employerName}
           className="w-16 h-16 rounded-lg object-contain bg-white"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              listing.employerName
-            )}&background=random`;
+            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`;
           }}
         />
         <div className="flex-1">

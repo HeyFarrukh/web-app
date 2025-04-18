@@ -2,9 +2,9 @@ import React from 'react';
 import { ListingDetails } from '@/components/listings/ListingDetails';
 import { ListingType } from '@/types/listing';
 import { vacancyService } from '@/services/supabase/vacancyService';
+import { employerService } from '@/services/supabase/employerService';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { companies } from '@/components/listings/companyData';
 
 export const dynamicParams = true;
 export const revalidate = 0; 
@@ -37,18 +37,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const expired = isExpired(listing.closingDate);
 
   // Helper function for logo URL (from both files)
-  const getLogoUrl = (employerName: string) => {
-    const normalizedEmployerName = employerName.toLowerCase();
-    const company = companies.find((company) =>
-      company.name.toLowerCase() === normalizedEmployerName
-    );
-
-    if (company && company.domain) {
-      return `https://img.logo.dev/${company.domain}?token=${process.env.NEXT_PUBLIC_LOGODEV_KEY}`;
+  const getLogoUrl = async (employerName: string) => {
+    const employer = await employerService.getEmployerByName(employerName);
+    if (employer?.is_verified && employer?.logo_url) {
+      return employer.logo_url;
     }
-
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(employerName)}&background=random`;
   };
+
+  // Get the logo URL for OpenGraph image
+  const logoUrl = await getLogoUrl(listing.employerName);
 
   // Helper function for formatting wage (consistent check)
   const formatWage = (wage: ListingType['wage']) => {
@@ -99,23 +97,25 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     ].filter(Boolean), 
 
     openGraph: {
-      title: `${listing.title} - Level ${listing.course.level} ${listing.course.route} Apprenticeship${expired ? " [EXPIRED]" : ""}`,
+      title: `${listing.title} - Level ${listing.course.level} Apprenticeship at ${listing.employerName}`,
       description: ogDescription,
-      type: 'website', 
-      url: canonicalUrl, 
-      images: [{ 
-        url: getLogoUrl(listing.employerName),
-        alt: `${listing.employerName} logo`,
-        width: 400, 
-        height: 400 
-      }]
+      url: canonicalUrl,
+      siteName: 'ApprenticeWatch',
+      images: [{
+        url: logoUrl,
+        width: 800,
+        height: 600,
+        alt: `${listing.employerName} logo`
+      }],
+      locale: 'en_GB',
+      type: 'website',
     },
 
     twitter: {
       card: 'summary_large_image', 
       title: `${listing.title} at ${listing.employerName}${expired ? " [EXPIRED]" : ""}`, 
       description: twitterDescription,
-      images: [getLogoUrl(listing.employerName)] 
+      images: [logoUrl] 
     },
 
     alternates: {

@@ -13,8 +13,13 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'logos.apprenticewatch.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'cdn.apprenticewatch.com',
       }
+
     ],
   },
   trailingSlash: false,
