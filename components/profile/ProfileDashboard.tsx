@@ -18,6 +18,7 @@ import { vacancyService } from '@/services/supabase/vacancyService';
 import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
 import { ListingsFilter } from "@/components/listings/ListingsFilter";
 import { apprenticeshipProgressService } from '@/services/supabase/apprenticeshipProgressService';
+import { companies } from '../listings/companyData';
 
 const logger = createLogger({ module: 'ProfileDashboard' });
 
@@ -103,6 +104,22 @@ const recommendedArticles = [
     description: 'A comprehensive guide to applying for work experience as a student.'
   }
 ];
+
+// Helper function to get the company logo URL
+const getLogoUrl = (employerName: string) => {
+  const normalizedEmployerName = employerName.toLowerCase();
+  const company = companies.find(
+    (company) => company.name.toLowerCase() === normalizedEmployerName
+  );
+
+  if (company && company.domain) {
+    return `https://img.logo.dev/${company.domain}?token=${process.env.NEXT_PUBLIC_LOGODEV_KEY}`;
+  }
+
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    employerName
+  )}&background=random`;
+};
 
 // Component for the greeting section with user's name
 const GreetingSection: React.FC<{ name: string | null }> = ({ name }) => {
@@ -562,15 +579,15 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                 <button
                   key={app.id}
                   onClick={() => setActiveApprenticeship(app.id)}
-                  className={`flex items-center space-x-2 sm:space-x-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm ${ // Smaller padding/text on mobile
+                  className={`flex items-center space-x-2 sm:space-x-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm ${
                     activeApprenticeship === app.id
                       ? 'bg-orange-500 text-white shadow-md'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/20'
                   }`}
                 >
-                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full flex-shrink-0 overflow-hidden"> {/* Slightly smaller logo */}
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full flex-shrink-0 overflow-hidden">
                     <img
-                      src={app.logo || '/assets/logos/default.svg'}
+                      src={getLogoUrl(app.vacancy_company || 'Unknown Company')}
                       alt={app.vacancy_company || 'Company Logo'}
                       className="w-full h-full object-contain"
                       onError={(e) => {
@@ -578,14 +595,14 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                         target.onerror = null;
                         target.style.display = 'none';
                         const fallback = target.parentElement!.appendChild(document.createElement('div'));
-                        fallback.className = "w-full h-full flex items-center justify-center bg-orange-500 text-white font-bold text-xs sm:text-xs"; // Keep text small
+                        fallback.className = "w-full h-full flex items-center justify-center bg-orange-500 text-white font-bold text-xs sm:text-xs";
                         fallback.textContent = app.vacancy_company
                           ? app.vacancy_company.charAt(0).toUpperCase()
                           : '-';
                       }}
                     />
                   </div>
-                  <span className="font-medium truncate max-w-[150px] sm:max-w-[200px]">{app.vacancy_title || 'Untitled Apprenticeship'}</span> {/* Limit width */}
+                  <span className="truncate">{app.vacancy_title || 'Untitled Apprenticeship'}</span>
                 </button>
               ))}
             </div>
