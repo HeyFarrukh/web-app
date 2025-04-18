@@ -18,6 +18,7 @@ import { vacancyService } from '@/services/supabase/vacancyService';
 import { savedApprenticeshipService } from '@/services/supabase/savedApprenticeshipService';
 import { ListingsFilter } from "@/components/listings/ListingsFilter";
 import { apprenticeshipProgressService } from '@/services/supabase/apprenticeshipProgressService';
+import { employerService } from '@/services/supabase/employerService';
 
 const logger = createLogger({ module: 'ProfileDashboard' });
 
@@ -104,6 +105,7 @@ const recommendedArticles = [
   }
 ];
 
+
 // Component for the greeting section with user's name
 const GreetingSection: React.FC<{ name: string | null }> = ({ name }) => {
   const [greeting, setGreeting] = useState<string>('');
@@ -182,7 +184,24 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
   const [directSearchQuery, setDirectSearchQuery] = useState('');
   const [isDirectSearching, setIsDirectSearching] = useState(false);
 
-  // Fetch tracked apprenticeships from Supabase
+  // Add a loading state for logo fetching
+  const [apprenticeshipLogos, setApprenticeshipLogos] = useState<Record<string, string>>({});
+
+  // Helper to fetch logo for a company
+  const fetchLogoForCompany = async (companyName: string): Promise<string> => {
+    if (!companyName) return '/assets/logos/default.svg';
+    try {
+      const employer = await employerService.getEmployerByName(companyName);
+      if (employer?.is_verified && employer?.logo_url) {
+        return employer.logo_url;
+      }
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(companyName)}&background=random`;
+    } catch {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(companyName)}&background=random`;
+    }
+  };
+
+  // Fetch tracked apprenticeships and their logos
   useEffect(() => {
     if (!userId) return;
     const fetchProgress = async () => {
@@ -197,8 +216,19 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
               return dateB.getTime() - dateA.getTime();
           });
           setActiveApprenticeship(sortedData[0].id);
+
+          // Fetch logos for all companies (avoid duplicate requests)
+          const uniqueCompanies = Array.from(new Set(data.map(app => app.vacancy_company).filter(Boolean)));
+          const logoMap: Record<string, string> = {};
+          await Promise.all(
+            uniqueCompanies.map(async (company) => {
+              logoMap[company] = await fetchLogoForCompany(company);
+            })
+          );
+          setApprenticeshipLogos(logoMap);
         } else {
           setActiveApprenticeship(null);
+          setApprenticeshipLogos({});
         }
       } catch (error) {
         console.error('Error loading tracked apprenticeships from Supabase:', error);
@@ -380,6 +410,11 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       if (created) {
         setApprenticeships((prev) => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
+        // Fetch logo for this company if not already present
+        if (created.vacancy_company && !apprenticeshipLogos[created.vacancy_company]) {
+          const logoUrl = await fetchLogoForCompany(created.vacancy_company);
+          setApprenticeshipLogos(prev => ({ ...prev, [created.vacancy_company]: logoUrl }));
+        }
         setShowAddModal(false); // Close modal after adding
         showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
         Analytics.event('apprenticeship_tracker', 'add_from_search', apprenticeship.title);
@@ -408,7 +443,11 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
       if (created) {
         setApprenticeships((prev) => [created, ...prev].sort((a, b) => new Date(b.updated_at || b.started_at).getTime() - new Date(a.updated_at || a.started_at).getTime()));
         setActiveApprenticeship(created.id);
-        // Maybe remove from saved list visually here if desired
+        // Fetch logo for this company if not already present
+        if (created.vacancy_company && !apprenticeshipLogos[created.vacancy_company]) {
+          const logoUrl = await fetchLogoForCompany(created.vacancy_company);
+          setApprenticeshipLogos(prev => ({ ...prev, [created.vacancy_company]: logoUrl }));
+        }
         showNotification(`Added ${apprenticeship.title} to your tracker!`, 'success');
         Analytics.event('apprenticeship_tracker', 'add_from_saved', apprenticeship.title);
       }
@@ -567,9 +606,13 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/20'
                   }`}
                 >
-                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full flex-shrink-0 overflow-hidden"> {/* Slightly smaller logo */}
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full flex-shrink-0 overflow-hidden">
                     <img
-                      src={app.logo || '/assets/logos/default.svg'}
+                      src={
+                        (app.vacancy_company && apprenticeshipLogos[app.vacancy_company])
+                          ? apprenticeshipLogos[app.vacancy_company]
+                          : '/assets/logos/default.svg'
+                      }
                       alt={app.vacancy_company || 'Company Logo'}
                       className="w-full h-full object-contain"
                       onError={(e) => {
@@ -577,14 +620,14 @@ const ApprenticeshipTrackerSection: React.FC<{ userId: string }> = ({ userId }) 
                         target.onerror = null;
                         target.style.display = 'none';
                         const fallback = target.parentElement!.appendChild(document.createElement('div'));
-                        fallback.className = "w-full h-full flex items-center justify-center bg-orange-500 text-white font-bold text-xs sm:text-xs"; // Keep text small
+                        fallback.className = "w-full h-full flex items-center justify-center bg-orange-500 text-white font-bold text-xs sm:text-xs";
                         fallback.textContent = app.vacancy_company
                           ? app.vacancy_company.charAt(0).toUpperCase()
                           : '-';
                       }}
                     />
                   </div>
-                  <span className="font-medium truncate max-w-[150px] sm:max-w-[200px]">{app.vacancy_title || 'Untitled Apprenticeship'}</span> {/* Limit width */}
+                  <span className="font-medium truncate max-w-[150px] sm:max-w-[200px]">{app.vacancy_title || 'Untitled Apprenticeship'}</span>
                 </button>
               ))}
             </div>
