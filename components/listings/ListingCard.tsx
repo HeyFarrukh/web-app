@@ -130,7 +130,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       <div className="flex items-start space-x-4">
         <div className="w-16 h-16 rounded-lg bg-white flex items-center justify-center">
           {logoLoading ? (
-            <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            // Themed loading spinner with thicker line
+            <div className="flex items-center justify-center w-12 h-12">
+              <span className="animate-spin rounded-full h-10 w-10 border-4 border-orange-500 border-t-transparent dark:border-white dark:border-t-orange-500" />
+            </div>
           ) : (
             <img
               src={logoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.employerName)}&background=random`}
