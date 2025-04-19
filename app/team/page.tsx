@@ -224,6 +224,17 @@ const teamMembers: TeamMember[] = [
       linkedin: "https://www.linkedin.com/in/ivan-ivanov-3b34b6335/?utm_source=apprentice-watch",
     },
   },
+  {
+    name: "Leo Bytyci",
+    role: "Ambassador",
+    type: "ambassador",
+    image: "https://cdn.apprenticewatch.com/AW-Ambassador-LinkedIn-Photos/leo-av.jpg",
+    description:
+      "I joined ApprenticeWatch because it's an excellent resource for discovering meaningful apprenticeship opportunities.",
+    links: {
+      linkedin: "https://www.linkedin.com/in/leo-bytyci-97a30132b/?utm_source=apprentice-watch",
+    },
+  },
 ];
 
 const FounderCard: React.FC<{ member: TeamMember }> = ({ member }) => (
